@@ -2,11 +2,13 @@ import logging
 import os
 import pathlib
 from datetime import UTC, datetime
-from typing import cast
+from typing import Any, cast
 
 import dask.distributed
+import numpy as np
 import pandas as pd
 import psutil
+import pyarrow as pa
 import tiledbsoma as soma
 
 from ..build_state import CensusBuildArgs
@@ -295,16 +297,15 @@ def build_step4a_add_spatial(
     """Populate spatial info."""
     logger.info("Build step 4a - Populate spatial info - started")
     import h5py
-    import numpy as np
     import pyarrow as pa
     from anndata.experimental import read_elem
-    from tiledbsoma import (
-        Axis,
-        CompositeTransform,
-        CoordinateSystem,
-        DenseNDArray,
-        ScaleTransform,
-    )
+    # from tiledbsoma import (
+    #     Axis,
+    #     CompositeTransform,
+    #     CoordinateSystem,
+    #     DenseNDArray,
+    #     ScaleTransform,
+    # )
 
     h5ad_path = args.h5ads_path
 
@@ -332,71 +333,18 @@ def build_step4a_add_spatial(
                 spatial_dict = read_elem(f["uns/spatial"])
             obs = cast(pd.DataFrame, eb.obs_df).query(f"dataset_id == '{d.dataset_id}'")
 
-            assert len(spatial_dict) == 2, f"Found {list(spatial_dict)} in {d.dataset_h5ad_path}"
-            _keys = list(spatial_dict)
-            # This flag seems wholly uneccesary since you can tell by the number of keys
-            _keys.remove("is_single")
-            library_id = _keys[0]
-            del _keys
-
-            scale_factors = spatial_dict[library_id]["scalefactors"]
-            # tissue_pos_df = pd.DataFrame(
-            #     tissue_pos,
-            #     index=obs.index.rename("barcode"),
-            #     columns=["pxl_col_in_fullres", "pxl_row_in_fullres"]
-            # )
-
-            # pixels_per_spot_radius = 0.5 * scale_factors["spot_diameter_fullres"]
-            fullres_to_coords_scale = 65 / scale_factors["spot_diameter_fullres"]
-
-            # Create axes and transformations
-            coordinate_system = CoordinateSystem(
-                (
-                    Axis(axis_name="y", axis_type="space", axis_unit="micrometer"),
-                    Axis(axis_name="x", axis_type="space", axis_unit="micrometer"),
-                )
-            )
-
-            spots_to_coords = CompositeTransform((ScaleTransform((fullres_to_coords_scale, fullres_to_coords_scale)),))
-
-            scene.metadata["soma_scene_coordinates"] = coordinate_system.to_json()
-            img_collection = scene.add_new_collection("img")
-            img_metadata = {"soma_scene_coords": spots_to_coords.to_json()}
-            # axes_metadata = [
-            #     {"name": "c", "type": "channel"},
-            #     {"name": "y", "type": "space", "unit": "micrometer"},
-            #     {"name": "x", "type": "space", "unit": "micrometer"},
-            # ]
-            # Images
-            image_dict = spatial_dict[library_id]["images"]
-            logger.debug(f"Writing images {list(image_dict)}")
-            for k, v in image_dict.items():
-                if k == "fullres":
-                    scale = (1.0, 1.0, 1.0)
-                elif k == "hires":
-                    scale = (1.0, scale_factors["tissue_hires_scalef"], scale_factors["tissue_hires_scalef"])
-                elif k == "lowres":
-                    scale = (1.0, scale_factors["tissue_lowres_scalef"], scale_factors["tissue_lowres_scalef"])
-                else:
-                    raise ValueError(f"Unexpected image name: {k}")
-
-                img_metadata[f"soma_asset_transform_{k}"] = CompositeTransform((ScaleTransform(scale),)).to_json()
-                image_uri = f"{img_collection.uri}/{k}"
-                im = np.transpose(v, (2, 0, 1))
-                image_array = DenseNDArray.create(
-                    image_uri,
-                    type=pa.from_numpy_dtype(im.dtype),
-                    shape=im.shape,
-                    # platform_config=platform_config,
-                    # context=context,
-                )
-                tensor = pa.Tensor.from_numpy(im)
-                image_array.write(
-                    (slice(None), slice(None), slice(None)),
-                    tensor,
-                )
-                img_collection.set(k, image_array, use_relative_uri=True)
-            img_collection.metadata.update(img_metadata)
+            assert spatial_dict["is_single"]
+            if len(spatial_dict) > 1:
+                assert (
+                    len(spatial_dict) == 2
+                ), f"Found {list(spatial_dict)} in {d.dataset_h5ad_path}"  # No image for slide-seqv2
+                _keys = list(spatial_dict)
+                # This flag seems wholly uneccesary since you can tell by the number of keys
+                _keys.remove("is_single")
+                library_id = _keys[0]
+                del _keys
+                # There are images
+                add_image_collection(scene, spatial_dict[library_id])
 
             # Locations
             logger.debug("Writing locations")
@@ -428,6 +376,76 @@ def build_step4a_add_spatial(
             schema=obs_scene.schema,
         ) as df_store:
             df_store.write(obs_scene)
+
+
+def add_image_collection(
+    scene: soma.Collection,
+    spatial_library_info: dict[str, Any],
+) -> None:
+    from tiledbsoma import (
+        Axis,
+        CompositeTransform,
+        CoordinateSystem,
+        DenseNDArray,
+        ScaleTransform,
+    )
+
+    img_collection = scene.add_new_collection("img")
+    scale_factors = spatial_library_info["scalefactors"]
+    image_dict = spatial_library_info["images"]
+
+    # Coordinate systems
+
+    # pixels_per_spot_radius = 0.5 * scale_factors["spot_diameter_fullres"]
+    fullres_to_coords_scale = 65 / scale_factors["spot_diameter_fullres"]
+
+    # Create axes and transformations
+    coordinate_system = CoordinateSystem(
+        (
+            Axis(axis_name="y", axis_type="space", axis_unit="micrometer"),
+            Axis(axis_name="x", axis_type="space", axis_unit="micrometer"),
+        )
+    )
+
+    spots_to_coords = CompositeTransform((ScaleTransform((fullres_to_coords_scale, fullres_to_coords_scale)),))
+
+    scene.metadata["soma_scene_coordinates"] = coordinate_system.to_json()
+    img_metadata = {"soma_scene_coords": spots_to_coords.to_json()}
+    # axes_metadata = [
+    #     {"name": "c", "type": "channel"},
+    #     {"name": "y", "type": "space", "unit": "micrometer"},
+    #     {"name": "x", "type": "space", "unit": "micrometer"},
+    # ]
+
+    # Images
+    logger.debug(f"Writing images {list(image_dict)}")
+    for k, v in image_dict.items():
+        if k == "fullres":
+            scale = (1.0, 1.0, 1.0)
+        elif k == "hires":
+            scale = (1.0, scale_factors["tissue_hires_scalef"], scale_factors["tissue_hires_scalef"])
+        elif k == "lowres":
+            scale = (1.0, scale_factors["tissue_lowres_scalef"], scale_factors["tissue_lowres_scalef"])
+        else:
+            raise ValueError(f"Unexpected image name: {k}")
+
+        img_metadata[f"soma_asset_transform_{k}"] = CompositeTransform((ScaleTransform(scale),)).to_json()
+        image_uri = f"{img_collection.uri}/{k}"
+        im = np.transpose(v, (2, 0, 1))
+        image_array = DenseNDArray.create(
+            image_uri,
+            type=pa.from_numpy_dtype(im.dtype),
+            shape=im.shape,
+            # platform_config=platform_config,
+            # context=context,
+        )
+        tensor = pa.Tensor.from_numpy(im)
+        image_array.write(
+            (slice(None), slice(None), slice(None)),
+            tensor,
+        )
+        img_collection.set(k, image_array, use_relative_uri=True)
+    img_collection.metadata.update(img_metadata)
 
 
 def build_step5_save_axis_and_summary_info(
