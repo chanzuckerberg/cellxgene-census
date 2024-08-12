@@ -20,7 +20,7 @@ class BatchEncoder(Encoder):
         self._name = name
         self._encoder = LabelEncoder()
 
-    def _join_cols(self, df: pd.DataFrame) -> pd.Series[str]:
+    def _join_cols(self, df: pd.DataFrame) -> pd.Series:
         return functools.reduce(lambda a, b: a + b, [df[c].astype(str) for c in self.cols])
 
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
