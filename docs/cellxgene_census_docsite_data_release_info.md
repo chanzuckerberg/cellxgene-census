@@ -1,6 +1,6 @@
 # Census data releases
 
-**Last edited**: December 15th, 2023.
+**Last edited**: July 8th, 2024.
 
 **Contents:**
 

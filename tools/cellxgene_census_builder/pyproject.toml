@@ -51,7 +51,7 @@ dependencies= [
     "fsspec[http]==2024.3.1",
     "s3fs==2024.3.1",
     "requests==2.32.0",
-    "aiohttp==3.9.3",
+    "aiohttp==3.10.2",
     "Cython", # required by owlready2
     "wheel",  # required by owlready2
     "owlready2==0.44",
