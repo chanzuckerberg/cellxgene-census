@@ -305,14 +305,9 @@ def build_step4a_add_spatial(
     import h5py
     import pyarrow as pa
     from anndata.experimental import read_elem
-    # from tiledbsoma import (
-    # Scene,
-    #     Axis,
-    #     CompositeTransform,
-    #     CoordinateSystem,
-    #     DenseNDArray,
-    #     ScaleTransform,
-    # )
+    from tiledbsoma import (
+        Scene,
+    )
 
     h5ad_path = args.h5ads_path
     client = dask.distributed.Client.current()
@@ -335,7 +330,7 @@ def build_step4a_add_spatial(
 
         for d in datasets:
             logger.debug(f"Writing spatial info from {d.dataset_id}")
-            scene = spatial_collection.add_new_collection(d.dataset_id)
+            scene = spatial_collection.add_new_collection(d.dataset_id, kind=Scene)
 
             with h5py.File(h5ad_path / d.dataset_h5ad_path) as f:
                 tissue_pos = read_elem(f["obsm/spatial"])

@@ -158,3 +158,12 @@ def test_obs_scene(spatial_build):
     pd.testing.assert_frame_equal(
         obs[["soma_joinid", "dataset_id"]], obs_scene.rename(columns={"scene_id": "dataset_id"})
     )
+
+
+def test_scene(spatial_build):
+    # TODO: Figure out what else needs checking here
+    census = cellxgene_census.open_soma(uri=str(spatial_build.soma_path))
+    experiment = census["census_spatial"]["homo_sapiens"]
+
+    for scene in experiment.spatial.values():
+        assert isinstance(scene, tiledbsoma.Scene)
