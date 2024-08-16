@@ -2,14 +2,18 @@ import logging
 import os
 import pathlib
 from datetime import UTC, datetime
-from typing import Any, cast
+from typing import cast
 
+import dask.array as da
 import dask.distributed
+import h5py
 import numpy as np
 import pandas as pd
 import psutil
 import pyarrow as pa
+import tiledbsoma
 import tiledbsoma as soma
+from anndata.experimental import read_elem_as_dask
 
 from ..build_state import CensusBuildArgs
 from ..util import clamp, cpu_count
@@ -102,6 +106,8 @@ def build(args: CensusBuildArgs, *, validate: bool = True) -> int:
 
         # Prune datasets that we will not use, and do not want to include in the build
         prune_unused_datasets(args.h5ads_path, datasets, filtered_datasets)
+
+        client.cluster.scale(16)  # TODO: Come up with some heuristic/ decide on chunk sizes for writing images
         build_step4a_add_spatial(args.h5ads_path.as_posix(), filtered_datasets, experiment_builders, args)
 
         # Step 5- write out dataset manifest and summary information
@@ -300,6 +306,7 @@ def build_step4a_add_spatial(
     import pyarrow as pa
     from anndata.experimental import read_elem
     # from tiledbsoma import (
+    # Scene,
     #     Axis,
     #     CompositeTransform,
     #     CoordinateSystem,
@@ -308,6 +315,7 @@ def build_step4a_add_spatial(
     # )
 
     h5ad_path = args.h5ads_path
+    client = dask.distributed.Client.current()
 
     # Add images
     for eb in reopen_experiment_builders(experiment_builders):
@@ -323,6 +331,7 @@ def build_step4a_add_spatial(
         #     pd.DataFrame({"soma_joinid": np.array([], dtype=np.int64), "scene_id": np.array([], dtype=object)})
         # ]
         obs_scenes: list[pd.DataFrame] = []
+        write_tasks = []
 
         for d in datasets:
             logger.debug(f"Writing spatial info from {d.dataset_id}")
@@ -330,21 +339,23 @@ def build_step4a_add_spatial(
 
             with h5py.File(h5ad_path / d.dataset_h5ad_path) as f:
                 tissue_pos = read_elem(f["obsm/spatial"])
-                spatial_dict = read_elem(f["uns/spatial"])
-            obs = cast(pd.DataFrame, eb.obs_df).query(f"dataset_id == '{d.dataset_id}'")
+                is_single = read_elem(f["uns/spatial/is_single"])
+                assert is_single
+                spatial_group = f["uns/spatial"]
+                # spatial_dict = read_elem(f["uns/spatial"])
+                if len(spatial_group) > 1:
+                    assert (
+                        len(spatial_group) == 2
+                    ), f"Found {list(spatial_group)} in {d.dataset_h5ad_path}"  # No image for slide-seqv2
+                    _keys = list(spatial_group)
+                    # This flag seems wholly uneccesary since you can tell by the number of keys
+                    _keys.remove("is_single")
+                    library_id = _keys[0]
+                    del _keys
+                    # There are images
+                    write_tasks.extend(add_image_collection(scene, spatial_group[library_id]))
 
-            assert spatial_dict["is_single"]
-            if len(spatial_dict) > 1:
-                assert (
-                    len(spatial_dict) == 2
-                ), f"Found {list(spatial_dict)} in {d.dataset_h5ad_path}"  # No image for slide-seqv2
-                _keys = list(spatial_dict)
-                # This flag seems wholly uneccesary since you can tell by the number of keys
-                _keys.remove("is_single")
-                library_id = _keys[0]
-                del _keys
-                # There are images
-                add_image_collection(scene, spatial_dict[library_id])
+            obs = cast(pd.DataFrame, eb.obs_df).query(f"dataset_id == '{d.dataset_id}'")
 
             # Locations
             logger.debug("Writing locations")
@@ -362,6 +373,8 @@ def build_step4a_add_spatial(
 
             obs_scenes.append(obs[["soma_joinid", "dataset_id"]].rename(columns={"dataset_id": "scene_id"}))
 
+        client.compute(write_tasks, sync=True)
+
         if len(obs_scenes) == 0:
             logger.warn(f"No scenes found for spatial experiment at {eb.experiment_uri}")
             continue
@@ -378,21 +391,49 @@ def build_step4a_add_spatial(
             df_store.write(obs_scene)
 
 
+class TileDBSOMADenseArrayWriteWrapper:
+    def __init__(
+        self,
+        uri: str,
+    ):
+        self.uri = uri
+
+    def __setitem__(self, k: tuple[slice, ...], v: np.ndarray):
+        with tiledbsoma.open(self.uri, mode="w") as soma_array:
+            soma_array.write(k, pa.Tensor.from_numpy(v))
+
+
+def write_dask_array_as_tiledbsoma(collection: tiledbsoma.Collection, key: str, value: da.Array):
+    # TODO: Would be nice to set chunking here
+    soma_array = collection.add_new_dense_ndarray(key, type=pa.from_numpy_dtype(value.dtype), shape=value.shape)
+
+    wrapped_soma_array = TileDBSOMADenseArrayWriteWrapper(soma_array.uri)
+
+    return value.store(
+        wrapped_soma_array,
+        lock=False,
+        compute=False,
+    )
+
+
 def add_image_collection(
     scene: soma.Collection,
-    spatial_library_info: dict[str, Any],
+    # spatial_library_info: dict[str, Any],
+    spatial_library_info: h5py.Group,
 ) -> None:
+    from anndata.experimental import read_elem
     from tiledbsoma import (
         Axis,
         CompositeTransform,
         CoordinateSystem,
-        DenseNDArray,
         ScaleTransform,
     )
 
     img_collection = scene.add_new_collection("img")
-    scale_factors = spatial_library_info["scalefactors"]
-    image_dict = spatial_library_info["images"]
+    scale_factors = read_elem(spatial_library_info["scalefactors"])
+    image_dict = {
+        k: read_elem_as_dask(spatial_library_info["images"][k]) for k in spatial_library_info["images"].keys()
+    }
 
     # Coordinate systems
 
@@ -418,6 +459,7 @@ def add_image_collection(
     # ]
 
     # Images
+    write_tasks = []
     logger.debug(f"Writing images {list(image_dict)}")
     for k, v in image_dict.items():
         if k == "fullres":
@@ -430,22 +472,22 @@ def add_image_collection(
             raise ValueError(f"Unexpected image name: {k}")
 
         img_metadata[f"soma_asset_transform_{k}"] = CompositeTransform((ScaleTransform(scale),)).to_json()
-        image_uri = f"{img_collection.uri}/{k}"
-        im = np.transpose(v, (2, 0, 1))
-        image_array = DenseNDArray.create(
-            image_uri,
-            type=pa.from_numpy_dtype(im.dtype),
-            shape=im.shape,
-            # platform_config=platform_config,
-            # context=context,
-        )
-        tensor = pa.Tensor.from_numpy(im)
-        image_array.write(
-            (slice(None), slice(None), slice(None)),
-            tensor,
-        )
-        img_collection.set(k, image_array, use_relative_uri=True)
+        write_tasks.append(write_dask_array_as_tiledbsoma(img_collection, k, np.transpose(v, (2, 0, 1))))
+        # image_array = DenseNDArray.create(
+        #     image_uri,
+        #     type=pa.from_numpy_dtype(im.dtype),
+        #     shape=im.shape,
+        #     # platform_config=platform_config,
+        #     # context=context,
+        # )
+        # tensor = pa.Tensor.from_numpy(im)
+        # image_array.write(
+        #     (slice(None), slice(None), slice(None)),
+        #     tensor,
+        # )
+        # img_collection.set(k, image_array, use_relative_uri=True)
     img_collection.metadata.update(img_metadata)
+    return write_tasks
 
 
 def build_step5_save_axis_and_summary_info(
