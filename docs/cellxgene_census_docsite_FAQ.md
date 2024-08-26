@@ -153,3 +153,20 @@ See also:
 - <https://community.databricks.com/s/question/0D53f00001GHVP3CAP/whats-the-difference-between-magic-commands-pip-and-sh-pip>
 
 Alternately, you can configure your cluster to install the `cellxgene-census` package each time it is started by adding this package to the "Libraries" tab on the cluster configuration page per these [instructions](https://docs.databricks.com/libraries/cluster-libraries.html).
+
+## How do I connect to census from behind a proxy?
+
+TileDB doesn't use the typical proxy environment variables and you'll need to specify these directly. That looks like:
+
+```python
+# Replace the ellipses with your proxy host and port info
+config = {
+    "vfs.s3.proxy_host": ..., "vfs.s3.proxy_port": ...
+}
+
+census = cellxgene_census.open_soma(tiledb_config=config)
+```
+
+It may not be obvious that a proxy is the issue. This will typically manifest as a `TileDBError` which says that a timeout was reached during a request to the s3 bucket.
+
+You can read more about how to configure how TileDB communicates with S3 [here](https://docs.tiledb.com/main/how-to/backends/s3#aws-security-credentials).
