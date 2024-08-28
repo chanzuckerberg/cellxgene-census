@@ -43,7 +43,7 @@ dependencies= [
     # TODO (spatial): tiledbsoma pin to a PyPI release is temporarily commented out in favor git commit pin
     # "tiledbsoma==1.9.3",
     # TODO (spatial): Pin tiledbsoma dependency to an actual released version after tiledbsoma spatial code has been released
-    "tiledbsoma @ git+https://github.com/single-cell-data/TileDB-SOMA.git@e91be360745488d5fd51d6c09d78504f036d5a24#egg=tiledbsoma&subdirectory=apis/python/",
+    "tiledbsoma @ git+https://github.com/single-cell-data/TileDB-SOMA.git@eb71e83f9acbd69098898f2426b6a22aa122c16d#egg=tiledbsoma&subdirectory=apis/python/",
     # TODO (spatial): Deal with the following line before release
     "cellxgene-census @ {root:parent:parent:uri}/api/python/cellxgene_census",
     "cellxgene-ontology-guide==1.0.0",
