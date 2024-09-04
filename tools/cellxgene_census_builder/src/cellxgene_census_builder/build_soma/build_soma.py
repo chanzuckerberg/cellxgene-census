@@ -417,10 +417,9 @@ def add_image_collection(
     spatial_library_info: h5py.Group,
 ) -> None:
     from anndata.experimental import read_elem
-    from tiledbsoma import (
+    from somacore import (
         Axis,
-        CompositeTransform,
-        CoordinateSystem,
+        CoordinateSpace,
         ScaleTransform,
     )
 
@@ -436,14 +435,14 @@ def add_image_collection(
     fullres_to_coords_scale = 65 / scale_factors["spot_diameter_fullres"]
 
     # Create axes and transformations
-    coordinate_system = CoordinateSystem(
+    coordinate_system = CoordinateSpace(
         (
-            Axis(axis_name="y", axis_type="space", axis_unit="micrometer"),
-            Axis(axis_name="x", axis_type="space", axis_unit="micrometer"),
+            Axis(name="y", units="micrometer"),
+            Axis(name="x", units="micrometer"),
         )
     )
 
-    spots_to_coords = CompositeTransform((ScaleTransform((fullres_to_coords_scale, fullres_to_coords_scale)),))
+    spots_to_coords = ScaleTransform((fullres_to_coords_scale, fullres_to_coords_scale))
 
     scene.metadata["soma_scene_coordinates"] = coordinate_system.to_json()
     img_metadata = {"soma_scene_coords": spots_to_coords.to_json()}
@@ -466,7 +465,7 @@ def add_image_collection(
         else:
             raise ValueError(f"Unexpected image name: {k}")
 
-        img_metadata[f"soma_asset_transform_{k}"] = CompositeTransform((ScaleTransform(scale),)).to_json()
+        img_metadata[f"soma_asset_transform_{k}"] = ScaleTransform(scale).to_json()
         write_tasks.append(write_dask_array_as_tiledbsoma(img_collection, k, np.transpose(v, (2, 0, 1))))
         # image_array = DenseNDArray.create(
         #     image_uri,
