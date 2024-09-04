@@ -1,7 +1,6 @@
 import csv
 import io
 import logging
-import os.path
 
 import fsspec
 
@@ -34,15 +33,7 @@ def dedup_datasets(datasets: list[Dataset]) -> list[Dataset]:
 
 def load_manifest_from_fp(manifest_fp: io.TextIOBase) -> list[Dataset]:
     logger.info("Loading manifest from file")
-    all_datasets = parse_manifest_file(manifest_fp)
-    datasets = [
-        d
-        for d in all_datasets
-        if d.dataset_asset_h5ad_uri.endswith(".h5ad") and os.path.exists(d.dataset_asset_h5ad_uri)
-    ]
-    if len(datasets) != len(all_datasets):
-        logger.warning("Manifest contained records which are not H5AD files or which are not accessible - ignoring")
-    return datasets
+    return parse_manifest_file(manifest_fp)
 
 
 def null_to_empty_str(val: str | None) -> str:
