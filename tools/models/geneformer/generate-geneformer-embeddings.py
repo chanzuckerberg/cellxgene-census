@@ -36,13 +36,11 @@ def main(argv):
         except Exception:  # noqa: BLE001
             pass
         tiledbsoma_context = tiledbsoma.options.SOMATileDBContext(
-            tiledb_ctx=tiledb.Ctx(
-                {
-                    "py.init_buffer_bytes": 4 * 1024**3,
-                    "soma.init_buffer_bytes": 4 * 1024**3,
-                    "vfs.s3.region": aws_region,
-                }
-            )
+            tiledb_config={
+                "py.init_buffer_bytes": 4 * 1024**3,
+                "soma.init_buffer_bytes": 4 * 1024**3,
+                "vfs.s3.region": aws_region,
+            }
         )
 
         with tiledbsoma.SparseNDArray.open(args.outfile, "r", context=tiledbsoma_context):
@@ -59,14 +57,18 @@ def main(argv):
     with tempfile.TemporaryDirectory() as scratch_dir:
         # prepare the dataset, taking only one shard of it if so instructed
         logger.info("Extracting embeddings...")
-        extractor = geneformer.EmbExtractor(
-            model_type=args.model_type,
-            num_classes=num_classes,
-            max_ncells=None,
-            emb_layer=args.emb_layer,
-            emb_label=args.features,
-            forward_batch_size=args.batch_size,
-        )
+        emb_kwargs = {
+            "model_type": args.model_type,
+            "num_classes": num_classes,
+            "max_ncells": None,
+            "emb_mode": args.emb_mode,
+            "emb_layer": args.emb_layer,
+            "emb_label": args.features,
+            "forward_batch_size": args.batch_size,
+        }
+        if args.token_dictionary:
+            emb_kwargs["token_dictionary_file"] = args.token_dictionary
+        extractor = geneformer.EmbExtractor(**emb_kwargs)
         # NOTE: EmbExtractor will use only one GPU
         #       see https://huggingface.co/ctheodoris/Geneformer/blob/main/geneformer/emb_extractor.py
         embs_df = extractor.extract_embs(
@@ -116,8 +118,12 @@ def parse_arguments(argv):
         help="model type (Pretrained or default CellClassifier)",
     )
     parser.add_argument(
+        "--emb-mode", type=str, choices=("cell", "gene", "cls"), default="cell", help="embedding mode (default cell)"
+    )
+    parser.add_argument(
         "--emb-layer", type=int, choices=(-1, 0), default=-1, help="desired embedding layer (0 or default -1)"
     )
+    parser.add_argument("--token-dictionary", type=str, default=None, help="custom token dictionary pickle file")
     parser.add_argument(
         "--features",
         type=str,

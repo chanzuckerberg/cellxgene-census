@@ -155,6 +155,39 @@ def test_non_batched(soma_experiment: Experiment, use_eager_fetch: bool) -> None
 
 
 @pytest.mark.experimental
+# noinspection PyTestParametrized
+@pytest.mark.parametrize(
+    "obs_range,var_range,X_value_gen,use_eager_fetch",
+    [(6, 3, pytorch_x_value_gen, use_eager_fetch) for use_eager_fetch in (True, False)],
+)
+@pytest.mark.parametrize("return_sparse_X", [True, False])
+def test_uneven_soma_and_result_batches(
+    soma_experiment: Experiment, use_eager_fetch: bool, return_sparse_X: bool
+) -> None:
+    """This is checking that batches are correctly created when they require fetching multiple chunks.
+
+    This was added due to failures in _ObsAndXIterator.__next__.
+    """
+    exp_data_pipe = ExperimentDataPipe(
+        soma_experiment,
+        measurement_name="RNA",
+        X_name="raw",
+        obs_column_names=["label"],
+        shuffle=False,
+        batch_size=3,
+        soma_chunk_size=2,
+        return_sparse_X=return_sparse_X,
+        use_eager_fetch=use_eager_fetch,
+    )
+    row_iter = iter(exp_data_pipe)
+
+    row = next(row_iter)
+    X_batch = row[0].to_dense() if return_sparse_X else row[0]
+    assert X_batch.int()[0].tolist() == [0, 1, 0]
+    assert row[1].tolist() == [[0], [1], [2]]
+
+
+@pytest.mark.experimental
 # noinspection PyTestParametrized,DuplicatedCode
 @pytest.mark.parametrize(
     "obs_range,var_range,X_value_gen,use_eager_fetch",

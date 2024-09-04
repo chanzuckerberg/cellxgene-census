@@ -132,6 +132,7 @@ class CensusMirror(TypedDict):
     provider: Provider
     base_uri: str
     region: str | None
+    embeddings_base_uri: str
 
 
 CensusMirrors = dict[CensusMirrorName, CensusMirrorName | CensusMirror]

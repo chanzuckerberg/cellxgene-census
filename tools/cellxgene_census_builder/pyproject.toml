@@ -34,14 +34,14 @@ dependencies= [
     # recent cellxgene-census _readers_ are able to read the results of a Census build (writer).
     # The compatibility matrix is defined here:
     #    https://github.com/TileDB-Inc/TileDB/blob/dev/format_spec/FORMAT_SPEC.md
-    "tiledbsoma==1.9.3",
-    "cellxgene-census==1.12.0",
+    "tiledbsoma==1.11.4",
+    "cellxgene-census==1.15.0",
     "cellxgene-ontology-guide==1.0.0",
     "scipy==1.12.0",
     "fsspec[http]==2024.3.1",
     "s3fs==2024.3.1",
     "requests==2.32.0",
-    "aiohttp==3.9.3",
+    "aiohttp==3.10.2",
     "Cython", # required by owlready2
     "wheel",  # required by owlready2
     "owlready2==0.44",

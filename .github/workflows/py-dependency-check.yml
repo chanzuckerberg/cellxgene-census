@@ -24,8 +24,8 @@ jobs:
     strategy:
       fail-fast: false  # don't fail-fast, as errors are often specific to a single cell in the matrix
       matrix:
-        os: [single-cell-8c64g-runner, macos-latest]
-        python-version: ["3.10", "3.11"]
+        os: [sc-dev-64g-runner, macos-latest]
+        python-version: ["3.10", "3.11", "3.12"]
         exclude:
           - os: macos-latest
             python-version: "3.10"
@@ -34,7 +34,7 @@ jobs:
 
     steps:
       - name: install tooling
-        if: matrix.os == 'single-cell-8c64g-runner'
+        if: matrix.os == 'sc-dev-64g-runner'
         run: |
           sudo apt-get update && sudo apt-get install -y jq
 
