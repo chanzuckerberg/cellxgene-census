@@ -10,6 +10,7 @@ on:
 
 env:
   CELLXGENE_CENSUS_USERAGENT: "CZI-test"
+  AWS_DEFAULT_REGION: "us-west-2"
 
 jobs:
   build:
