@@ -1,7 +1,8 @@
 """Nearest-neighbor search based on vector index of Census embeddings."""
 
+from collections.abc import Sequence
 from contextlib import ExitStack
-from typing import Any, Dict, NamedTuple, Optional, Sequence, Tuple, cast
+from typing import Any, NamedTuple, cast
 
 import anndata as ad
 import numpy as np
@@ -43,9 +44,9 @@ def find_nearest_obs(
     k: int = 10,
     nprobe: int = 100,
     memory_GiB: int = 4,
-    mirror: Optional[str] = None,
-    embedding_metadata: Optional[Dict[str, Any]] = None,
-    **kwargs: Dict[str, Any],
+    mirror: str | None = None,
+    embedding_metadata: dict[str, Any] | None = None,
+    **kwargs: dict[str, Any],
 ) -> NeighborObs:
     """Search Census for similar obs (cells) based on nearest neighbors in embedding space.
 
@@ -97,9 +98,9 @@ def find_nearest_obs(
 
 
 def _resolve_embedding_index(
-    embedding_metadata: Dict[str, Any],
-    mirror: Optional[str] = None,
-) -> Optional[Tuple[str, str]]:
+    embedding_metadata: dict[str, Any],
+    mirror: str | None = None,
+) -> tuple[str, str] | None:
     index_metadata = embedding_metadata.get("indexes", None)
     if not index_metadata:
         return None
@@ -117,7 +118,7 @@ def predict_obs_metadata(
     census_version: str,
     neighbors: NeighborObs,
     column_names: Sequence[str],
-    experiment: Optional[soma.Experiment] = None,
+    experiment: soma.Experiment | None = None,
 ) -> pd.DataFrame:
     """Predict obs metadata attributes for the query cells based on the embedding nearest neighbors.
 
