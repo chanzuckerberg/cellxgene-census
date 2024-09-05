@@ -1,6 +1,5 @@
 import pathlib
-import sys
-from typing import Callable, List, Optional, Sequence, Union
+from collections.abc import Callable, Sequence
 from unittest.mock import patch
 
 import numpy as np
@@ -50,17 +49,17 @@ def pytorch_seq_x_value_gen(obs_range: range, var_range: range) -> spmatrix:
 
 
 @pytest.fixture
-def X_layer_names() -> List[str]:
+def X_layer_names() -> list[str]:
     return ["raw"]
 
 
 @pytest.fixture
-def obsp_layer_names() -> Optional[List[str]]:
+def obsp_layer_names() -> list[str] | None:
     return None
 
 
 @pytest.fixture
-def varp_layer_names() -> Optional[List[str]]:
+def varp_layer_names() -> list[str] | None:
     return None
 
 
@@ -102,8 +101,8 @@ def add_sparse_array(
 @pytest.fixture(scope="function")
 def soma_experiment(
     tmp_path: pathlib.Path,
-    obs_range: Union[int, range],
-    var_range: Union[int, range],
+    obs_range: int | range,
+    var_range: int | range,
     X_value_gen: Callable[[range, range], sparse.spmatrix],
     obsp_layer_names: Sequence[str],
     varp_layer_names: Sequence[str],
@@ -485,10 +484,6 @@ def test_custom_encoders_fail_if_columns_defined(soma_experiment: Experiment) ->
 
 
 @pytest.mark.experimental
-@pytest.mark.skipif(
-    (sys.version_info.major, sys.version_info.minor) == (3, 9),
-    reason="fails intermittently with OOM error for 3.9",
-)
 # noinspection PyTestParametrized
 @pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(6, 3, pytorch_x_value_gen)])
 def test_multiprocessing__returns_full_result(soma_experiment: Experiment) -> None:
@@ -520,11 +515,11 @@ def test_distributed__returns_data_partition_for_rank(
     """Tests pytorch._partition_obs_joinids() behavior in a simulated PyTorch distributed processing mode,
     using mocks to avoid having to do real PyTorch distributed setup."""
 
-    with patch("cellxgene_census.experimental.ml.pytorch.dist.is_initialized") as mock_dist_is_initialized, patch(
-        "cellxgene_census.experimental.ml.pytorch.dist.get_rank"
-    ) as mock_dist_get_rank, patch(
-        "cellxgene_census.experimental.ml.pytorch.dist.get_world_size"
-    ) as mock_dist_get_world_size:
+    with (
+        patch("cellxgene_census.experimental.ml.pytorch.dist.is_initialized") as mock_dist_is_initialized,
+        patch("cellxgene_census.experimental.ml.pytorch.dist.get_rank") as mock_dist_get_rank,
+        patch("cellxgene_census.experimental.ml.pytorch.dist.get_world_size") as mock_dist_get_world_size,
+    ):
         mock_dist_is_initialized.return_value = True
         mock_dist_get_rank.return_value = 1
         mock_dist_get_world_size.return_value = 3
@@ -556,13 +551,12 @@ def test_distributed_and_multiprocessing__returns_data_partition_for_rank(
     DataLoader multiprocessing mode, using mocks to avoid having to do distributed pytorch
     setup or real DataLoader multiprocessing."""
 
-    with patch("torch.utils.data.get_worker_info") as mock_get_worker_info, patch(
-        "cellxgene_census.experimental.ml.pytorch.dist.is_initialized"
-    ) as mock_dist_is_initialized, patch(
-        "cellxgene_census.experimental.ml.pytorch.dist.get_rank"
-    ) as mock_dist_get_rank, patch(
-        "cellxgene_census.experimental.ml.pytorch.dist.get_world_size"
-    ) as mock_dist_get_world_size:
+    with (
+        patch("torch.utils.data.get_worker_info") as mock_get_worker_info,
+        patch("cellxgene_census.experimental.ml.pytorch.dist.is_initialized") as mock_dist_is_initialized,
+        patch("cellxgene_census.experimental.ml.pytorch.dist.get_rank") as mock_dist_get_rank,
+        patch("cellxgene_census.experimental.ml.pytorch.dist.get_world_size") as mock_dist_get_world_size,
+    ):
         mock_get_worker_info.return_value = WorkerInfo(id=1, num_workers=2, seed=1234)
         mock_dist_is_initialized.return_value = True
         mock_dist_get_rank.return_value = 1

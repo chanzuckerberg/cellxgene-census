@@ -1,7 +1,8 @@
 """Nearest-neighbor search based on vector index of Census embeddings."""
 
+from collections.abc import Sequence
 from contextlib import ExitStack
-from typing import Any, Dict, List, NamedTuple, Optional, Sequence, Tuple, cast
+from typing import Any, NamedTuple, cast
 
 import anndata as ad
 import numpy as np
@@ -42,9 +43,9 @@ def find_nearest_obs(
     k: int = 10,
     nprobe: int = 100,
     memory_GiB: int = 4,
-    mirror: Optional[str] = None,
-    embedding_metadata: Optional[Dict[str, Any]] = None,
-    **kwargs: Dict[str, Any],
+    mirror: str | None = None,
+    embedding_metadata: dict[str, Any] | None = None,
+    **kwargs: dict[str, Any],
 ) -> NeighborObs:
     """Search Census for similar obs (cells) based on nearest neighbors in embedding space.
 
@@ -96,9 +97,9 @@ def find_nearest_obs(
 
 
 def _resolve_embedding_index(
-    embedding_metadata: Dict[str, Any],
-    mirror: Optional[str] = None,
-) -> Optional[Tuple[str, str]]:
+    embedding_metadata: dict[str, Any],
+    mirror: str | None = None,
+) -> tuple[str, str] | None:
     index_metadata = embedding_metadata.get("indexes", None)
     if not index_metadata:
         return None
@@ -116,7 +117,7 @@ def predict_obs_metadata(
     census_version: str,
     neighbors: NeighborObs,
     column_names: Sequence[str],
-    experiment: Optional[soma.Experiment] = None,
+    experiment: soma.Experiment | None = None,
 ) -> pd.DataFrame:
     """Predict obs metadata attributes for the query cells based on the embedding nearest neighbors.
 
@@ -156,7 +157,7 @@ def predict_obs_metadata(
         # step through query cells to generate prediction for each column as the plurality value
         # found among its neighbors, with a confidence score based on the simple fraction (for now)
         # TODO: something more intelligent for numeric columns! also use distances, etc.
-        out: Dict[str, List[Any]] = {}
+        out: dict[str, list[Any]] = {}
         for i in range(neighbors.neighbor_ids.shape[0]):
             neighbors_i = neighbor_obs.loc[neighbors.neighbor_ids[i]]
             for col in column_names:
