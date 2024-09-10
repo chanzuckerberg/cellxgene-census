@@ -49,9 +49,15 @@ jobs:
       - name: Test with pytest (API, main tests)
         run: |
           PYTHONPATH=. coverage run --parallel-mode -m pytest -v -rP --durations=20 ./api/python/cellxgene_census/tests/
+      - name: "List the contents of the directory"
+        run: |
+          ls -al
       - name: Test with pytest (API, experimental)
         run: |
           PYTHONPATH=. coverage run --parallel-mode -m pytest -v -rP --durations=20 --experimental ./api/python/cellxgene_census/tests/experimental
+      - name: "List the contents of the directory"
+        run: |
+          ls -al
       - uses: actions/upload-artifact@v4
         with:
           name: coverage-api-${{ matrix.os }}-${{ matrix.python-version }}
