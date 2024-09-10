@@ -160,16 +160,17 @@ def predict_obs_metadata(
         # TODO: something more intelligent for numeric columns! also use distances, etc.
         max_joinid = neighbor_obs.index.max()
         out: dict[str, pd.Series[Any]] = {}
-        indices = np.broadcast_to(np.arange(neighbors.neighbor_ids.shape[0]), (10, neighbors.neighbor_ids.shape[0])).T
+        n_queries, n_neighbors = neighbors.neighbor_ids.shape
+        indices = np.broadcast_to(np.arange(n_queries), (n_neighbors, n_queries)).T
         g = sparse.csr_matrix(
             (
-                np.broadcast_to(1, neighbors.neighbor_ids.shape[0] * 10),
+                np.broadcast_to(1, n_queries * n_neighbors),
                 (
                     indices.flatten(),
                     neighbors.neighbor_ids.astype(np.int64).flatten(),
                 ),
             ),
-            shape=(neighbors.neighbor_ids.shape[0], max_joinid + 1),
+            shape=(n_queries, max_joinid + 1),
         )
         for col in column_names:
             col_categorical = neighbor_obs[col].astype("category")
