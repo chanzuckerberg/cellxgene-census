@@ -1,10 +1,9 @@
 import logging
 import threading
 from collections import deque
-from collections.abc import Iterator
 from concurrent import futures
 from concurrent.futures import Future
-from typing import TypeVar
+from typing import Deque, Iterator, Optional, TypeVar
 
 util_logger = logging.getLogger("cellxgene_census.experimental.util")
 
@@ -15,13 +14,13 @@ class _EagerIterator(Iterator[_T]):
     def __init__(
         self,
         iterator: Iterator[_T],
-        pool: futures.Executor | None = None,
+        pool: Optional[futures.Executor] = None,
     ):
         super().__init__()
         self.iterator = iterator
         self._pool = pool or futures.ThreadPoolExecutor()
         self._own_pool = pool is None
-        self._future: Future[_T] | None = None
+        self._future: Optional[Future[_T]] = None
         self._begin_next()
 
     def _begin_next(self) -> None:
@@ -57,14 +56,14 @@ class _EagerBufferedIterator(Iterator[_T]):
         self,
         iterator: Iterator[_T],
         max_pending: int = 1,
-        pool: futures.Executor | None = None,
+        pool: Optional[futures.Executor] = None,
     ):
         super().__init__()
         self.iterator = iterator
         self.max_pending = max_pending
         self._pool = pool or futures.ThreadPoolExecutor()
         self._own_pool = pool is None
-        self._pending_results: deque[futures.Future[_T]] = deque()
+        self._pending_results: Deque[futures.Future[_T]] = deque()
         self._lock = threading.Lock()
         self._begin_next()
 

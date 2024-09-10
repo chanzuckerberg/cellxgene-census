@@ -1,3 +1,5 @@
+from typing import Optional, Tuple
+
 import numba
 import numpy as np
 import numpy.typing as npt
@@ -41,7 +43,7 @@ class MeanVarianceAccumulator:
         self,
         var_vec: npt.NDArray[np.int64],
         val_vec: npt.NDArray[np.float32],
-        batch_vec: npt.NDArray[np.int64] | None = None,
+        batch_vec: Optional[npt.NDArray[np.int64]] = None,
     ) -> None:
         if self.n_batches == 1:
             assert batch_vec is None
@@ -52,7 +54,7 @@ class MeanVarianceAccumulator:
 
     def finalize(
         self,
-    ) -> tuple[
+    ) -> Tuple[
         npt.NDArray[np.float64],
         npt.NDArray[np.float64],
         npt.NDArray[np.float64],
@@ -123,7 +125,7 @@ class CountsAccumulator:
         self,
         var_vec: npt.NDArray[np.int64],
         val_vec: npt.NDArray[np.float32],
-        batch_vec: npt.NDArray[np.int64] | None = None,
+        batch_vec: Optional[npt.NDArray[np.int64]] = None,
     ) -> None:
         if self.n_batches == 1:
             assert batch_vec is None
@@ -145,7 +147,7 @@ class CountsAccumulator:
                 self.clip_val,
             )
 
-    def finalize(self) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
+    def finalize(self) -> Tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
         return self.counts_sum, self.squared_counts_sum
 
 
@@ -280,7 +282,7 @@ def _mbomv_combine_batches(
     n_samples: npt.NDArray[np.int64],
     u: npt.NDArray[np.float64],
     M2: npt.NDArray[np.float64],
-) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
+) -> Tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
     """Combine all batches using Chan's parallel adaptation of Welford's.
 
     Returns tuple of (u, M2).

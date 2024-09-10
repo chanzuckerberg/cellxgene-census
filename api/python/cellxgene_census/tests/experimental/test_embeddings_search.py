@@ -1,5 +1,5 @@
 import json
-from typing import Any
+from typing import Any, Dict, List
 
 import anndata as ad
 import numpy as np
@@ -15,7 +15,7 @@ from cellxgene_census.experimental import (
 
 @pytest.mark.experimental
 @pytest.mark.live_corpus
-def test_embeddings_search(true_neighbors: dict[str, Any], query_result: NeighborObs) -> None:
+def test_embeddings_search(true_neighbors: Dict[str, Any], query_result: NeighborObs) -> None:
     # check result shapes
     rslt = query_result
     assert isinstance(rslt.neighbor_ids, np.ndarray)
@@ -96,7 +96,7 @@ def test_predict_obs_metadata(query_anndata: ad.AnnData, query_result: NeighborO
 
 
 @pytest.fixture(scope="module")
-def true_neighbors() -> dict[int, list[dict[str, Any]]]:
+def true_neighbors() -> Dict[int, List[Dict[str, Any]]]:
     ans = {}
     for line in TRUE_NEAREST_NEIGHBORS_JSON.strip().split("\n"):
         example = json.loads(line)
@@ -105,7 +105,7 @@ def true_neighbors() -> dict[int, list[dict[str, Any]]]:
 
 
 @pytest.fixture(scope="module")
-def query_anndata(true_neighbors: dict[str, Any]) -> ad.AnnData:
+def query_anndata(true_neighbors: Dict[str, Any]) -> ad.AnnData:
     with cellxgene_census.open_soma(census_version=TRUE_NEAREST_NEIGHBORS_CENSUS_VERSION) as census:
         return cellxgene_census.get_anndata(
             census,

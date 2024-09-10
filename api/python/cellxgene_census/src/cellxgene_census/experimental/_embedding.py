@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import json
 import warnings
-from typing import Any, cast
+from typing import Any, Dict, cast
 
 import numpy as np
 import numpy.typing as npt
@@ -55,7 +55,7 @@ def get_embedding_metadata(embedding_uri: str, context: soma.options.SOMATileDBC
         embedding_metadata = json.loads(E.metadata["CxG_embedding_info"])
         assert isinstance(embedding_metadata, dict)
 
-    return cast(dict[str, Any], embedding_metadata)
+    return cast(Dict[str, Any], embedding_metadata)
 
 
 def _get_embedding(
@@ -67,7 +67,7 @@ def _get_embedding(
     context: soma.options.SOMATileDBContext | None = None,
 ) -> npt.NDArray[np.float32]:
     """Private. Like get_embedding, but accepts a Census object and a Census directory."""
-    if isinstance(obs_soma_joinids, pa.Array | pa.ChunkedArray | pd.Series):
+    if isinstance(obs_soma_joinids, (pa.Array, pa.ChunkedArray, pd.Series)):
         obs_soma_joinids = obs_soma_joinids.to_numpy()
     assert isinstance(obs_soma_joinids, np.ndarray)
     if obs_soma_joinids.dtype != np.int64:
@@ -194,7 +194,7 @@ def get_embedding_metadata_by_name(
     response = requests.get(CELL_CENSUS_EMBEDDINGS_MANIFEST_URL, headers={"User-Agent": _user_agent()})
     response.raise_for_status()
 
-    manifest = cast(dict[str, dict[str, Any]], response.json())
+    manifest = cast(Dict[str, Dict[str, Any]], response.json())
     embeddings = []
     for _, obj in manifest.items():
         if (

@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from collections.abc import Generator
 from concurrent import futures
-from typing import Any
+from typing import Any, Generator
 
 import numpy as np
 import numpy.typing as npt

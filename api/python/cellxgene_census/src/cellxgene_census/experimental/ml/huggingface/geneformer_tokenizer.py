@@ -1,6 +1,5 @@
 import pickle
-from collections.abc import Sequence
-from typing import Any
+from typing import Any, Dict, List, Optional, Sequence, Set
 
 import numpy as np
 import numpy.typing as npt
@@ -43,7 +42,7 @@ class GeneformerTokenizer(CellDatasetBuilder):
     - and the specified `obs_column_names` (cell metadata from the experiment obs dataframe)
     """
 
-    obs_column_names: set[str]
+    obs_column_names: Set[str]
     max_input_tokens: int
     special_token: bool
 
@@ -55,15 +54,15 @@ class GeneformerTokenizer(CellDatasetBuilder):
     model_gene_map: scipy.sparse.coo_matrix
     model_gene_tokens: npt.NDArray[np.int64]  # Geneformer token for each column of model_gene_map
     model_gene_medians: npt.NDArray[np.float64]  # float for each column of model_gene_map
-    model_cls_token: np.int64 | None = None
-    model_eos_token: np.int64 | None = None
+    model_cls_token: Optional[np.int64] = None
+    model_eos_token: Optional[np.int64] = None
 
     def __init__(
         self,
         experiment: tiledbsoma.Experiment,
         *,
-        obs_column_names: Sequence[str] | None = None,
-        obs_attributes: Sequence[str] | None = None,
+        obs_column_names: Optional[Sequence[str]] = None,
+        obs_attributes: Optional[Sequence[str]] = None,
         max_input_tokens: int = 2048,
         special_token: bool = False,
         token_dictionary_file: str = "",
@@ -148,10 +147,10 @@ class GeneformerTokenizer(CellDatasetBuilder):
         map_data = []
         map_i = []
         map_j = []
-        model_gene_id_by_ensg: dict[str, int] = {}
+        model_gene_id_by_ensg: Dict[str, int] = {}
         model_gene_count = 0
-        model_gene_tokens: list[np.int64] = []
-        model_gene_medians: list[np.float64] = []
+        model_gene_tokens: List[np.int64] = []
+        model_gene_medians: List[np.float64] = []
         for gene_id, row in genes_df.iterrows():
             ensg = row["feature_id"]  # ENSG... gene id, which keys Geneformer's dicts
             if gene_mapping is not None:
@@ -199,7 +198,7 @@ class GeneformerTokenizer(CellDatasetBuilder):
         self.obs_df = self.obs(column_names=obs_column_names).concat().to_pandas().set_index("soma_joinid")
         return self
 
-    def cell_item(self, cell_joinid: int, cell_Xrow: scipy.sparse.csr_matrix) -> dict[str, Any]:
+    def cell_item(self, cell_joinid: int, cell_Xrow: scipy.sparse.csr_matrix) -> Dict[str, Any]:
         """Given the expression vector for one cell, compute the Dataset item providing
         the Geneformer inputs (token sequence and metadata).
         """

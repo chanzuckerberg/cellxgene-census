@@ -11,7 +11,7 @@ authors = [
 ]
 license = { text = "MIT" }
 readme = "README.md"
-requires-python = ">= 3.10, < 3.13"
+requires-python = ">= 3.8, < 3.12"
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
@@ -22,17 +22,18 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Bio-Informatics",
     "Operating System :: POSIX :: Linux",
     "Operating System :: MacOS :: MacOS X",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
 ]
 dependencies= [
     # NOTE: the tiledbsoma version must be >= to the version used in the Census builder, to
     # ensure that the assets are readable (tiledbsoma supports backward compatible reading).
     # Make sure this version does not fall behind the builder's tiledbsoma version.
-    "tiledbsoma>=1.12.3",
+    "tiledbsoma~=1.12.3",
     "anndata",
-    "numpy>=1.23,<2.0",
+    "numpy>=1.21,<2.0",
     "requests",
     "typing_extensions",
     "s3fs>=2021.06.1",
@@ -42,8 +43,9 @@ dependencies= [
 experimental = [
     "torch",
     "torchdata~=0.7",
-    "scikit-learn>=1.2",
+    "scikit-learn~=1.0",
     "scikit-misc>=0.2,<0.4",  # scikit-misc 0.3 dropped Python 3.8 support, and 0.4 doesn't have MacOS/ARM wheels
+    "psutil~=5.0",
     "datasets~=2.0",
     "tdigest~=0.5",
     # choose newest version of tiledb-vector-search that doesn't need a newer version of tiledb
@@ -79,7 +81,7 @@ root = "../../.."
 [tool.ruff]
 line-length = 120
 src = ["api/python/cellxgene_census/src"]
-target-version = "py310"
+target-version = "py38"
 
 [tool.ruff.lint]
 select = [
@@ -127,8 +129,6 @@ ignore = [
     "D205",
     # Prefer absolute imports over relative imports from parent modules TODO: enable
     "TID252",
-    # It's okay to use zip without the strict kwarg. In fact, numba doesn't like it when you use it
-    "B905",
 ]
 
 [tool.ruff.lint.pydocstyle]

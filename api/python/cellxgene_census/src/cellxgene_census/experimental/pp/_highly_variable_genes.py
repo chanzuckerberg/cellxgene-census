@@ -1,14 +1,14 @@
 from __future__ import annotations
 
 import os
-from collections.abc import Callable, Sequence
 from concurrent import futures
-from typing import Any, Literal, cast
+from typing import Any, Callable, Sequence, cast
 
 import numpy as np
 import pandas as pd
 import tiledbsoma as soma
 from somacore.options import SparseDFCoord
+from typing_extensions import Literal
 
 from ..._experiment import _get_experiment
 from ..util._eager_iter import _EagerIterator

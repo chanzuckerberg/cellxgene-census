@@ -7,8 +7,9 @@
 Methods to retrieve information about versions of the publicly hosted Census object.
 """
 
+import typing
 from collections import OrderedDict
-from typing import Any, Literal, cast
+from typing import Any, Dict, Literal, Optional, Union, cast
 
 import requests
 from typing_extensions import NotRequired, TypedDict
@@ -36,7 +37,7 @@ class CensusLocator(TypedDict):
 
     uri: str
     relative_uri: str
-    s3_region: str | None
+    s3_region: Optional[str]
 
 
 class CensusVersionRetraction(TypedDict):
@@ -54,13 +55,13 @@ class CensusVersionRetraction(TypedDict):
     """
 
     date: str
-    reason: str | None
-    info_url: str | None
-    replaced_by: str | None
+    reason: Optional[str]
+    info_url: Optional[str]
+    replaced_by: Optional[str]
 
 
 ReleaseFlag = Literal["lts", "retracted"]
-ReleaseFlags = dict[ReleaseFlag, bool]
+ReleaseFlags = Dict[ReleaseFlag, bool]
 
 
 class CensusVersionDescription(TypedDict):
@@ -81,7 +82,7 @@ class CensusVersionDescription(TypedDict):
             If retracted, details of the retraction.
     """
 
-    release_date: str | None
+    release_date: Optional[str]
     release_build: str
     soma: CensusLocator
     h5ads: CensusLocator
@@ -89,7 +90,7 @@ class CensusVersionDescription(TypedDict):
     retraction: NotRequired[CensusVersionRetraction]
 
 
-CensusDirectory = dict[CensusVersionName, CensusVersionName | CensusVersionDescription]
+CensusDirectory = Dict[CensusVersionName, Union[CensusVersionName, CensusVersionDescription]]
 
 """
 A provider identifies a storage medium for the Census, which can either be a cloud provider or a local file.
@@ -131,11 +132,11 @@ class CensusMirror(TypedDict):
 
     provider: Provider
     base_uri: str
-    region: str | None
+    region: Optional[str]
     embeddings_base_uri: str
 
 
-CensusMirrors = dict[CensusMirrorName, CensusMirrorName | CensusMirror]
+CensusMirrors = Dict[CensusMirrorName, Union[CensusMirrorName, CensusMirror]]
 
 
 class ResolvedCensusLocator(TypedDict):
@@ -154,7 +155,7 @@ class ResolvedCensusLocator(TypedDict):
     """
 
     uri: str
-    region: str | None
+    region: Optional[str]
     provider: str
 
 
@@ -199,8 +200,8 @@ def get_census_version_description(census_version: str) -> CensusVersionDescript
 
 
 def get_census_version_directory(
-    *, lts: bool | None = None, retracted: bool | None = False
-) -> dict[CensusVersionName, CensusVersionDescription]:
+    *, lts: Optional[bool] = None, retracted: Optional[bool] = False
+) -> Dict[CensusVersionName, CensusVersionDescription]:
     """Get the directory of Census versions currently available, optionally filtering by specified
     flags. If a filtering flag is not specified, Census versions will not be filtered by that flag.
     Defaults to including both "long-term stable" (LTS) and weekly Census versions, and excluding
@@ -355,9 +356,9 @@ def get_census_version_directory(
     response = requests.get(CELL_CENSUS_RELEASE_DIRECTORY_URL, headers={"User-Agent": _user_agent()})
     response.raise_for_status()
 
-    directory: dict[str, str | dict[str, Any]] = response.json()
+    directory: dict[str, Union[str, dict[str, Any]]] = response.json()
     directory_out: CensusDirectory = {}
-    aliases: set[CensusVersionName] = set()
+    aliases: typing.Set[CensusVersionName] = set()
 
     # Resolve all aliases for easier use
     for census_version_name in list(directory.keys()):
@@ -400,7 +401,7 @@ def get_census_version_directory(
         directory_out[census_version_name] = census_version_description.copy()
 
     # Cast is safe, as we have removed all aliases
-    unordered_directory = cast(dict[CensusVersionName, CensusVersionDescription], directory_out)
+    unordered_directory = cast(Dict[CensusVersionName, CensusVersionDescription], directory_out)
 
     # Sort by aliases and release date, descending
     aliased_releases = [(k, v) for k, v in unordered_directory.items() if k in aliases]
@@ -416,7 +417,7 @@ def get_census_version_directory(
     return ordered_directory
 
 
-def get_census_mirror_directory() -> dict[CensusMirrorName, CensusMirror]:
+def get_census_mirror_directory() -> Dict[CensusMirrorName, CensusMirror]:
     """Get the directory of Census mirrors currently available.
 
     Returns:
@@ -428,7 +429,7 @@ def get_census_mirror_directory() -> dict[CensusMirrorName, CensusMirror]:
     """
     mirrors = _get_census_mirrors()
     del mirrors["default"]
-    return cast(dict[CensusMirrorName, CensusMirror], mirrors)
+    return cast(Dict[CensusMirrorName, CensusMirror], mirrors)
 
 
 def _get_census_mirrors() -> CensusMirrors:

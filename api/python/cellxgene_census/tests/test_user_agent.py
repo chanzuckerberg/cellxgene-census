@@ -3,10 +3,9 @@ from __future__ import annotations
 
 import json
 import os
-from collections.abc import Callable
 from functools import partial
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable
 
 import numpy as np
 import proxy
