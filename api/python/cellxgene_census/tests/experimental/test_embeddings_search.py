@@ -41,6 +41,26 @@ def test_embeddings_search(true_neighbors: dict[str, Any], query_result: Neighbo
 
 @pytest.mark.experimental
 @pytest.mark.live_corpus
+@pytest.mark.parametrize("n_neighbors", [5, 7, 20])
+def test_embedding_search_n_neighbors(query_anndata: ad.AnnData, n_neighbors: int) -> None:
+    columns = ["cell_type"]
+    result = find_nearest_obs(
+        TRUE_NEAREST_NEIGHBORS_EMBEDDING_NAME,
+        TRUE_NEAREST_NEIGHBORS_ORGANISM,
+        TRUE_NEAREST_NEIGHBORS_CENSUS_VERSION,
+        query_anndata,
+        k=n_neighbors,
+        nprobe=25,
+    )
+
+    # Check that the correct number of neighbors is being returned
+    assert result.neighbor_ids.shape[1] == n_neighbors
+    # Check that this step works
+    _ = predict_obs_metadata(TRUE_NEAREST_NEIGHBORS_ORGANISM, TRUE_NEAREST_NEIGHBORS_CENSUS_VERSION, result, columns)
+
+
+@pytest.mark.experimental
+@pytest.mark.live_corpus
 def test_embeddings_search_errors(query_anndata: ad.AnnData) -> None:
     # bogus embedding name
     with pytest.raises(ValueError, match="No embeddings found"):
