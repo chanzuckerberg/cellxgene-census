@@ -94,13 +94,14 @@ jobs:
           PYTHONPATH=. NUMBA_DISABLE_JIT=1 coverage run --parallel-mode -m pytest -v -s -rP ./tools/cellxgene_census_builder/tests/
       - name: "List the contents of the directory"
         run: |
-          ls -al
+          ls -al .coverage*
       - uses: actions/upload-artifact@v4
         with:
           name: coverage-builder-${{ matrix.os }}-${{ matrix.python-version }}
           path: .coverage*
           retention-days: 3
           if-no-files-found: error
+          include-hidden-files: true
 
   submit-codecoverage:
     needs:
