@@ -56,6 +56,8 @@ jobs:
         with:
           name: coverage-api-${{ matrix.os }}-${{ matrix.python-version }}
           path: ./.coverage*
+          include-hidden-files: true
+          if-no-files-found: "error"
           retention-days: 3
 
   unit_tests_builder:
@@ -90,6 +92,8 @@ jobs:
         with:
           name: coverage-builder-${{ matrix.os }}-${{ matrix.python-version }}
           path: ./.coverage*
+          include-hidden-files: true
+          if-no-files-found: "error"
           retention-days: 3
 
   submit-codecoverage:
