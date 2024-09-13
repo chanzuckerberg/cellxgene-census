@@ -440,10 +440,9 @@ def test_opening_census_without_anon_access_fails_with_bogus_creds() -> None:
     os.environ["AWS_ACCESS_KEY_ID"] = "fake_id"
     os.environ["AWS_SECRET_ACCESS_KEY"] = "fake_key"
     # Passing an empty context
-    # TODO: Re-enable matching
     with pytest.raises(
         soma.DoesNotExistError,
-        # match=r"The AWS Access Key Id you provided does not exist in our records",
+        match=r"does not exist",
     ):
         cellxgene_census.open_soma(census_version="latest", context=soma.SOMATileDBContext())
 

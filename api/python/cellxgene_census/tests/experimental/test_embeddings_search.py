@@ -1,5 +1,5 @@
 import json
-from typing import Any, Dict, List
+from typing import Any
 
 import anndata as ad
 import numpy as np
@@ -15,7 +15,7 @@ from cellxgene_census.experimental import (
 
 @pytest.mark.experimental
 @pytest.mark.live_corpus
-def test_embeddings_search(true_neighbors: Dict[str, Any], query_result: NeighborObs) -> None:
+def test_embeddings_search(true_neighbors: dict[str, Any], query_result: NeighborObs) -> None:
     # check result shapes
     rslt = query_result
     assert isinstance(rslt.neighbor_ids, np.ndarray)
@@ -37,6 +37,26 @@ def test_embeddings_search(true_neighbors: Dict[str, Any], query_result: Neighbo
     assert jaccard >= 0.92
 
     return
+
+
+@pytest.mark.experimental
+@pytest.mark.live_corpus
+@pytest.mark.parametrize("n_neighbors", [5, 7, 20])
+def test_embedding_search_n_neighbors(query_anndata: ad.AnnData, n_neighbors: int) -> None:
+    columns = ["cell_type"]
+    result = find_nearest_obs(
+        TRUE_NEAREST_NEIGHBORS_EMBEDDING_NAME,
+        TRUE_NEAREST_NEIGHBORS_ORGANISM,
+        TRUE_NEAREST_NEIGHBORS_CENSUS_VERSION,
+        query_anndata,
+        k=n_neighbors,
+        nprobe=25,
+    )
+
+    # Check that the correct number of neighbors is being returned
+    assert result.neighbor_ids.shape[1] == n_neighbors
+    # Check that this step works
+    _ = predict_obs_metadata(TRUE_NEAREST_NEIGHBORS_ORGANISM, TRUE_NEAREST_NEIGHBORS_CENSUS_VERSION, result, columns)
 
 
 @pytest.mark.experimental
@@ -96,7 +116,7 @@ def test_predict_obs_metadata(query_anndata: ad.AnnData, query_result: NeighborO
 
 
 @pytest.fixture(scope="module")
-def true_neighbors() -> Dict[int, List[Dict[str, Any]]]:
+def true_neighbors() -> dict[int, list[dict[str, Any]]]:
     ans = {}
     for line in TRUE_NEAREST_NEIGHBORS_JSON.strip().split("\n"):
         example = json.loads(line)
@@ -105,7 +125,7 @@ def true_neighbors() -> Dict[int, List[Dict[str, Any]]]:
 
 
 @pytest.fixture(scope="module")
-def query_anndata(true_neighbors: Dict[str, Any]) -> ad.AnnData:
+def query_anndata(true_neighbors: dict[str, Any]) -> ad.AnnData:
     with cellxgene_census.open_soma(census_version=TRUE_NEAREST_NEIGHBORS_CENSUS_VERSION) as census:
         return cellxgene_census.get_anndata(
             census,

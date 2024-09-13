@@ -1,7 +1,8 @@
 """Nearest-neighbor search based on vector index of Census embeddings."""
 
+from collections.abc import Sequence
 from contextlib import ExitStack
-from typing import Any, Dict, List, NamedTuple, Optional, Sequence, Tuple, cast
+from typing import Any, NamedTuple, cast
 
 import anndata as ad
 import numpy as np
@@ -9,6 +10,7 @@ import numpy.typing as npt
 import pandas as pd
 import tiledb.vector_search as vs
 import tiledbsoma as soma
+from scipy import sparse
 
 from .._experiment import _get_experiment_name
 from .._open import DEFAULT_TILEDB_CONFIGURATION, open_soma
@@ -42,9 +44,9 @@ def find_nearest_obs(
     k: int = 10,
     nprobe: int = 100,
     memory_GiB: int = 4,
-    mirror: Optional[str] = None,
-    embedding_metadata: Optional[Dict[str, Any]] = None,
-    **kwargs: Dict[str, Any],
+    mirror: str | None = None,
+    embedding_metadata: dict[str, Any] | None = None,
+    **kwargs: dict[str, Any],
 ) -> NeighborObs:
     """Search Census for similar obs (cells) based on nearest neighbors in embedding space.
 
@@ -96,9 +98,9 @@ def find_nearest_obs(
 
 
 def _resolve_embedding_index(
-    embedding_metadata: Dict[str, Any],
-    mirror: Optional[str] = None,
-) -> Optional[Tuple[str, str]]:
+    embedding_metadata: dict[str, Any],
+    mirror: str | None = None,
+) -> tuple[str, str] | None:
     index_metadata = embedding_metadata.get("indexes", None)
     if not index_metadata:
         return None
@@ -116,7 +118,7 @@ def predict_obs_metadata(
     census_version: str,
     neighbors: NeighborObs,
     column_names: Sequence[str],
-    experiment: Optional[soma.Experiment] = None,
+    experiment: soma.Experiment | None = None,
 ) -> pd.DataFrame:
     """Predict obs metadata attributes for the query cells based on the embedding nearest neighbors.
 
@@ -156,12 +158,29 @@ def predict_obs_metadata(
         # step through query cells to generate prediction for each column as the plurality value
         # found among its neighbors, with a confidence score based on the simple fraction (for now)
         # TODO: something more intelligent for numeric columns! also use distances, etc.
-        out: Dict[str, List[Any]] = {}
-        for i in range(neighbors.neighbor_ids.shape[0]):
-            neighbors_i = neighbor_obs.loc[neighbors.neighbor_ids[i]]
-            for col in column_names:
-                col_value_counts = neighbors_i[col].value_counts(normalize=True)
-                out.setdefault(col, []).append(col_value_counts.idxmax())
-                out.setdefault(col + "_confidence", []).append(col_value_counts.max())
+        max_joinid = neighbor_obs.index.max()
+        out: dict[str, pd.Series[Any]] = {}
+        n_queries, n_neighbors = neighbors.neighbor_ids.shape
+        indices = np.broadcast_to(np.arange(n_queries), (n_neighbors, n_queries)).T
+        g = sparse.csr_matrix(
+            (
+                np.broadcast_to(1, n_queries * n_neighbors),
+                (
+                    indices.flatten(),
+                    neighbors.neighbor_ids.astype(np.int64).flatten(),
+                ),
+            ),
+            shape=(n_queries, max_joinid + 1),
+        )
+        for col in column_names:
+            col_categorical = neighbor_obs[col].astype("category")
+            joinid2category = sparse.coo_matrix(
+                (np.broadcast_to(1, len(neighbor_obs)), (neighbor_obs.index, col_categorical.cat.codes)),
+                shape=(max_joinid + 1, len(col_categorical.cat.categories)),
+            )
+            counts = g @ joinid2category
+            rel_counts = counts / counts.sum(axis=1)
+            out[col] = col_categorical.cat.categories[rel_counts.argmax(axis=1).A.flatten()].astype(object)
+            out[f"{col}_confidence"] = rel_counts.max(axis=1).toarray().flatten()
 
     return pd.DataFrame.from_dict(out)
