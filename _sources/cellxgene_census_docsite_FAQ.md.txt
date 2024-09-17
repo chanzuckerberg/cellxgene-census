@@ -1,22 +1,6 @@
 # FAQ
 
-Last updated: Jan, 2024.
-
-- [Why should I use the Census?](#why-should-i-use-the-census)
-- [What data is contained in the Census?](#what-data-is-contained-in-the-census)
-- [How do I cite the use of the Census for a publication?](#how-do-i-cite-the-use-of-the-census-for-a-publication)
-- [Why does the Census not have a normalized layer or embeddings?](#why-does-the-census-not-have-a-normalized-layer-or-embeddings)
-- [How does the Census differentiate from other tools?](#how-does-the-census-differentiate-from-other-tools)
-- [Can I query human and mouse data in a single query?](#can-i-query-human-and-mouse-data-in-a-single-query)
-- [Where are the Census data hosted?](#where-are-the-census-data-hosted)
-- [Can I retrieve the original H5AD datasets from which the Census was built?](#can-i-retrieve-the-original-h5ad-datasets-from-which-the-census-was-built)
-- [How can I increase the performance of my queries?](#how-can-i-increase-the-performance-of-my-queries)
-- [Can I use conda to install the Census Python API?](#can-i-use-conda-to-install-the-census-python-api)
-- [How can I ask for support?](#how-can-i-ask-for-support)
-- [How can I ask for new features?](#how-can-i-ask-for-new-features)
-- [How can I contribute my data to the Census?](#how-can-i-contribute-my-data-to-the-census)
-- [Why do I get an `ArraySchema` error when opening the Census?](#why-do-i-get-an-arrayschema-error-when-opening-the-census)
-- [Why do I get an error when running `import cellxgene_census` on Databricks?](#why-do-i-get-an-error-when-running-import-cellxgene_census-on-databricks)
+Last updated: Sept, 2024.
 
 ## Why should I use the Census?
 
@@ -153,3 +137,20 @@ See also:
 - <https://community.databricks.com/s/question/0D53f00001GHVP3CAP/whats-the-difference-between-magic-commands-pip-and-sh-pip>
 
 Alternately, you can configure your cluster to install the `cellxgene-census` package each time it is started by adding this package to the "Libraries" tab on the cluster configuration page per these [instructions](https://docs.databricks.com/libraries/cluster-libraries.html).
+
+## How do I connect to census from behind a proxy?
+
+TileDB doesn't use the typical proxy environment variables and you'll need to specify these directly. That looks like:
+
+```python
+# Replace the ellipses with your proxy host and port info
+config = {
+    "vfs.s3.proxy_host": ..., "vfs.s3.proxy_port": ...
+}
+
+census = cellxgene_census.open_soma(tiledb_config=config)
+```
+
+It may not be obvious that a proxy is the issue. This will typically manifest as a `TileDBError` which says that a timeout was reached during a request to the s3 bucket.
+
+You can read more about how to configure how TileDB communicates with S3 [here](https://docs.tiledb.com/main/how-to/backends/s3#aws-security-credentials).

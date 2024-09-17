@@ -81,8 +81,11 @@
                       </span>
                       <span class="navbar-cxg-link">
                         <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/cellguide">Cell Guide</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/differential-expression">Differential Expression</a>
                         <div style="height: 16px!important; display: flex;">
-                          <span class="beta">BETA</span>
+                          <span class="beta">NEW</span>
                         </div>
                       </span>
                     </span>
@@ -126,7 +129,7 @@
                 
                 
                 <div class="version">
-                    1.15.0
+                    1.16.1
                 </div>
                 
             
@@ -453,7 +456,7 @@ Name: count, dtype: int64
 <h2>Integration with scvi-tools<a class="headerlink" href="#Integration-with-scvi-tools" title="Permalink to this heading"></a></h2>
 <p>From its documentation <code class="docutils literal notranslate"><span class="pre">scvi-tools</span></code> is described as a package for end-to-end analysis of single-cell omics data primarily developed and maintained by the Yosef Lab at UC Berkeley.</p>
 <p>Here we will use the “single-cell Variational Inference” model or scVI which uses a deep generative model for the integration of spatial transcriptomic data and scRNA-seq data.</p>
-<p><strong>For comprehensive usage and best practices of scVI please refer to the</strong><a class="reference external" href="https://docs.scvi-tools.org/en/stable/index.html">doc site</a><strong>of scvi-tools.</strong></p>
+<p><strong>For comprehensive usage and best practices of scVI please refer to the</strong> <a class="reference external" href="https://docs.scvi-tools.org/en/stable/index.html">doc site</a> <strong>of scvi-tools.</strong></p>
 <section id="Inspecting-data-prior-to-integration">
 <h3>Inspecting data prior to integration<a class="headerlink" href="#Inspecting-data-prior-to-integration" title="Permalink to this heading"></a></h3>
 <p>Let’s take a look at the strength of batch effects in our data. For that we will perform bread-and-butter normalization, neighbor graph calculation, and embedding visualization via UMAP.</p>

@@ -77,8 +77,11 @@
                       </span>
                       <span class="navbar-cxg-link">
                         <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/cellguide">Cell Guide</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/differential-expression">Differential Expression</a>
                         <div style="height: 16px!important; display: flex;">
-                          <span class="beta">BETA</span>
+                          <span class="beta">NEW</span>
                         </div>
                       </span>
                     </span>
@@ -122,7 +125,7 @@
                 
                 
                 <div class="version">
-                    1.15.0
+                    1.16.1
                 </div>
                 
             
@@ -173,6 +176,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#how-can-i-contribute-my-data-to-the-census">How can I contribute my data to the Census?</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#why-do-i-get-an-arrayschema-error-when-opening-the-census">Why do I get an <code class="docutils literal notranslate"><span class="pre">ArraySchema</span></code> error when opening the Census?</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#why-do-i-get-an-error-when-running-import-cellxgene-census-on-databricks">Why do I get an error when running <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">cellxgene_census</span></code> on Databricks?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#how-do-i-connect-to-census-from-behind-a-proxy">How do I connect to census from behind a proxy?</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/releases">Release notes</a></li>
@@ -215,24 +219,7 @@
                 
   <section id="faq">
 <h1>FAQ<a class="headerlink" href="#faq" title="Permalink to this heading"></a></h1>
-<p>Last updated: Jan, 2024.</p>
-<ul class="simple">
-<li><p><a class="reference internal" href="#why-should-i-use-the-census"><span class="std std-ref">Why should I use the Census?</span></a></p></li>
-<li><p><a class="reference internal" href="#what-data-is-contained-in-the-census"><span class="std std-ref">What data is contained in the Census?</span></a></p></li>
-<li><p><a class="reference internal" href="#how-do-i-cite-the-use-of-the-census-for-a-publication"><span class="std std-ref">How do I cite the use of the Census for a publication?</span></a></p></li>
-<li><p><a class="reference internal" href="#why-does-the-census-not-have-a-normalized-layer-or-embeddings"><span class="std std-ref">Why does the Census not have a normalized layer or embeddings?</span></a></p></li>
-<li><p><a class="reference internal" href="#how-does-the-census-differentiate-from-other-tools"><span class="std std-ref">How does the Census differentiate from other tools?</span></a></p></li>
-<li><p><a class="reference internal" href="#can-i-query-human-and-mouse-data-in-a-single-query"><span class="std std-ref">Can I query human and mouse data in a single query?</span></a></p></li>
-<li><p><a class="reference internal" href="#where-are-the-census-data-hosted"><span class="std std-ref">Where are the Census data hosted?</span></a></p></li>
-<li><p><a class="reference internal" href="#can-i-retrieve-the-original-h5ad-datasets-from-which-the-census-was-built"><span class="std std-ref">Can I retrieve the original H5AD datasets from which the Census was built?</span></a></p></li>
-<li><p><a class="reference internal" href="#how-can-i-increase-the-performance-of-my-queries"><span class="std std-ref">How can I increase the performance of my queries?</span></a></p></li>
-<li><p><a class="reference internal" href="#can-i-use-conda-to-install-the-census-python-api"><span class="std std-ref">Can I use conda to install the Census Python API?</span></a></p></li>
-<li><p><a class="reference internal" href="#how-can-i-ask-for-support"><span class="std std-ref">How can I ask for support?</span></a></p></li>
-<li><p><a class="reference internal" href="#how-can-i-ask-for-new-features"><span class="std std-ref">How can I ask for new features?</span></a></p></li>
-<li><p><a class="reference internal" href="#how-can-i-contribute-my-data-to-the-census"><span class="std std-ref">How can I contribute my data to the Census?</span></a></p></li>
-<li><p><a class="reference internal" href="#why-do-i-get-an-arrayschema-error-when-opening-the-census"><span class="std std-ref">Why do I get an ArraySchema error when opening the Census?</span></a></p></li>
-<li><p>Why do I get an error when running import cellxgene_census on Databricks?</p></li>
-</ul>
+<p>Last updated: Sept, 2024.</p>
 <section id="why-should-i-use-the-census">
 <h2>Why should I use the Census?<a class="headerlink" href="#why-should-i-use-the-census" title="Permalink to this heading"></a></h2>
 <p>The Census provides efficient low-latency access via Python and R APIs to most single-cell RNA data from <a class="reference external" href="https://cellxgene.cziscience.com/">CZ CELLxGENE Discover</a>. To accelerate computational research, the Census enables researchers to:</p>
@@ -357,6 +344,20 @@ pip<span class="w"> </span>install<span class="w"> </span>cellxgene-census
 <li><p><a class="reference external" href="https://community.databricks.com/s/question/0D53f00001GHVP3CAP/whats-the-difference-between-magic-commands-pip-and-sh-pip">https://community.databricks.com/s/question/0D53f00001GHVP3CAP/whats-the-difference-between-magic-commands-pip-and-sh-pip</a></p></li>
 </ul>
 <p>Alternately, you can configure your cluster to install the <code class="docutils literal notranslate"><span class="pre">cellxgene-census</span></code> package each time it is started by adding this package to the “Libraries” tab on the cluster configuration page per these <a class="reference external" href="https://docs.databricks.com/libraries/cluster-libraries.html">instructions</a>.</p>
+</section>
+<section id="how-do-i-connect-to-census-from-behind-a-proxy">
+<h2>How do I connect to census from behind a proxy?<a class="headerlink" href="#how-do-i-connect-to-census-from-behind-a-proxy" title="Permalink to this heading"></a></h2>
+<p>TileDB doesn’t use the typical proxy environment variables and you’ll need to specify these directly. That looks like:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Replace the ellipses with your proxy host and port info</span>
+<span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;vfs.s3.proxy_host&quot;</span><span class="p">:</span> <span class="o">...</span><span class="p">,</span> <span class="s2">&quot;vfs.s3.proxy_port&quot;</span><span class="p">:</span> <span class="o">...</span>
+<span class="p">}</span>
+
+<span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">(</span><span class="n">tiledb_config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>It may not be obvious that a proxy is the issue. This will typically manifest as a <code class="docutils literal notranslate"><span class="pre">TileDBError</span></code> which says that a timeout was reached during a request to the s3 bucket.</p>
+<p>You can read more about how to configure how TileDB communicates with S3 <a class="reference external" href="https://docs.tiledb.com/main/how-to/backends/s3#aws-security-credentials">here</a>.</p>
 </section>
 </section>
 
