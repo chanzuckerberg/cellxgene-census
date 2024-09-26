@@ -8,7 +8,6 @@ import anndata as ad
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-import tiledb.vector_search as vs
 import tiledbsoma as soma
 from scipy import sparse
 
@@ -70,6 +69,8 @@ def find_nearest_obs(
             The result of `get_embedding_metadata_by_name(embedding_name, organism, census_version)`.
             Supplying this saves a network request for repeated searches.
     """
+    import tiledb.vector_search as vs
+
     if embedding_metadata is None:
         embedding_metadata = get_embedding_metadata_by_name(embedding_name, organism, census_version)
     assert embedding_metadata["embedding_name"] == embedding_name
