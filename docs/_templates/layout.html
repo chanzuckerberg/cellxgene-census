@@ -375,7 +375,11 @@
     ga('create', '{{ theme_analytics_id }}', 'auto');
     ga('send', 'pageview');
     </script>
-
+    <!-- HubSpot doNotTrack -->
+    <script>
+      var _hsq = ( window._hsq = window._hsq || []) ;
+      _hsq.push(["doNotTrack"]);
+    </script>
     {% endif %}
   {% endif %}
 
