@@ -242,7 +242,7 @@ class ExperimentBuilder:
             pm = sparse.lil_matrix((max_dataset_joinid + 1, self.n_var), dtype=bool)
             for dataset_joinid, presence in self.presence.items():
                 data, cols = presence
-                pm[dataset_joinid, cols] = data
+                pm[dataset_joinid, cols] = data  # TODO: Does this need to be 1?
 
             pm = pm.tocoo()
             pm.eliminate_zeros()
@@ -712,7 +712,8 @@ def populate_X_layers(
         for presence in eb_summary["presence"]:
             assert presence.eb_name == eb.name
             eb.presence[presence.dataset_soma_joinid] = (
-                presence.data,
+                # If a gene was in the `.var_names` of the h5ad, it counts as present regardless of whether any values were greater than 1
+                np.broadcast_to(True, presence.cols.shape),
                 presence.cols,
             )
 

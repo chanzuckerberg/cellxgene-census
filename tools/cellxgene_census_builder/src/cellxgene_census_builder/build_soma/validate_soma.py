@@ -1013,6 +1013,7 @@ def validate_soma_bounding_box(
             for layer_name in exp.ms[MEASUREMENT_RNA_NAME].X:
                 assert exp.ms[MEASUREMENT_RNA_NAME].X[layer_name].shape == (n_obs, n_vars)
             if "feature_dataset_presence_matrix" in exp.ms[MEASUREMENT_RNA_NAME]:
+                # TODO: Add test for values here
                 assert exp.ms[MEASUREMENT_RNA_NAME]["feature_dataset_presence_matrix"].shape[1] == n_vars
 
     with soma.open(soma_path) as C:
