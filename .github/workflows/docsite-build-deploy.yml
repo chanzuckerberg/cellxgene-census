@@ -40,8 +40,13 @@ jobs:
         run: |
           cd docs/
           make clean && make html
-          cp -r _build/html/* ../docsite/.
 
+      - name: Copy everything to docsite directory
+        run: |
+          # Python docs
+          cp -r docs/_build/html/* docsite/.
+
+          # R docs
           mkdir -p docsite/r
           cp -r api/r/cellxgene.census/docs/* docsite/r/.
 
