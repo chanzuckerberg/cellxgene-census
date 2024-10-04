@@ -32,6 +32,11 @@ jobs:
           mkdir -p docsite
           touch docsite/.nojekyll
 
+      - name: Install system deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libcairo2-dev rsync
+
       - name: Install Pandoc
         run: |
           sudo apt-get install -y pandoc
