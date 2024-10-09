@@ -27,7 +27,8 @@ extensions = [
     "sphinx.ext.intersphinx", 
     'sphinx.ext.napoleon', 
     'sphinx.ext.autosummary', 
-    'myst_parser'
+    "sphinxext.opengraph",
+    'myst_parser',
 ]
 
 autosummary_generate = True
@@ -58,7 +59,12 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 source_suffix = ['.rst', '.md']
 
+# Sphinx open graph for social previews
+# https://sphinxext-opengraph.readthedocs.io/
 
+ogp_site_url = "https://chanzuckerberg.github.io/cellxgene-census/"
+ogp_image = "https://raw.githubusercontent.com/chanzuckerberg/single-cell-explorer/49e8d145f45520c524b56483b4cecea691fd7452/client/src/assets/img/cellxgene.png"
+ogp_image_alt = "CZ CELLxGENE Logo"
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output

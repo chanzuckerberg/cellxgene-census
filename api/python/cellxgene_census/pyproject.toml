@@ -59,6 +59,7 @@ doc = [
     "sphinx-rtd-theme",
     "gitpython",
     "sphinx<7.0.0",
+    "sphinxext-opengraph",
 ]
 
 [project.urls]
