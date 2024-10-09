@@ -63,7 +63,7 @@ source_suffix = ['.rst', '.md']
 # https://sphinxext-opengraph.readthedocs.io/
 
 ogp_site_url = "https://chanzuckerberg.github.io/cellxgene-census/"
-ogp_image = "https://raw.githubusercontent.com/chanzuckerberg/single-cell-explorer/49e8d145f45520c524b56483b4cecea691fd7452/client/src/assets/img/cellxgene.png"
+ogp_image = "_static/img/cellxgene-discover-logo-1024x1024.png"
 ogp_image_alt = "CZ CELLxGENE Logo"
 
 # -- Options for HTML output -------------------------------------------------
