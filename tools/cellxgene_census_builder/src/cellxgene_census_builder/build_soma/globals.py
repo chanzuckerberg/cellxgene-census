@@ -335,6 +335,13 @@ RNA_SEQ = [
     "EFO:0022396",  # TruSeq
     "EFO:0022488",  # Smart-seq3
     "EFO:0022490",  # ScaleBio single cell RNA sequencing
+    "EFO:0022600",  # Parse Evercode Whole Transcriptome v1
+    "EFO:0022601",  # Parse Evercode Whole Transcriptome v2
+    "EFO:0022602",  # Parse Evercode Whole Transcriptome v3
+    "EFO:0022606",  # 10x gene expression flex
+    "EFO:0022839",  # STORM-seq
+    "EFO:0022845",  # modified STRT-seq
+    "EFO:0022846",  # 5' STRT-seq
     "EFO:0030002",  # microwell-seq
     "EFO:0030003",  # 10x 3' transcription profiling
     "EFO:0030004",  # 10x 5' transcription profiling
@@ -371,6 +378,7 @@ FULL_GENE_ASSAY = [
     "EFO:0010184",  # Smart-like
     "EFO:0022396",  # TruSeq
     "EFO:0022488",  # Smart-seq3
+    "EFO:0022839",  # STORM-seq
     "EFO:0030031",  # SCOPE-chip
     "EFO:0030061",  # mcSCRB-seq
     "EFO:0700016",  # Smart-seq v4
