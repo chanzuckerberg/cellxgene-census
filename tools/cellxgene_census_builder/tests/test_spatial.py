@@ -26,8 +26,8 @@ class SpatialBuild:
 
 # These should be updated with every schema update
 VISIUM_DATASET_URIS = [
-    "https://datasets.cellxgene.cziscience.com/6811c454-def2-4d9e-b360-aa8a69f843ce.h5ad",
-    "https://datasets.cellxgene.cziscience.com/17d9e43f-1251-4f1e-8a5b-a96f2c89e5ec.h5ad",
+    "https://datasets.cellxgene.cziscience.com/fee901ce-87ea-46cd-835a-c15906a4aa6d.h5ad",
+    "https://datasets.cellxgene.cziscience.com/e944a0f7-e398-4e8f-a060-94dae8a08fb3.h5ad",
 ]
 
 
@@ -57,6 +57,7 @@ def spatial_manifest(tmp_path_factory, worker_id) -> Path:
     # get the temp directory shared by all workers
     # root_tmp_dir = tmp_path_factory.getbasetemp().parent
     root_tmp_dir = tmp_path_factory.getbasetemp()  # Not shared, but also not reused
+    # TODO: the cache is never invalidated, so we need a way to not include data from different schema versions
     anndata_dir = pooch.os_cache("cellxgene_census_builder")
     manifest_pth = root_tmp_dir / "manifest.csv"
     # fn = root_tmp_dir / "data.json"

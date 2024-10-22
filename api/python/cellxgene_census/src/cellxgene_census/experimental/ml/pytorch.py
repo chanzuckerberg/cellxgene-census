@@ -430,11 +430,9 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
     The ``return_sparse_X`` parameter controls whether the ``X`` data is returned as a dense or sparse
     :class:`torch.Tensor`. If the model supports use of sparse :class:`torch.Tensor`\ s, this will reduce memory usage.
 
-    The ``obs_column_names`` parameter determines the data columns that are returned in the ``obs`` Tensor. The first
-    element is always the ``soma_joinid`` of the ``obs`` :class:`pandas.DataFrame` (or, equivalently, the
-    ``soma_dim_0`` of the ``X`` matrix). The remaining elements are the ``obs`` columns specified by
-    ``obs_column_names``, and string-typed columns are encoded as integer values. If needed, these values can be decoded
-    by obtaining the encoder for a given ``obs`` column name and calling its ``inverse_transform`` method:
+    The ``obs_column_names`` parameter determines the data columns that are returned in the ``obs`` Tensor. String-typed
+    columns are encoded as integer values. If needed, these values can be decoded by obtaining the encoder for a given
+    ``obs`` column name and calling its ``inverse_transform`` method:
 
     >>> exp_data_pipe.obs_encoders["<obs_attr_name>"].inverse_transform(encoded_values)
 
@@ -489,10 +487,8 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
                 The query used to filter along the ``var`` axis. If not specified, all ``var`` columns (genes/features)
                 will be returned.
             obs_column_names:
-                The names of the ``obs`` columns to return. The ``soma_joinid`` index "column" does not need to be
-                specified and will always be returned. If not specified, only the ``soma_joinid`` will be returned.
-                If custom encoders are passed, this parameter must not be used, since the columns will be inferred
-                automatically from the encoders.
+                The names of the ``obs`` columns to return. If custom encoders are passed, this parameter must not be used,
+                since the columns will be inferred automatically from the encoders.
             batch_size:
                 The number of rows of ``obs`` and ``X`` data to return in each iteration. Defaults to ``1``. A value of
                 ``1`` will result in :class:`torch.Tensor` of rank 1 being returns (a single row); larger values will
