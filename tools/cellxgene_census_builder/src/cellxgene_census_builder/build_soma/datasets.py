@@ -77,6 +77,9 @@ def create_dataset_manifest(info_collection: soma.Collection, datasets: list[Dat
 
     # write to a SOMA dataframe
     with info_collection.add_new_dataframe(
-        CENSUS_DATASETS_NAME, schema=schema, index_column_names=["soma_joinid"]
+        CENSUS_DATASETS_NAME,
+        schema=schema,
+        index_column_names=["soma_joinid"],
+        domain=[(manifest_df["soma_joinid"].min(), manifest_df["soma_joinid"].max())],
     ) as manifest:
         manifest.write(pa.Table.from_pandas(manifest_df, preserve_index=False, schema=schema))
