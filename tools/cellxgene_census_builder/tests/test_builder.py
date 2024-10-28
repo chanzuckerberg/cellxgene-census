@@ -188,6 +188,7 @@ def test_unicode_support(tmp_path: pathlib.Path) -> None:
         uri=os.path.join(tmp_path, "unicode_support"),
         schema=pa.Schema.from_pandas(pd_df, preserve_index=False),
         index_column_names=["soma_joinid"],
+        domain=[(pd_df["soma_joinid"].min(), pd_df["soma_joinid"].max())],
     ) as s_df:
         s_df.write(pa.Table.from_pandas(pd_df, preserve_index=False))
 
