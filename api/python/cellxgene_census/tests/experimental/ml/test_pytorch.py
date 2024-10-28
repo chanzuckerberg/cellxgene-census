@@ -74,6 +74,7 @@ def add_dataframe(coll: CollectionBase, key: str, value_range: range) -> None:
             ]
         ),
         index_column_names=["soma_joinid"],
+        domain=[(min(value_range), max(value_range))],
     )
     df.write(
         pa.Table.from_pydict(
