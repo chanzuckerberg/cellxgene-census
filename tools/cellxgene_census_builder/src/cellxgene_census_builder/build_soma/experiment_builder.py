@@ -169,8 +169,13 @@ class ExperimentBuilder:
         assert self.experiment is not None
         _assert_open_for_write(self.experiment)
 
-        obs_df = cast(pd.DataFrame, CENSUS_OBS_TABLE_SPEC.recategoricalize(self.obs_df))
+        obs_df = CENSUS_OBS_TABLE_SPEC.recategoricalize(self.obs_df)
         obs_schema = CENSUS_OBS_TABLE_SPEC.to_arrow_schema(obs_df)
+
+        if obs_df is None or obs_df.empty:
+            domain = None
+        else:
+            domain = [(obs_df["soma_joinid"].min(), obs_df["soma_joinid"].max())]
 
         # create `obs`
         self.experiment.add_new_dataframe(
@@ -178,7 +183,7 @@ class ExperimentBuilder:
             schema=obs_schema,
             index_column_names=["soma_joinid"],
             platform_config=CENSUS_OBS_PLATFORM_CONFIG,
-            domain=[(obs_df["soma_joinid"].min(), obs_df["soma_joinid"].max())],
+            domain=domain,
         )
 
         if obs_df is None or obs_df.empty:
@@ -196,8 +201,13 @@ class ExperimentBuilder:
 
         rna_measurement = self.experiment.ms[MEASUREMENT_RNA_NAME]
 
-        var_df = cast(pd.DataFrame, CENSUS_VAR_TABLE_SPEC.recategoricalize(self.var_df))
+        var_df = CENSUS_VAR_TABLE_SPEC.recategoricalize(self.var_df)
         var_schema = CENSUS_VAR_TABLE_SPEC.to_arrow_schema(var_df)
+
+        if var_df is None or var_df.empty:
+            domain = None
+        else:
+            domain = [(var_df["soma_joinid"].min(), var_df["soma_joinid"].max())]
 
         # create `var` in the measurement
         rna_measurement.add_new_dataframe(
@@ -205,7 +215,7 @@ class ExperimentBuilder:
             schema=var_schema,
             index_column_names=["soma_joinid"],
             platform_config=CENSUS_VAR_PLATFORM_CONFIG,
-            domain=[(var_df["soma_joinid"].min(), var_df["soma_joinid"].max())],
+            domain=domain,
         )
 
         if var_df is None or var_df.empty:
