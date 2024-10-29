@@ -62,6 +62,7 @@ dependencies= [
     "numba==0.59.1",
     "dask==2024.3.1",
     "distributed==2024.3.1",
+    "tiledb",
 ]
 
 [project.urls]
