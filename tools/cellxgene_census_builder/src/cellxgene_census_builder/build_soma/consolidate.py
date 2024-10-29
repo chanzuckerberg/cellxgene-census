@@ -101,11 +101,11 @@ def list_uris_to_consolidate(
     collection: soma.Collection,
 ) -> list[ConsolidationCandidate]:
     """Recursively walk the soma.Collection and return all uris for soma_types that can be consolidated and vacuumed."""
-    from tiledbsoma._collection import CollectionBase
+    from tiledbsoma._soma_group import SOMAGroup
 
     uris = []
     for soma_obj in collection.values():
-        if isinstance(soma_obj, CollectionBase):
+        if isinstance(soma_obj, SOMAGroup):
             uris += list_uris_to_consolidate(soma_obj)
             n_columns = 0
             n_fragments = 0

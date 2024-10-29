@@ -306,6 +306,8 @@ def build_step4a_add_spatial(
     import pyarrow as pa
     from anndata.experimental import read_elem
     from tiledbsoma import (
+        Axis,
+        CoordinateSpace,
         Scene,
     )
 
@@ -332,6 +334,11 @@ def build_step4a_add_spatial(
             logger.debug(f"Writing spatial info from {d.dataset_id}")
             scene = spatial_collection.add_new_collection(d.dataset_id, kind=Scene)
 
+            coord_space = CoordinateSpace(
+                (Axis(name="y", unit="micrometers"), Axis(name="x", unit="micrometers"))  # type: ignore[arg-type]
+            )
+            scene.coordinate_space = coord_space
+
             with h5py.File(h5ad_path / d.dataset_h5ad_path) as f:
                 tissue_pos = read_elem(f["obsm/spatial"])
                 is_single = read_elem(f["uns/spatial/is_single"])
@@ -348,7 +355,7 @@ def build_step4a_add_spatial(
                     library_id = _keys[0]
                     del _keys
                     # There are images
-                    write_tasks.extend(add_image_collection(scene, spatial_group[library_id]))
+                    write_tasks.extend(add_image_collection(scene, library_id, spatial_group[library_id]))
 
             obs = cast(pd.DataFrame, eb.obs_df).query(f"dataset_id == '{d.dataset_id}'")
 
@@ -363,6 +370,7 @@ def build_step4a_add_spatial(
                 "loc",
                 schema=loc_pa.schema,
                 index_column_names=["soma_joinid"],
+                domain=[(loc["soma_joinid"].min(), loc["soma_joinid"].max())],
             ) as loc_sink:
                 loc_sink.write(loc_pa)
 
@@ -382,6 +390,7 @@ def build_step4a_add_spatial(
         with cast(soma.Experiment, eb.experiment).add_new_dataframe(
             "obs_scene",
             schema=obs_scene.schema,
+            domain=[(np.min(obs_scene["soma_joinid"]), np.max(obs_scene["soma_joinid"]))],
         ) as df_store:
             df_store.write(obs_scene)
 
@@ -401,7 +410,17 @@ class TileDBSOMADenseArrayWriteWrapper:
 def write_dask_array_as_tiledbsoma(collection: tiledbsoma.Collection, key: str, value: da.Array):
     # TODO: Would be nice to set chunking here
     soma_array = collection.add_new_dense_ndarray(key, type=pa.from_numpy_dtype(value.dtype), shape=value.shape)
+    write_dask_array_to_existing_tiledbsoma(soma_array, value)
+    # wrapped_soma_array = TileDBSOMADenseArrayWriteWrapper(soma_array.uri)
 
+    # return value.store(
+    #     wrapped_soma_array,
+    #     lock=False,
+    #     compute=False,
+    # )
+
+
+def write_dask_array_to_existing_tiledbsoma(soma_array: tiledbsoma.DenseNDArray, value: da.Array):
     wrapped_soma_array = TileDBSOMADenseArrayWriteWrapper(soma_array.uri)
 
     return value.store(
@@ -413,17 +432,16 @@ def write_dask_array_as_tiledbsoma(collection: tiledbsoma.Collection, key: str, 
 
 def add_image_collection(
     scene: soma.Collection,
+    key: str,
     # spatial_library_info: dict[str, Any],
     spatial_library_info: h5py.Group,
 ) -> None:
     from anndata.experimental import read_elem
     from somacore import (
-        Axis,
-        CoordinateSpace,
         ScaleTransform,
     )
 
-    img_collection = scene.add_new_collection("img")
+    # img_collection = scene.add_new_collection("img")
     scale_factors = read_elem(spatial_library_info["scalefactors"])
     image_dict = {
         k: read_elem_as_dask(spatial_library_info["images"][k]) for k in spatial_library_info["images"].keys()
@@ -435,52 +453,86 @@ def add_image_collection(
     fullres_to_coords_scale = 65 / scale_factors["spot_diameter_fullres"]
 
     # Create axes and transformations
-    coordinate_system = CoordinateSpace(
+    # coordinate_system = CoordinateSpace(
+    #     (
+    #         Axis(name="y", unit="micrometer"),
+    #         Axis(name="x", unit="micrometer"),
+    #     )
+    # )
+
+    # spots_to_coords = ScaleTransform(("y", "x"), ("y", "x"), scale_factors=(fullres_to_coords_scale, fullres_to_coords_scale))
+    scale_transform = ScaleTransform(
+        ("y", "x"),
+        ("y", "x"),
         (
-            Axis(name="y", units="micrometer"),
-            Axis(name="x", units="micrometer"),
-        )
+            scale_factors["tissue_hires_scalef"] * fullres_to_coords_scale,
+            scale_factors["tissue_hires_scalef"] * fullres_to_coords_scale,
+        ),
     )
 
-    spots_to_coords = ScaleTransform((fullres_to_coords_scale, fullres_to_coords_scale))
+    # scene.metadata["soma_scene_coordinates"] = coordinate_system.to_json()
+    # img_metadata = {"soma_scene_coords": spots_to_coords.to_json()}
 
-    scene.metadata["soma_scene_coordinates"] = coordinate_system.to_json()
-    img_metadata = {"soma_scene_coords": spots_to_coords.to_json()}
     # axes_metadata = [
     #     {"name": "c", "type": "channel"},
     #     {"name": "y", "type": "space", "unit": "micrometer"},
     #     {"name": "x", "type": "space", "unit": "micrometer"},
     # ]
+    # If we only host the hires
+    # * The hires transform is the only transform
+    # * And we just set the shape
+    # * We can include the fullres image in a seperate group if needed
 
     # Images
     write_tasks = []
     logger.debug(f"Writing images {list(image_dict)}")
-    for k, v in image_dict.items():
-        if k == "fullres":
-            scale = (1.0, 1.0, 1.0)
-        elif k == "hires":
-            scale = (1.0, scale_factors["tissue_hires_scalef"], scale_factors["tissue_hires_scalef"])
-        elif k == "lowres":
-            scale = (1.0, scale_factors["tissue_lowres_scalef"], scale_factors["tissue_lowres_scalef"])
-        else:
-            raise ValueError(f"Unexpected image name: {k}")
+    scene.add_new_collection("img")
 
-        img_metadata[f"soma_asset_transform_{k}"] = ScaleTransform(scale).to_json()
-        write_tasks.append(write_dask_array_as_tiledbsoma(img_collection, k, np.transpose(v, (2, 0, 1))))
-        # image_array = DenseNDArray.create(
-        #     image_uri,
-        #     type=pa.from_numpy_dtype(im.dtype),
-        #     shape=im.shape,
-        #     # platform_config=platform_config,
-        #     # context=context,
-        # )
-        # tensor = pa.Tensor.from_numpy(im)
-        # image_array.write(
-        #     (slice(None), slice(None), slice(None)),
-        #     tensor,
-        # )
-        # img_collection.set(k, image_array, use_relative_uri=True)
-    img_collection.metadata.update(img_metadata)
+    hires_image = np.transpose(image_dict["hires"], (2, 0, 1))
+    multiscale_image = scene.add_new_multiscale_image(
+        key=key,
+        subcollection="img",
+        transform=scale_transform,
+        axis_names=("c", "y", "x"),
+        axis_types=("channel", "width", "height"),
+        reference_level_shape=hires_image.shape,
+        type=pa.from_numpy_dtype(hires_image.dtype),
+    )
+
+    soma_image = multiscale_image.add_new_level("hires", shape=hires_image.shape)
+    write_tasks.append(write_dask_array_to_existing_tiledbsoma(soma_image, hires_image))
+
+    # assert False, f"hires image has shape: {hires_image.shape}"
+
+    # for k in ["hires"]:
+    # v = np.transpose(image_dict[k], (2, 0, 1))
+
+    # for k, v in image_dict.items():
+    #     if k == "fullres":
+    #         scale = (1.0, 1.0, 1.0)
+    #     elif k == "hires":
+    #         scale = (1.0, scale_factors["tissue_hires_scalef"], scale_factors["tissue_hires_scalef"])
+    #     elif k == "lowres":
+    #         scale = (1.0, scale_factors["tissue_lowres_scalef"], scale_factors["tissue_lowres_scalef"])
+    #     else:
+    #         raise ValueError(f"Unexpected image name: {k}")
+
+    #     img_metadata[f"soma_asset_transform_{k}"] = ScaleTransform(scale).to_json()
+    #     write_tasks.append(write_dask_array_as_tiledbsoma(img_collection, k, np.transpose(v, (2, 0, 1))))
+    #     # image_array = DenseNDArray.create(
+    #     image_uri,
+    #     type=pa.from_numpy_dtype(im.dtype),
+    #     shape=im.shape,
+    #     # platform_config=platform_config,
+    #     # context=context,
+    # )
+    # tensor = pa.Tensor.from_numpy(im)
+    # image_array.write(
+    #     (slice(None), slice(None), slice(None)),
+    #     tensor,
+    # )
+    # img_collection.set(k, image_array, use_relative_uri=True)
+    # img_collection.metadata.update(img_metadata)
     return write_tasks
 
 
