@@ -186,19 +186,21 @@ CXG_VAR_COLUMNS_READ: tuple[str, ...] = (
     "feature_length",
     "feature_reference",
     "feature_biotype",
+    "feature_type",
 )
 CENSUS_VAR_TABLE_SPEC = TableSpec.create(
     [
         ("soma_joinid", pa.int64()),
         ("feature_id", pa.large_string()),
         ("feature_name", pa.large_string()),
+        ("feature_type", pa.large_string()),
         ("feature_length", pa.int64()),
         ("nnz", pa.int64()),
         ("n_measured_obs", pa.int64()),
     ],
     use_arrow_dictionary=USE_ARROW_DICTIONARY,
 )
-_StringLabelVar = ["feature_id", "feature_name"]
+_StringLabelVar = ["feature_id", "feature_name", "feature_type"]
 _NumericVar = ["nnz", "n_measured_obs", "feature_length"]
 CENSUS_VAR_PLATFORM_CONFIG = {
     "tiledb": {
