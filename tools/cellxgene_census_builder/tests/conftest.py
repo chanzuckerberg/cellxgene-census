@@ -99,6 +99,7 @@ def get_anndata(
             "feature_biotype": "gene",
             "feature_is_filtered": False,
             "feature_name": "ERCC-00002 (spike-in control)",
+            "feature_type": "synthetic",
             "feature_reference": organism.organism_ontology_term_id,
             "feature_length": 1000,
         },

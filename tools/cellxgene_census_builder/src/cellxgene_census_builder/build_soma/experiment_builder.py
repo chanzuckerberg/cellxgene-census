@@ -297,7 +297,7 @@ def accumulate_axes_dataframes(
             var_df = (
                 adata.var.copy()
                 .rename_axis("feature_id")
-                .reset_index()[["feature_id", "feature_name", "feature_length"]]
+                .reset_index()[["feature_id", "feature_name", "feature_length", "feature_type"]]
             )
 
             return obs_df, var_df
