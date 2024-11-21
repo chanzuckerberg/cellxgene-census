@@ -145,10 +145,6 @@ These data need to be normalized by gene length for downstream analysis.
 
 Per the CELLxGENE dataset schema, [all RNA assays MUST include UMI or read counts](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.2.0/schema.md#x-matrix-layers). Author-normalized data layers [as defined in the CELLxGENE dataset schema](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.2.0/schema.md#x-matrix-layers) MUST NOT be included in the Census.
 
-#### Sample types
-
-Only observations (cells) from primary tissue MUST be included in the Census. Thus, ONLY those observations with a [`tissue_type`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.2.0/schema.md#tissue_type) value equal to "tissue" MUST be included; other values of `tissue_type` MUST NOT be included.
-
 #### Repeated data
 
 When a cell is represented multiple times in CELLxGENE Discover, only one is marked as the primary cell. This is defined in the CELLxGENE dataset schema under [`is_primary_data`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.2.0/schema.md#is_primary_data). This information MUST be included in the Census cell metadata to enable queries that retrieve datasets (see cell metadata below), and all cells MUST be included in the Census.
@@ -873,6 +869,10 @@ Cell metadata MUST be encoded as a `SOMADataFrame` with the following columns:
 </table>
 
 ## Changelog
+
+### Version 2.1.1
+
+* Allow cell culture and organoid data, e.g. values for `tissue_type` other than `tissue`.
 
 ### Version 2.1.0
 
