@@ -370,7 +370,7 @@ def build_step4a_add_spatial(
                 "loc",
                 schema=loc_pa.schema,
                 index_column_names=["soma_joinid"],
-                domain=[(loc["soma_joinid"].min(), loc["soma_joinid"].max())],
+                domain=[(0, loc["soma_joinid"].max())],  # TODO: investigate why soma_joinid.min isn't zero here
             ) as loc_sink:
                 loc_sink.write(loc_pa)
 
@@ -493,9 +493,8 @@ def add_image_collection(
         key=key,
         subcollection="img",
         transform=scale_transform,
-        axis_names=("c", "y", "x"),
-        axis_types=("channel", "width", "height"),
-        reference_level_shape=hires_image.shape,
+        coordinate_space=("y", "x"),
+        level_shape=hires_image.shape,
         type=pa.from_numpy_dtype(hires_image.dtype),
     )
 

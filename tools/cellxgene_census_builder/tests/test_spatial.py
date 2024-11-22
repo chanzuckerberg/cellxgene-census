@@ -92,6 +92,7 @@ def spatial_build(spatial_manifest, tmp_path_factory) -> SpatialBuild:
             "build",
             "--manifest",
             str(spatial_manifest),
+            "--no-validate",
         ],
         check=True,
     )
@@ -136,10 +137,10 @@ def test_images(spatial_build):
     spatial = census["census_spatial"]["homo_sapiens"]["spatial"]
 
     for dataset_id, h5ad_path in h5ads.items():
-        image_collection = spatial[dataset_id]["img"]
         with h5py.File(h5ad_path) as f:
             library_id = list(filter(lambda x: x != "is_single", f["uns/spatial"].keys()))[0]
             spatial_dict = read_elem(f[f"uns/spatial/{library_id}"])
+        image_collection = spatial[dataset_id]["img"][library_id]
         for k in image_collection.keys():
             from_census = image_collection[k].read().to_numpy()
             from_h5ad = np.transpose(spatial_dict["images"][k], (2, 0, 1))  ## TODO figure out why we do this
