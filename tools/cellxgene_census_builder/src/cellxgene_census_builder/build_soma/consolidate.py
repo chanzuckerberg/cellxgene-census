@@ -127,6 +127,10 @@ def _consolidate_array(
     consolidation_modes: list[str] | None = None,
     consolidation_config: dict[str, str] | None = None,
 ) -> None:
+    # TODO: Consolidation for dense arrays is currently broken, tracked in https://github.com/single-cell-data/TileDB-SOMA/issues/3383
+    if obj.soma_type == "SOMADenseNDArray":
+        return
+
     modes = consolidation_modes or ["fragment_meta", "array_meta", "commits", "fragments"]
     uri = obj.uri
 

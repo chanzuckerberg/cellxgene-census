@@ -33,7 +33,7 @@ dependencies= [
     "typing_extensions==4.10.0",
     "pyarrow==15.0.2",
     "pandas[performance]==2.2.1",
-    "anndata @ git+https://github.com/scverse/anndata",
+    "anndata",
     "numpy==1.26.4",
     # IMPORTANT: consider TileDB format compat before advancing this version. It is important that
     # the tiledbsoma _format_ version lag that used in cellxgene-census package, ensuring that
@@ -43,7 +43,7 @@ dependencies= [
     # TODO (spatial): tiledbsoma pin to a PyPI release is temporarily commented out in favor git commit pin
     # "tiledbsoma==1.9.3",
     # TODO (spatial): Pin tiledbsoma dependency to an actual released version after tiledbsoma spatial code has been released
-    "tiledbsoma @ git+https://github.com/single-cell-data/TileDB-SOMA.git@75112e5e4646b400bb19f132d70114fc5414b12b#egg=tiledbsoma&subdirectory=apis/python/",
+    "tiledbsoma==1.15.0rc4",
     # TODO (spatial): Deal with the following line before release
     "cellxgene-census @ {root:parent:parent:uri}/api/python/cellxgene_census",
     "cellxgene-ontology-guide==1.2.0",
@@ -60,8 +60,8 @@ dependencies= [
     "psutil==5.9.8",
     "pyyaml==6.0.1",
     "numba==0.59.1",
-    "dask==2024.3.1",
-    "distributed==2024.3.1",
+    "dask",
+    "distributed",
     "tiledb",
 ]
 

@@ -492,14 +492,14 @@ def add_image_collection(
     multiscale_image = scene.add_new_multiscale_image(
         key=key,
         subcollection="img",
+        level_key="hires",
         transform=scale_transform,
         coordinate_space=("y", "x"),
         level_shape=hires_image.shape,
         type=pa.from_numpy_dtype(hires_image.dtype),
     )
 
-    soma_image = multiscale_image.add_new_level("hires", shape=hires_image.shape)
-    write_tasks.append(write_dask_array_to_existing_tiledbsoma(soma_image, hires_image))
+    write_tasks.append(write_dask_array_to_existing_tiledbsoma(multiscale_image["hires"], hires_image))
 
     # assert False, f"hires image has shape: {hires_image.shape}"
 
