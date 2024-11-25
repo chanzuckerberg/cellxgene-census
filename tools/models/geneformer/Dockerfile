@@ -21,7 +21,7 @@ RUN pip uninstall -y transformer-engine
 # compatibility with the Census embeddings curator
 ARG EMBEDDINGS_TILEDBSOMA_VERSION=1.9.5
 ARG CELLXGENE_CENSUS_VERSION=main
-ARG GENEFORMER_VERSION=57f02a4
+ARG GENEFORMER_VERSION=c99403
 
 RUN mkdir /census-geneformer
 WORKDIR /census-geneformer
@@ -44,6 +44,3 @@ RUN python3 -m venv --system-site-packages embeddings_tiledbsoma_venv && \
 COPY helpers ./helpers
 COPY *.py ./
 COPY finetune-geneformer.config.yml .
-
-# FIXME: eliminate once model is published in Geneformer repo
-COPY gf-95m/ ./gf-95m/
