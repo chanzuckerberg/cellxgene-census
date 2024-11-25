@@ -1,4 +1,5 @@
 import pathlib
+from functools import partial
 from typing import Literal
 
 import anndata
@@ -43,8 +44,17 @@ def get_anndata(
     n_cells = 4
     n_genes = len(gene_ids)
     rng = np.random.default_rng()
-    min_X_val = 1 if no_zero_counts else 0
-    X = rng.integers(min_X_val, min_X_val + 5, size=(n_cells, n_genes)).astype(np.float32)
+    if no_zero_counts:
+        X = rng.integers(1, 6, size=(n_cells, n_genes)).astype(np.float32)
+    else:
+        X = sparse.random(
+            n_cells,
+            n_genes,
+            density=0.5,
+            random_state=rng,
+            data_rvs=partial(rng.integers, 1, 6),
+            dtype=np.float32,
+        ).toarray()
 
     # Builder code currently assumes (and enforces) that ALL cells (rows) contain at least
     # one non-zero value in their count matrix. Enforce this assumption, as the rng will
@@ -147,7 +157,7 @@ def datasets(census_build_args: CensusBuildArgs) -> list[Dataset]:
     for organism in ORGANISMS:
         for i in range(NUM_DATASET):
             h5ad = get_anndata(
-                organism, GENE_IDS[i], no_zero_counts=True, assay_ontology_term_id=ASSAY_IDS[i], X_format=X_FORMAT[i]
+                organism, GENE_IDS[i], no_zero_counts=False, assay_ontology_term_id=ASSAY_IDS[i], X_format=X_FORMAT[i]
             )
             h5ad_path = f"{assets_path}/{organism.name}_{i}.h5ad"
             h5ad.write_h5ad(h5ad_path)
