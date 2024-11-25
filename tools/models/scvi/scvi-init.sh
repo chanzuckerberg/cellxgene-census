@@ -26,8 +26,7 @@ python3 -m venv scvi_venv
 source scvi_venv/bin/activate
 
 pip install --upgrade "jax[cuda11_pip]" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
-pip install pathlib torch click ray hyperopt
-pip install git+https://github.com/scverse/scvi-tools.git
+pip install torch click ray hyperopt scvi-tools
 
 
 # pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
