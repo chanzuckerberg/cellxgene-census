@@ -966,9 +966,14 @@ def validate_internal_consistency(
                 """
                 datasets_df["presence_sum_var_axis"] = presence.sum(axis=1).A1
                 tmp = obs.merge(datasets_df, left_on="dataset_id", right_on="dataset_id")
-                assert (
-                    tmp.n_measured_vars == tmp.presence_sum_var_axis
-                ).all(), f"{eb.name}: obs.n_measured_vars does not match presence matrix."
+                try:
+                    np.testing.assert_array_equal(
+                        tmp.n_measured_vars,
+                        tmp.presence_sum_var_axis,
+                    )
+                except AssertionError as e:
+                    e.add_note(f"{eb.name}: obs.n_measured_vars does not match presence matrix.")
+                    raise
                 del tmp
 
                 # Assertion 3 - var.n_measured_obs is consistent with presence matrix

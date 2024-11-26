@@ -455,7 +455,7 @@ def compute_X_file_stats(
 
     obs_stats = res["obs_stats"]
     var_stats = res["var_stats"]
-    obs_stats["n_measured_vars"] = (var_stats.nnz > 0).sum()
+    obs_stats["n_measured_vars"] = var_stats.shape[0]
     var_stats.loc[var_stats.nnz > 0, "n_measured_obs"] = n_obs
     res["presence"].append(
         PresenceResult(
