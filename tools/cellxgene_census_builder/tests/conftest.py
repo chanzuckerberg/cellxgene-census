@@ -109,6 +109,7 @@ def get_anndata(
             "feature_biotype": "gene",
             "feature_is_filtered": False,
             "feature_name": "ERCC-00002 (spike-in control)",
+            "feature_type": "synthetic",
             "feature_reference": organism.organism_ontology_term_id,
             "feature_length": 1000,
         },
@@ -126,7 +127,7 @@ def get_anndata(
     uns["batch_condition"] = np.array(["a", "b"], dtype="object")
 
     # Need to carefully set the corpora schema versions in order for tests to pass.
-    uns["schema_version"] = "5.1.0"  # type: ignore
+    uns["schema_version"] = "5.2.0"  # type: ignore
 
     return anndata.AnnData(X=X, obs=obs, var=var, obsm=obsm, uns=uns)
 

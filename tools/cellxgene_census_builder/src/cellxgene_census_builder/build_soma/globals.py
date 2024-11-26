@@ -13,7 +13,7 @@ USE_ARROW_DICTIONARY = True
 
 CENSUS_SCHEMA_VERSION = "2.1.0"
 
-CXG_SCHEMA_VERSION = "5.1.0"  # the CELLxGENE schema version supported
+CXG_SCHEMA_VERSION = "5.2.0"  # the CELLxGENE schema version supported
 
 # Columns expected in the census_datasets dataframe
 CENSUS_DATASETS_TABLE_SPEC = TableSpec.create(
@@ -186,19 +186,21 @@ CXG_VAR_COLUMNS_READ: tuple[str, ...] = (
     "feature_length",
     "feature_reference",
     "feature_biotype",
+    "feature_type",
 )
 CENSUS_VAR_TABLE_SPEC = TableSpec.create(
     [
         ("soma_joinid", pa.int64()),
         ("feature_id", pa.large_string()),
         ("feature_name", pa.large_string()),
+        ("feature_type", pa.large_string()),
         ("feature_length", pa.int64()),
         ("nnz", pa.int64()),
         ("n_measured_obs", pa.int64()),
     ],
     use_arrow_dictionary=USE_ARROW_DICTIONARY,
 )
-_StringLabelVar = ["feature_id", "feature_name"]
+_StringLabelVar = ["feature_id", "feature_name", "feature_type"]
 _NumericVar = ["nnz", "n_measured_obs", "feature_length"]
 CENSUS_VAR_PLATFORM_CONFIG = {
     "tiledb": {
@@ -335,6 +337,13 @@ RNA_SEQ = [
     "EFO:0022396",  # TruSeq
     "EFO:0022488",  # Smart-seq3
     "EFO:0022490",  # ScaleBio single cell RNA sequencing
+    "EFO:0022600",  # Parse Evercode Whole Transcriptome v1
+    "EFO:0022601",  # Parse Evercode Whole Transcriptome v2
+    "EFO:0022602",  # Parse Evercode Whole Transcriptome v3
+    "EFO:0022606",  # 10x gene expression flex
+    "EFO:0022839",  # STORM-seq
+    "EFO:0022845",  # modified STRT-seq
+    "EFO:0022846",  # 5' STRT-seq
     "EFO:0030002",  # microwell-seq
     "EFO:0030003",  # 10x 3' transcription profiling
     "EFO:0030004",  # 10x 5' transcription profiling
@@ -371,6 +380,7 @@ FULL_GENE_ASSAY = [
     "EFO:0010184",  # Smart-like
     "EFO:0022396",  # TruSeq
     "EFO:0022488",  # Smart-seq3
+    "EFO:0022839",  # STORM-seq
     "EFO:0030031",  # SCOPE-chip
     "EFO:0030061",  # mcSCRB-seq
     "EFO:0700016",  # Smart-seq v4

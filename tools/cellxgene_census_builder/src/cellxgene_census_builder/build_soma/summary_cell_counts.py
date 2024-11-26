@@ -29,7 +29,10 @@ def create_census_summary_cell_counts(
 
     # write to a SOMA dataframe
     with info_collection.add_new_dataframe(
-        CENSUS_SUMMARY_CELL_COUNTS_NAME, schema=schema, index_column_names=["soma_joinid"]
+        CENSUS_SUMMARY_CELL_COUNTS_NAME,
+        schema=schema,
+        index_column_names=["soma_joinid"],
+        domain=[(df["soma_joinid"].min(), df["soma_joinid"].max())],
     ) as cell_counts:
         cell_counts.write(pa.Table.from_pandas(df, preserve_index=False, schema=schema))
 
