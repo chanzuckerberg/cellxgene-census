@@ -244,7 +244,7 @@ class ExperimentBuilder:
             pm = sparse.lil_matrix((max_dataset_joinid + 1, self.n_var), dtype=bool)
             for dataset_joinid, presence in self.presence.items():
                 data, cols = presence
-                pm[dataset_joinid, cols] = data  # TODO: Does this need to be 1?
+                pm[dataset_joinid, cols] = data  # This should always be 1
 
             pm = pm.tocoo()
             pm.eliminate_zeros()

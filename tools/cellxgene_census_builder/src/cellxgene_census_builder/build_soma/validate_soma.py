@@ -968,8 +968,8 @@ def validate_internal_consistency(
                 tmp = obs.merge(datasets_df, left_on="dataset_id", right_on="dataset_id")
                 try:
                     np.testing.assert_array_equal(
-                        tmp.n_measured_vars,
-                        tmp.presence_sum_var_axis,
+                        tmp["n_measured_vars"],
+                        tmp["presence_sum_var_axis"],
                     )
                 except AssertionError as e:
                     e.add_note(f"{eb.name}: obs.n_measured_vars does not match presence matrix.")
@@ -1018,7 +1018,6 @@ def validate_soma_bounding_box(
             for layer_name in exp.ms[MEASUREMENT_RNA_NAME].X:
                 assert exp.ms[MEASUREMENT_RNA_NAME].X[layer_name].shape == (n_obs, n_vars)
             if "feature_dataset_presence_matrix" in exp.ms[MEASUREMENT_RNA_NAME]:
-                # TODO: Add test for values here
                 assert exp.ms[MEASUREMENT_RNA_NAME]["feature_dataset_presence_matrix"].shape[1] == n_vars
 
     with soma.open(soma_path) as C:
