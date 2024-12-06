@@ -6,12 +6,14 @@ ARG COMMIT_SHA
 ENV COMMIT_SHA=${COMMIT_SHA}
 
 # Ubuntu 22 contains only the python3.11 RC as of 2023-12-21, so use deadsnakes
+# TODO (spatial): `git` is added to this dockerfile to be able to install python packages from github. Remove when it is not needed.
 RUN apt update && \
   apt install -y software-properties-common && \
   add-apt-repository -y ppa:deadsnakes/ppa && \
   apt update && \
   apt -y full-upgrade && \
   apt -y install python3.11 python3.11-venv python3-pip awscli && \
+  apt -y install git && \
   apt-get clean
 
 # set python3.11 as default
