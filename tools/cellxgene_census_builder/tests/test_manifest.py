@@ -210,13 +210,16 @@ def test_blocklist_alive_and_well() -> None:
 
     # test for existance by reading it. NOTE: if the file moves, this test will fail until
     # the new file location is merged to main.
-    with fsspec.open(dataset_id_blocklist_uri, "rt") as fp:
-        for line in fp:
-            # each line must be a comment, blank or a UUID
-            line = line.strip()
-            if not line or line.startswith("#"):
-                continue
+    blocklist = (
+        fsspec.open(dataset_id_blocklist_uri, "rt").fs.cat_file(dataset_id_blocklist_uri).decode("utf-8").split("\n")
+    )
 
-            # UUID() raises ValueError upon malformed UUID
-            # Equality check enforces formatting (i.e., dashes)
-            assert line == str(uuid.UUID(hex=line))
+    for line in blocklist:
+        # each line must be a comment, blank or a UUID
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+
+        # UUID() raises ValueError upon malformed UUID
+        # Equality check enforces formatting (i.e., dashes)
+        assert line == str(uuid.UUID(hex=line))
