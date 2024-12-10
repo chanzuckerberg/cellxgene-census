@@ -211,7 +211,14 @@ def test_blocklist_alive_and_well() -> None:
     # test for existance by reading it. NOTE: if the file moves, this test will fail until
     # the new file location is merged to main.
     blocklist = (
-        fsspec.open(dataset_id_blocklist_uri, "rt").fs.cat_file(dataset_id_blocklist_uri).decode("utf-8").split("\n")
+        # Figure out protocol to open file
+        fsspec.filesystem(fsspec.utils.infer_storage_options(dataset_id_blocklist_uri)["protocol"])
+        # Read whole file as bytes
+        .cat_file(dataset_id_blocklist_uri)
+        # Decode to string and split into lines
+        .decode("utf-8")
+        .strip()
+        .split("\n")
     )
 
     for line in blocklist:
