@@ -118,10 +118,10 @@ def _to_df(somadf: tiledbsoma.DataFrame) -> pd.DataFrame:
 def test_locations(spatial_build):
     census = cellxgene_census.open_soma(uri=str(spatial_build.soma_path))
     spatial = census["census_spatial"]["homo_sapiens"]
-    obs_scene = _to_df(spatial["obs_scene"])
+    obs_spatial_presence = _to_df(spatial["obs_spatial_presence"])
 
-    # Test that the obs_scene join id + dataset work with locations
-    for scene_id, subdf in obs_scene.groupby("scene_id"):
+    # Test that the obs_spatial_presence join id + dataset work with locations
+    for scene_id, subdf in obs_spatial_presence.groupby("scene_id"):
         locations = _to_df(spatial["spatial"][scene_id]["obsl"]["loc"])
         assert locations["soma_joinid"].isin(subdf["soma_joinid"]).all()
 
@@ -147,19 +147,21 @@ def test_images(spatial_build):
             np.testing.assert_array_equal(from_h5ad, from_census)
 
 
-def test_obs_scene(spatial_build):
+def test_obs_spatial_presence(spatial_build):
     census = cellxgene_census.open_soma(uri=str(spatial_build.soma_path))
 
     experiment = census["census_spatial"]["homo_sapiens"]
 
     obs = _to_df(experiment.obs)
-    obs_scene = _to_df(experiment["obs_scene"])
+    obs_spatial_presence = _to_df(experiment["obs_spatial_presence"])
 
     # For Visium specifically, each observation should show up once and only once in a scene
-    assert len(obs_scene) == len(obs)
-    pd.testing.assert_frame_equal(
-        obs[["soma_joinid", "dataset_id"]], obs_scene.rename(columns={"scene_id": "dataset_id"})
-    )
+    assert len(obs_spatial_presence) == len(obs)
+
+    expected = obs[["soma_joinid", "dataset_id"]].rename(columns={"dataset_id": "scene_id"}).assign(data=True)
+
+    # TODO: resolve casting `scene_id` to categorical. Ideally `scene_id` will be stored dictionary encoded
+    pd.testing.assert_frame_equal(expected, obs_spatial_presence.astype({"scene_id": "category"}))
 
 
 def test_scene(spatial_build):
@@ -169,3 +171,16 @@ def test_scene(spatial_build):
 
     for scene in experiment.spatial.values():
         assert isinstance(scene, tiledbsoma.Scene)
+
+
+def test_spatialdata_query_export(spatial_build):
+    census = cellxgene_census.open_soma(uri=str(spatial_build.soma_path))
+    experiment = census["census_spatial"]["homo_sapiens"]
+
+    obs = experiment["obs"].read().concat().to_pandas()
+    joinids = obs["soma_joinid"].iloc[:100].values
+
+    sdata = experiment.axis_query(
+        "RNA",
+        obs_query=tiledbsoma.AxisQuery(coords=(joinids,)),
+    ).to_spatial_data(X_name="raw")

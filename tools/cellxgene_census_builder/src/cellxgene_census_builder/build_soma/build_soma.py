@@ -324,10 +324,7 @@ def build_step4a_add_spatial(
         # TODO: figure out how to remove this cast
         spatial_collection = cast(soma.Experiment, eb.experiment)["spatial"]
         # Starting with an empty dataframe for the missing case
-        # obs_scenes: list[pd.DataFrame] = [
-        #     pd.DataFrame({"soma_joinid": np.array([], dtype=np.int64), "scene_id": np.array([], dtype=object)})
-        # ]
-        obs_scenes: list[pd.DataFrame] = []
+        obs_spatial_presences: list[pd.DataFrame] = []
         write_tasks = []
 
         for d in datasets:
@@ -374,25 +371,35 @@ def build_step4a_add_spatial(
             ) as loc_sink:
                 loc_sink.write(loc_pa)
 
-            obs_scenes.append(obs[["soma_joinid", "dataset_id"]].rename(columns={"dataset_id": "scene_id"}))
+            obs_spatial_presences.append(obs[["soma_joinid", "dataset_id"]].rename(columns={"dataset_id": "scene_id"}))
 
         client.compute(write_tasks, sync=True)
 
-        if len(obs_scenes) == 0:
+        if len(obs_spatial_presences) == 0:
             logger.warn(f"No scenes found for spatial experiment at {eb.experiment_uri}")
             continue
 
-        logger.debug(f"Creating obs_scene table for {len(obs_scenes)} scenes")
-        obs_scene = pa.Table.from_pandas(
-            pd.concat(obs_scenes, ignore_index=True).reset_index(drop=True).astype({"scene_id": "category"})
+        logger.debug(f"Creating obs_spatial_presence table for {len(obs_spatial_presences)} scenes")
+        obs_spatial_presence = pa.Table.from_pandas(
+            pd.concat(obs_spatial_presences, ignore_index=True)
+            .reset_index(drop=True)
+            # TODO: tiledbsoma doesn't let us use a categorical column as an index, follow up on this
+            # .astype({"scene_id": "category"})
+            # Add in all True boolean column for interpretation as sparse matrix
+            .assign(data=True)
         )
+        # assert False, obs_spatial_presence.schema
 
         with cast(soma.Experiment, eb.experiment).add_new_dataframe(
-            "obs_scene",
-            schema=obs_scene.schema,
-            domain=[(np.min(obs_scene["soma_joinid"]), np.max(obs_scene["soma_joinid"]))],
+            "obs_spatial_presence",
+            schema=obs_spatial_presence.schema,
+            index_column_names=["soma_joinid", "scene_id"],
+            domain=[
+                (np.min(obs_spatial_presence["soma_joinid"]), np.max(obs_spatial_presence["soma_joinid"])),
+                ("", ""),
+            ],
         ) as df_store:
-            df_store.write(obs_scene)
+            df_store.write(obs_spatial_presence)
 
 
 class TileDBSOMADenseArrayWriteWrapper:
