@@ -352,7 +352,7 @@ def build_step4a_add_spatial(
                     library_id = _keys[0]
                     del _keys
                     # There are images
-                    write_tasks.extend(add_image_collection(scene, library_id, spatial_group[library_id]))
+                    write_tasks.extend(add_image_collection(scene, library_id, coord_space, spatial_group[library_id]))
 
             obs = cast(pd.DataFrame, eb.obs_df).query(f"dataset_id == '{d.dataset_id}'")
 
@@ -363,13 +363,25 @@ def build_step4a_add_spatial(
             loc["soma_joinid"] = obs["soma_joinid"].array
             loc_pa = pa.Table.from_pandas(loc, preserve_index=False)
             obsl = scene.add_new_collection("obsl")
-            with obsl.add_new_dataframe(
+            # with obsl.add_new_point_cloud_dataframe(
+
+            # )
+            with scene.add_new_point_cloud_dataframe(
                 "loc",
+                "obsl",
                 schema=loc_pa.schema,
-                index_column_names=["soma_joinid"],
-                domain=[(0, loc["soma_joinid"].max())],  # TODO: investigate why soma_joinid.min isn't zero here
+                coordinate_space=coord_space,
+                transform=tiledbsoma.IdentityTransform(("y", "x"), ("y", "x")),
+                # index_column_names=["soma_joinid"],
+                domain=[(loc["y"].min(), loc["y"].max()), (loc["x"].min(), loc["x"].max())],
+                # domain=[(0, loc["soma_joinid"].max())],  # TODO: investigate why soma_joinid.min isn't zero here
             ) as loc_sink:
                 loc_sink.write(loc_pa)
+
+                # Added so we read as shape
+                # TODO: correct radius value (2.0 is a placeholder)
+                loc_sink.metadata["soma_geometry"] = 2.0
+                loc_sink.metadata["soma_geometry_type"] = "radius"
 
             obs_spatial_presences.append(obs[["soma_joinid", "dataset_id"]].rename(columns={"dataset_id": "scene_id"}))
 
@@ -383,7 +395,7 @@ def build_step4a_add_spatial(
         obs_spatial_presence = pa.Table.from_pandas(
             pd.concat(obs_spatial_presences, ignore_index=True)
             .reset_index(drop=True)
-            # TODO: tiledbsoma doesn't let us use a categorical column as an index, follow up on this
+            # TODO: tiledbsoma doesn't let us use a categorical column as an index, follow up on this, Julia is aware
             # .astype({"scene_id": "category"})
             # Add in all True boolean column for interpretation as sparse matrix
             .assign(data=True)
@@ -440,6 +452,7 @@ def write_dask_array_to_existing_tiledbsoma(soma_array: tiledbsoma.DenseNDArray,
 def add_image_collection(
     scene: soma.Collection,
     key: str,
+    coordinate_space,
     # spatial_library_info: dict[str, Any],
     spatial_library_info: h5py.Group,
 ) -> None:
@@ -501,7 +514,7 @@ def add_image_collection(
         subcollection="img",
         level_key="hires",
         transform=scale_transform,
-        coordinate_space=("y", "x"),
+        coordinate_space=coordinate_space,
         level_shape=hires_image.shape,
         type=pa.from_numpy_dtype(hires_image.dtype),
     )

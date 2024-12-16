@@ -93,6 +93,7 @@ def spatial_build(spatial_manifest, tmp_path_factory) -> SpatialBuild:
             "--manifest",
             str(spatial_manifest),
             "--no-validate",
+            "--no-consolidate",  # TODO: somehow became neccesary when I added the pointclouds, investigate further
         ],
         check=True,
     )
@@ -180,7 +181,11 @@ def test_spatialdata_query_export(spatial_build):
     obs = experiment["obs"].read().concat().to_pandas()
     joinids = obs["soma_joinid"].iloc[:100].values
 
-    sdata = experiment.axis_query(
+    query = experiment.axis_query(
         "RNA",
         obs_query=tiledbsoma.AxisQuery(coords=(joinids,)),
-    ).to_spatial_data(X_name="raw")
+    )
+    sdata = query.to_spatial_data(X_name="raw")
+    adata = query.to_anndata(X_name="raw")
+
+    sdata
