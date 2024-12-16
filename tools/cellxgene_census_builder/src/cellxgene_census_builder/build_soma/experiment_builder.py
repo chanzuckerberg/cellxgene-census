@@ -25,6 +25,7 @@ from ..util import clamp, log_process_resource_status, urlcat
 from .anndata import AnnDataFilterSpec, AnnDataProxy, open_anndata
 from .datasets import Dataset
 from .globals import (
+    ALLOWED_SPATIAL_ASSAYS,
     CENSUS_OBS_PLATFORM_CONFIG,
     CENSUS_OBS_TABLE_SPEC,
     CENSUS_VAR_PLATFORM_CONFIG,
@@ -109,6 +110,10 @@ class ExperimentSpecification:
         """Factory method. Do not instantiate the class directly."""
         return cls(name, label, anndata_cell_filter_spec, organism_ontology_term_id)
 
+    def is_exclusively_spatial(self) -> bool:
+        """Returns True if the experiment specification EXCLUSIVELY involves spatial assays."""
+        return self.anndata_cell_filter_spec["assay_ontology_term_ids"] == ALLOWED_SPATIAL_ASSAYS
+
 
 class ExperimentBuilder:
     """Class that embodies the operators and state to build an Experiment.
@@ -143,7 +148,7 @@ class ExperimentBuilder:
         return self.specification.anndata_cell_filter_spec
 
     def create(self, census_data: soma.Collection) -> None:
-        """Create experiment within the specified Collection with a single Measurement."""
+        """Create experiment within the specified Collection."""
         logger.info(f"{self.name}: create experiment at {urlcat(census_data.uri, self.name)}")
 
         self.experiment = census_data.add_new_collection(self.name, soma.Experiment)
@@ -155,13 +160,22 @@ class ExperimentBuilder:
         # make measurement and add to ms collection
         ms.add_new_collection(MEASUREMENT_RNA_NAME, soma.Measurement)
 
+        # create `spatial`
+        if self.specification.is_exclusively_spatial():
+            self.experiment.add_new_collection("spatial")
+
     def write_obs_dataframe(self) -> None:
         logger.info(f"{self.name}: writing obs dataframe")
         assert self.experiment is not None
         _assert_open_for_write(self.experiment)
 
-        obs_df = cast(pd.DataFrame, CENSUS_OBS_TABLE_SPEC.recategoricalize(self.obs_df))
+        obs_df = CENSUS_OBS_TABLE_SPEC.recategoricalize(self.obs_df)
         obs_schema = CENSUS_OBS_TABLE_SPEC.to_arrow_schema(obs_df)
+
+        if obs_df is None or obs_df.empty:
+            domain = None
+        else:
+            domain = [(obs_df["soma_joinid"].min(), obs_df["soma_joinid"].max())]
 
         # create `obs`
         self.experiment.add_new_dataframe(
@@ -169,7 +183,7 @@ class ExperimentBuilder:
             schema=obs_schema,
             index_column_names=["soma_joinid"],
             platform_config=CENSUS_OBS_PLATFORM_CONFIG,
-            domain=[(obs_df["soma_joinid"].min(), obs_df["soma_joinid"].max())],
+            domain=domain,
         )
 
         if obs_df is None or obs_df.empty:
@@ -187,8 +201,13 @@ class ExperimentBuilder:
 
         rna_measurement = self.experiment.ms[MEASUREMENT_RNA_NAME]
 
-        var_df = cast(pd.DataFrame, CENSUS_VAR_TABLE_SPEC.recategoricalize(self.var_df))
+        var_df = CENSUS_VAR_TABLE_SPEC.recategoricalize(self.var_df)
         var_schema = CENSUS_VAR_TABLE_SPEC.to_arrow_schema(var_df)
+
+        if var_df is None or var_df.empty:
+            domain = None
+        else:
+            domain = [(var_df["soma_joinid"].min(), var_df["soma_joinid"].max())]
 
         # create `var` in the measurement
         rna_measurement.add_new_dataframe(
@@ -196,7 +215,7 @@ class ExperimentBuilder:
             schema=var_schema,
             index_column_names=["soma_joinid"],
             platform_config=CENSUS_VAR_PLATFORM_CONFIG,
-            domain=[(var_df["soma_joinid"].min(), var_df["soma_joinid"].max())],
+            domain=domain,
         )
 
         if var_df is None or var_df.empty:
@@ -660,7 +679,7 @@ def _reduce_X_matrices(
             if d.dataset_id in eb.dataset_obs_joinid_start
             for chunk in range(0, eb.dataset_n_obs[d.dataset_id], REDUCE_X_MAJOR_ROW_STRIDE)
         ]
-        per_eb_results[eb.name] = (
+        per_eb_results[eb.experiment_uri] = (
             dask.bag.from_sequence(read_file_chunks)
             .starmap(read_and_dispatch_partial_h5ad, global_var_joinids=global_var_joinids)
             .foldby("dataset_id", reduce_X_stats_binop)
@@ -684,12 +703,12 @@ def populate_X_layers(
     per_eb_results = _reduce_X_matrices(assets_path, datasets, experiment_builders)
 
     for eb in experiment_builders:
-        if eb.name not in per_eb_results:
+        if eb.experiment_uri not in per_eb_results:
             continue
 
         # add per-dataset stats to each per-dataset XReduction
         eb_result: list[XReduction] = []
-        for dataset_id, xreduction in per_eb_results[eb.name]:
+        for dataset_id, xreduction in per_eb_results[eb.experiment_uri]:
             assert dataset_id == xreduction["dataset_id"]
             d = datasets_by_id[dataset_id]
             eb_result.extend(
