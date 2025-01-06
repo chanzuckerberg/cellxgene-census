@@ -41,4 +41,4 @@ The final selection of parameters for the training phase was based on a hyper pa
 
 ## Environment setup
 
-The training has been performed on an AWS EC2 machine (instance type: g4dn.12xlarge), running on Ubuntu 20.04. Run [scvi-init.sh](scvi-init.sh) to set up the environment required to run the pipeline.
+The training has been performed on an AWS EC2 machine (instance type: g4dn.12xlarge), running on Ubuntu 20.04. Run [scvi-init.sh](scvi-init.sh) to set up the environment required to run the pipeline. It is also necessary to mount the instance storage as swap since the loader requires the AnnData to be in memory. You can use [this script](https://github.com/chanzuckerberg/cellxgene-census/blob/main/tools/scripts/aws/swapon_instance_storage.sh) to automatically mount the drives as swap.
