@@ -138,7 +138,7 @@ def test_counts(matrix: sparse.coo_matrix, n_batches: int, stride: int) -> None:
     assert n_samples.sum() == matrix.shape[0]
     assert len(n_samples) == n_batches
 
-    clip_val = 50 * np.random.rand(n_batches, matrix.shape[1])
+    clip_val = (50 * np.random.rand(n_batches, matrix.shape[1])).astype(np.float64)
 
     ca = CountsAccumulator(n_batches, matrix.shape[1], clip_val)
     for i in range(0, matrix.nnz, stride):
