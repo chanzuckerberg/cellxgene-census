@@ -185,7 +185,7 @@ def test_spatialdata_query_export(spatial_build):
         "RNA",
         obs_query=tiledbsoma.AxisQuery(coords=(joinids,)),
     )
-    sdata = query.to_spatial_data(X_name="raw")
+    sdata = query.to_spatialdata(X_name="raw")
     adata = query.to_anndata(X_name="raw")
 
     sdata
