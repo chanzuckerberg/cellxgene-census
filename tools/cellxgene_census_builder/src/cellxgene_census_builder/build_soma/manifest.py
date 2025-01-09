@@ -111,15 +111,25 @@ def load_blocklist(dataset_id_blocklist_uri: str | None) -> set[str]:
         logger.error(msg)
         raise ValueError(msg)
 
-    with fsspec.open(dataset_id_blocklist_uri, "rt") as fp:
-        for line in fp:
-            line = line.strip()
-            if len(line) == 0 or line.startswith("#"):
-                # strip blank lines and comments (hash is never in a UUID)
-                continue
-            blocked_dataset_ids.add(line)
+    blocklist = (
+        # Figure out protocol to open file
+        fsspec.filesystem(fsspec.utils.infer_storage_options(dataset_id_blocklist_uri)["protocol"])
+        # Read whole file as bytes
+        .cat_file(dataset_id_blocklist_uri)
+        # Decode to string and split into lines
+        .decode("utf-8")
+        .strip()
+        .split("\n")
+    )
 
-        logger.info(f"Dataset blocklist found, containing {len(blocked_dataset_ids)} ids.")
+    for line in blocklist:
+        line = line.strip()
+        if len(line) == 0 or line.startswith("#"):
+            # strip blank lines and comments (hash is never in a UUID)
+            continue
+        blocked_dataset_ids.add(line)
+
+    logger.info(f"Dataset blocklist found, containing {len(blocked_dataset_ids)} ids.")
 
     return blocked_dataset_ids
 

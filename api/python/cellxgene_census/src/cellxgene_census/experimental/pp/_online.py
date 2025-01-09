@@ -96,7 +96,7 @@ class MeanAccumulator:
         self.n_samples = n_samples
         self.nnz_only = nnz_only
         # If we want to exclude zeros, we need to keep track of the denominator
-        self.n = np.zeros(n_variables)
+        self.n = np.zeros(n_variables, dtype=np.float64)
 
     def update(self, var_vec: npt.NDArray[np.int64], val_vec: npt.NDArray[np.float32]) -> None:
         if self.nnz_only:
@@ -106,9 +106,9 @@ class MeanAccumulator:
 
     def finalize(self) -> npt.NDArray[np.float64]:
         if self.nnz_only:
-            return self.u / self.n
+            return np.divide(self.u, self.n, dtype=np.float64)
         else:
-            return self.u / self.n_samples
+            return np.divide(self.u, self.n_samples, dtype=np.float64)
 
 
 class CountsAccumulator:
