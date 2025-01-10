@@ -872,7 +872,7 @@ Cell metadata MUST be encoded as a `SOMADataFrame` with the following columns:
 
 ### Version 2.2.0
 
-* Allow cell culture and organoid data, e.g. values for `tissue_type` other than `tissue`.
+* Allow organoid data, i.e. `tissue_type` can now be `organoid` other than `tissue`.
 
 ### Version 2.1.0
 
