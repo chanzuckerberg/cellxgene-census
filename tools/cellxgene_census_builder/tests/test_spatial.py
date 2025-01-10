@@ -42,7 +42,6 @@ def create_manifest_csv_file(spatial_datasets_dir: Path | str, manifest_file_pat
 
 def _fetch_datasets(h5ad_dir: Path, manifest_pth: str) -> None:
     for uri in VISIUM_DATASET_URIS:
-        # output_pth = uri.split("/")[-1]
         pooch.retrieve(uri, None, path=h5ad_dir)
     create_manifest_csv_file(h5ad_dir, manifest_pth)
 
@@ -60,8 +59,6 @@ def spatial_manifest(tmp_path_factory, worker_id) -> Path:
     # TODO: the cache is never invalidated, so we need a way to not include data from different schema versions
     anndata_dir = pooch.os_cache("cellxgene_census_builder")
     manifest_pth = root_tmp_dir / "manifest.csv"
-    # fn = root_tmp_dir / "data.json"
-    # TODO: use pooch for downloading files so I can cache them
     with FileLock(str(manifest_pth) + ".lock"):
         if manifest_pth.is_file():
             pass
@@ -92,7 +89,7 @@ def spatial_build(spatial_manifest, tmp_path_factory) -> SpatialBuild:
             "build",
             "--manifest",
             str(spatial_manifest),
-            "--no-validate",
+            # "--no-validate",
             "--no-consolidate",  # TODO: somehow became neccesary when I added the pointclouds, investigate further
         ],
         check=True,
@@ -188,4 +185,6 @@ def test_spatialdata_query_export(spatial_build):
     sdata = query.to_spatialdata(X_name="raw")
     adata = query.to_anndata(X_name="raw")
 
-    sdata
+    # TODO: compare adata and sdata more fully
+
+    assert sdata.tables["RNA"].n_obs == adata.n_obs

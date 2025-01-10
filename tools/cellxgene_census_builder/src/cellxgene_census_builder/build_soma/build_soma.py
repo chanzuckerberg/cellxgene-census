@@ -359,13 +359,11 @@ def build_step4a_add_spatial(
             # Locations
             logger.debug("Writing locations")
 
-            loc = pd.DataFrame(tissue_pos, columns=["x", "y"])
+            loc = pd.DataFrame(tissue_pos, columns=["y", "x"])
             loc["soma_joinid"] = obs["soma_joinid"].array
             loc_pa = pa.Table.from_pandas(loc, preserve_index=False)
-            obsl = scene.add_new_collection("obsl")
-            # with obsl.add_new_point_cloud_dataframe(
+            _ = scene.add_new_collection("obsl")
 
-            # )
             with scene.add_new_point_cloud_dataframe(
                 "loc",
                 "obsl",
@@ -470,23 +468,14 @@ def add_image_collection(
     # Coordinate systems
 
     # pixels_per_spot_radius = 0.5 * scale_factors["spot_diameter_fullres"]
-    fullres_to_coords_scale = 65 / scale_factors["spot_diameter_fullres"]
+    # fullres_to_coords_scale = 65 / scale_factors["spot_diameter_fullres"]
 
-    # Create axes and transformations
-    # coordinate_system = CoordinateSpace(
-    #     (
-    #         Axis(name="y", unit="micrometer"),
-    #         Axis(name="x", unit="micrometer"),
-    #     )
-    # )
-
-    # spots_to_coords = ScaleTransform(("y", "x"), ("y", "x"), scale_factors=(fullres_to_coords_scale, fullres_to_coords_scale))
     scale_transform = ScaleTransform(
         ("y", "x"),
         ("y", "x"),
         (
-            scale_factors["tissue_hires_scalef"] * fullres_to_coords_scale,
-            scale_factors["tissue_hires_scalef"] * fullres_to_coords_scale,
+            scale_factors["tissue_hires_scalef"],
+            scale_factors["tissue_hires_scalef"],
         ),
     )
 
