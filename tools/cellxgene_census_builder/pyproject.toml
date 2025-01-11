@@ -41,9 +41,9 @@ dependencies= [
     # The compatibility matrix is defined here:
     #    https://github.com/TileDB-Inc/TileDB/blob/dev/format_spec/FORMAT_SPEC.md
     # TODO (spatial): tiledbsoma pin to a PyPI release is temporarily commented out in favor git commit pin
-    # "tiledbsoma==1.9.3",
+    "tiledbsoma==1.15.3",
     # TODO (spatial): Pin tiledbsoma dependency to an actual released version after tiledbsoma spatial code has been released
-    "tiledbsoma @ git+https://github.com/single-cell-data/TileDB-SOMA.git@16467fa7405d59ab1763f103081318b839f87610#egg=tiledbsoma&subdirectory=apis/python/",
+    # "tiledbsoma @ git+https://github.com/single-cell-data/TileDB-SOMA.git@16467fa7405d59ab1763f103081318b839f87610#egg=tiledbsoma&subdirectory=apis/python/",
     # TODO (spatial): Deal with the following line before release
     "cellxgene-census @ {root:parent:parent:uri}/api/python/cellxgene_census",
     "cellxgene-ontology-guide>=1.2",
