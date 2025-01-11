@@ -230,15 +230,13 @@ class TestDataIJDPipe(EmbeddingIJDPipe):
 
         i = np.empty((n_embeddings, self.n_features), dtype=np.int64)
         i.T[:] = next_block
-        i = i.ravel()
 
         j = np.empty((n_embeddings, self.n_features), dtype=np.int64)
         j[:] = np.arange(self.n_features)
-        j = j.ravel()
 
         d = self._scale * self.rng.random((n_embeddings * self.n_features), dtype=np.float32) + self._offset
 
-        return pa.Table.from_pydict({"i": i, "j": j, "d": d})
+        return pa.Table.from_pydict({"i": i.ravel(), "j": j.ravel(), "d": d})
 
     @property
     def type(self) -> pa.DataType:
