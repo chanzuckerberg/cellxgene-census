@@ -8,7 +8,7 @@ from datasets import Dataset
 from tiledbsoma import Experiment, ExperimentAxisQuery
 
 
-class CellDatasetBuilder(ExperimentAxisQuery[Experiment], ABC):  # type: ignore
+class CellDatasetBuilder(ExperimentAxisQuery, ABC):  # type: ignore
     """Abstract base class for methods to process CELLxGENE Census ExperimentAxisQuery
     results into a Hugging Face Dataset in which each item represents one cell.
     Subclasses implement the `cell_item()` method to process each row of an X layer

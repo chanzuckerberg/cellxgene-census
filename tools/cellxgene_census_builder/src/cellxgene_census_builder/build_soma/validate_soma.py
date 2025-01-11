@@ -784,10 +784,12 @@ def validate_X_layers_raw_contents(
                     # the expected_X matrix.
                     raw_sum = np.zeros((len(obs_joinids_split),), dtype=np.float64)  # 64 bit for numerical stability
                     np.add.at(raw_sum, rows_by_position, X_raw_data)
-                    raw_sum = raw_sum.astype(
-                        CENSUS_OBS_TABLE_SPEC.field("raw_sum").to_pandas_dtype()
-                    )  # cast to the storage type
-                    assert np.allclose(raw_sum, obs_df.raw_sum.iloc[idx : idx + STRIDE].to_numpy())
+                    assert np.allclose(
+                        raw_sum.astype(
+                            CENSUS_OBS_TABLE_SPEC.field("raw_sum").to_pandas_dtype()
+                        ),  # cast to the storage type
+                        obs_df.raw_sum.iloc[idx : idx + STRIDE].to_numpy(),
+                    )
                     del raw_sum
 
                     # Assertion 1 - the contents of the X matrix are EQUAL for all var values present in the AnnData
