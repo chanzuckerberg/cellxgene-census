@@ -87,6 +87,11 @@ def get_census_data_collection_name(eb: ExperimentSpecification) -> str:
     return CENSUS_SPATIAL_NAME if eb.is_exclusively_spatial() else CENSUS_DATA_NAME
 
 
+def get_experiment_unique_key(es: ExperimentSpecification) -> str:
+    """Return a unique key for the experiment."""
+    return f"{es.name}-{get_census_data_collection_name(es)}"
+
+
 def get_experiment_uri(base_uri: str, eb: ExperimentSpecification) -> str:
     census_data_collection_name = get_census_data_collection_name(eb)
     return urlcat(base_uri, census_data_collection_name, eb.name)
@@ -102,7 +107,7 @@ def get_experiment_shape(base_uri: str, specs: list[ExperimentSpecification]) ->
     for es in specs:
         with open_experiment(base_uri, es) as exp:
             shape = (exp.obs.count, exp.ms[MEASUREMENT_RNA_NAME].var.count)
-            shapes[es.name] = shape
+            shapes[get_experiment_unique_key(es)] = shape
     return shapes
 
 
@@ -493,7 +498,7 @@ def validate_X_layers_normalized(
             (
                 (es, id, id + JOINID_STRIDE)
                 for es in experiment_specifications
-                for id in range(0, X_shapes[es.name][0], JOINID_STRIDE)
+                for id in range(0, X_shapes[get_experiment_unique_key(es)][0], JOINID_STRIDE)
             ),
             partition_size=8,
         )
@@ -545,7 +550,7 @@ def validate_X_layers_has_unique_coords(
                 (es, layer_name, id, id + JOINID_STRIDE)
                 for es in experiment_specifications
                 for layer_name in CENSUS_X_LAYERS
-                for id in range(0, X_shapes[es.name][0], JOINID_STRIDE)
+                for id in range(0, X_shapes[get_experiment_unique_key(es)][0], JOINID_STRIDE)
             ),
             partition_size=8,
         )
