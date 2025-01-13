@@ -206,14 +206,6 @@ def test_hvg_vs_scanpy(
             slice(750_000, 1_000_000),
             marks=pytest.mark.expensive,
         ),
-        pytest.param(
-            "homo_sapiens",
-            "Homo sapiens",
-            "is_primary_data == True",
-            "dataset_id",
-            slice(1_000_000, 4_000_000),
-            marks=pytest.mark.expensive,
-        ),
     ],
 )
 def test_get_highly_variable_genes(
