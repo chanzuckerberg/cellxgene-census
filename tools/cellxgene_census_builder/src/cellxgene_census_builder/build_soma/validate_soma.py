@@ -252,9 +252,9 @@ def validate_axis_dataframes_global_ids(
                 (obs_unique_joinids[0] == 0) and (obs_unique_joinids[-1] == (len(obs_unique_joinids) - 1))
             )
 
-            # Validate that we only contain primary tissue cells, no organoid, cell culture, etc.
+            # Validate that we only contain primary tissue cells and organoids, no cell culture, etc.
             # See census schema for more info.
-            assert (census_obs_df.tissue_type == "tissue").all()
+            assert (census_obs_df.tissue_type.isin(["tissue", "organoid"])).all()
 
             # Assert the stats values look reasonable
             assert all(
