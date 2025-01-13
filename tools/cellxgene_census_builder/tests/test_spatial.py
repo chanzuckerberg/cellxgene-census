@@ -90,7 +90,6 @@ def spatial_build(spatial_manifest, tmp_path_factory) -> SpatialBuild:
             "--manifest",
             str(spatial_manifest),
             # "--no-validate",
-            "--no-consolidate",  # TODO: somehow became neccesary when I added the pointclouds, investigate further
         ],
         check=True,
     )

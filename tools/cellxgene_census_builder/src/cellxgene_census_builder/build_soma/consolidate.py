@@ -112,6 +112,9 @@ def list_uris_to_consolidate(
         else:
             n_columns = len(soma_obj.schema)
             n_fragments = len(tiledb.array_fragments(soma_obj.uri))
+        # TODO: Consolidation for dense arrays is currently broken, tracked in https://github.com/single-cell-data/TileDB-SOMA/issues/3383
+        if soma_obj.soma_type in ["SOMADenseNDArray", "SOMAPointCloudDataFrame"]:
+            continue
         uris.append(
             ConsolidationCandidate(
                 uri=soma_obj.uri, soma_type=soma_obj.soma_type, n_columns=n_columns, n_fragments=n_fragments
@@ -127,10 +130,6 @@ def _consolidate_array(
     consolidation_modes: list[str] | None = None,
     consolidation_config: dict[str, str] | None = None,
 ) -> None:
-    # TODO: Consolidation for dense arrays is currently broken, tracked in https://github.com/single-cell-data/TileDB-SOMA/issues/3383
-    if obj.soma_type == "SOMADenseNDArray":
-        return
-
     modes = consolidation_modes or ["fragment_meta", "array_meta", "commits", "fragments"]
     uri = obj.uri
 
