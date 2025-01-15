@@ -1,5 +1,4 @@
 # mypy: ignore-errors
-import os
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
@@ -30,20 +29,31 @@ VISIUM_DATASET_URIS = [
     "https://datasets.cellxgene.cziscience.com/e944a0f7-e398-4e8f-a060-94dae8a08fb3.h5ad",
 ]
 
+VISIUM_DATASET_IDS = [
+    "fee901ce-87ea-46cd-835a-c15906a4aa6d",  # Homo sapiens Visium
+    "e944a0f7-e398-4e8f-a060-94dae8a08fb3",  # Homo sapiens Visium
+]
 
-def create_manifest_csv_file(spatial_datasets_dir: Path | str, manifest_file_path: Path | str) -> None:
-    file_ids = [os.path.splitext(filename)[0] for filename in os.listdir(spatial_datasets_dir)]
-    file_paths = [os.path.join(spatial_datasets_dir, filename) for filename in os.listdir(spatial_datasets_dir)]
-    manifest_content = "\n".join([", ".join(pair) for pair in zip(file_ids, file_paths, strict=False)])
+
+def create_manifest_csv_file(
+    spatial_datasets_dir: Path | str, manifest_file_path: Path | str, dataset_ids: list[str]
+) -> None:
+    file_paths = [str(Path(spatial_datasets_dir) / f"{d_id}.h5ad") for d_id in dataset_ids]
+    manifest_content = "\n".join([", ".join(pair) for pair in zip(dataset_ids, file_paths, strict=False)])
 
     with open(manifest_file_path, "w") as f:
         f.write(manifest_content.strip())
 
 
-def _fetch_datasets(h5ad_dir: Path, manifest_pth: str) -> None:
-    for uri in VISIUM_DATASET_URIS:
-        pooch.retrieve(uri, None, path=h5ad_dir)
-    create_manifest_csv_file(h5ad_dir, manifest_pth)
+def _fetch_datasets_and_write_manifest(h5ad_dir: Path, manifest_pth: str) -> None:
+    for dataset_id in VISIUM_DATASET_IDS:
+        pooch.retrieve(
+            f"https://datasets.cellxgene.cziscience.com/{dataset_id}.h5ad",
+            None,
+            fname=f"{dataset_id}.h5ad",
+            path=h5ad_dir,
+        )
+    create_manifest_csv_file(h5ad_dir, manifest_pth, VISIUM_DATASET_IDS)
 
 
 @pytest.fixture(scope="session")
@@ -56,7 +66,6 @@ def spatial_manifest(tmp_path_factory, worker_id) -> Path:
     # get the temp directory shared by all workers
     # root_tmp_dir = tmp_path_factory.getbasetemp().parent
     root_tmp_dir = tmp_path_factory.getbasetemp()  # Not shared, but also not reused
-    # TODO: the cache is never invalidated, so we need a way to not include data from different schema versions
     anndata_dir = pooch.os_cache("cellxgene_census_builder")
     manifest_pth = root_tmp_dir / "manifest.csv"
     with FileLock(str(manifest_pth) + ".lock"):
@@ -64,7 +73,7 @@ def spatial_manifest(tmp_path_factory, worker_id) -> Path:
             pass
         else:
             anndata_dir.mkdir(exist_ok=True)
-            _fetch_datasets(anndata_dir, manifest_pth)
+            _fetch_datasets_and_write_manifest(anndata_dir, manifest_pth)
     return manifest_pth
 
 
