@@ -12,7 +12,7 @@ This page provides a user-friendly overview of the Census contents and its schem
 
 The Census is a collection of a variety of **[SOMA objects](#soma-objects)** organized with the following hierarchy.
 
-![image](census-spatial-schema.png)
+![image](census-spatial-schema.svg)
 
 As you can see the Census data is a `SOMACollection` with two high-level items:
 
