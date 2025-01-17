@@ -1,0 +1,53 @@
+# Beta Release of Spatial Data on Census!
+
+**Published:** Jan 14, 2025  
+**By:** Cathy Stolitzka, Isaac Virshup, Maximilian Lombardo  
+
+The Census team is pleased to announce the release of Spatial data on Census!
+
+This has been a large joint effort between the Census team and TileDB to create an easy-to-use and backwards-compatible spatial schema that enables easy analysis with non-spatial and spatial data!
+
+This first release is a **beta release** with the ability to export all spatial data (10x Visium and Slideseq) from an `obs/var` query in `SpatialData`. The ability to export `SpatialData` with spatial-based filters, transforms, etc., is not supported and will be implemented in a future release.
+
+---
+
+## SOMA Spatial Data Model
+
+![Updated CELLxGENE Census Schema with spatial data](/census-spatial-schema.svg)
+
+### Building Blocks
+
+#### **SOMAExperiment**
+
+A collection encapsulating data from one or more single-cell datasets, with reserved attributes:
+
+| Field Name             | Field Description                                                                 |
+|-------------------------|-----------------------------------------------------------------------------------|
+| `obs`                  | A DataFrame for observation metadata                                             |
+| `ms`                   | A collection (`SOMAMeasurement`), with cell-by-gene data matrices and a gene metadata DataFrame |
+| **[NEW] `spatial`**    | A collection of `Scene` objects (see below)                                      |
+| **[NEW] `obs_spatial_presence`** | A DataFrame to map observations to `Scene` objects                              |
+
+---
+
+#### **[NEW] SOMAScene**
+
+A collection of spatial assets. All assets in one `Scene` should correspond to the same physical coordinate system. The collection provides operations for getting, setting, and transforming between coordinate systems, with reserved attributes:
+
+| Field Name   | Field Description                                                                                                                                   |
+|--------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
+| `obsl`       | A collection of spatial arrays and collections. The rows in these arrays correspond to observations and may correspond to `obs` of a `SOMAExperiment`. |
+| `varl`       | A collection of collections for spatial arrays on the `SOMAMeasurements`. The top-level collection is indexed by measurement name. The rows in the contained arrays correspond to features and may correspond to `var` of the associated `SOMAMeasurement`. |
+| `img`        | A `SOMAImageCollection` of images (single and multi-resolution).                                                                                    |
+
+---
+
+#### **[NEW] SOMAImageCollection**
+
+A group of multi-resolution images that can be accessed by levels. Below are some sample operations on this collection type. Every `SOMAImageNDArray` in the collection must be mappable to the same physical space by translation and scaling only.
+
+| Operation         | Description                                                             |
+|-------------------|-------------------------------------------------------------------------|
+| `levels`          | Sequence of level numbers in the slide                                 |
+| `dimensions`      | A `(width, height)` tuple for level 0 of the slide                     |
+| `level_dimensions`| A sequence of down-sample factors for each level of the slide          |

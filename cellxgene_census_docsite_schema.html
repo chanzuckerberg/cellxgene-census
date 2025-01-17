@@ -151,12 +151,12 @@
 <li class="toctree-l1"><a class="reference internal" href="cellxgene_census_aws_open_data.html">Census in AWS ☁️</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Census data and schema</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#schema">Schema</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#census-summary-info-census-info">Census summary info <code class="docutils literal notranslate"><span class="pre">&quot;census_info&quot;</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#census-single-cell-data-census-data">Census single-cell data <code class="docutils literal notranslate"><span class="pre">&quot;census_data&quot;</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#census-summary-info-census-info">Census Summary Info <code class="docutils literal notranslate"><span class="pre">&quot;census_info&quot;</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#census-single-cell-data-census-data">Census Single-Cell Data <code class="docutils literal notranslate"><span class="pre">&quot;census_data&quot;</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data-included-in-the-census">Data Included in the Census</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#soma-objects">SOMA Objects</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#data-included-in-the-census">Data included in the Census</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#soma-objects">SOMA objects</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="cellxgene_census_docsite_data_release_info.html">Census data releases</a></li>
@@ -214,64 +214,70 @@
 <section id="schema">
 <h2>Schema<a class="headerlink" href="#schema" title="Permalink to this heading"></a></h2>
 <p>The Census is a collection of a variety of <strong><a class="reference internal" href="#soma-objects"><span class="std std-ref">SOMA objects</span></a></strong> organized with the following hierarchy.</p>
-<p><img alt="image" src="_images/cellxgene_census_docsite_model.svg" /></p>
+<p><img alt="image" src="census-spatial-schema.svg" /></p>
 <p>As you can see the Census data is a <code class="docutils literal notranslate"><span class="pre">SOMACollection</span></code> with two high-level items:</p>
 <ol class="arabic simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">&quot;census_info&quot;</span></code> for the census summary info.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">&quot;census_data&quot;</span></code> for the single-cell data and metadata.</p></li>
 </ol>
 <section id="census-summary-info-census-info">
-<h3>Census summary info <code class="docutils literal notranslate"><span class="pre">&quot;census_info&quot;</span></code><a class="headerlink" href="#census-summary-info-census-info" title="Permalink to this heading"></a></h3>
+<h3>Census Summary Info <code class="docutils literal notranslate"><span class="pre">&quot;census_info&quot;</span></code><a class="headerlink" href="#census-summary-info-census-info" title="Permalink to this heading"></a></h3>
 <p>A <code class="docutils literal notranslate"><span class="pre">SOMAcollection</span></code> with tables providing information of the census as a whole, it has the following items:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;summary&quot;</span></code>: high-level information of this Census, e.g. build date, total cell count, etc.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;summary&quot;</span></code>: High-level information of this Census, e.g., build date, total cell count, etc.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">&quot;datasets&quot;</span></code>: A table with all datasets from CELLxGENE Discover used to create the Census.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">&quot;summary_cell_counts&quot;</span></code>: Cell counts stratified by relevant cell metadata.</p></li>
 </ul>
 </section>
+<hr class="docutils" />
 <section id="census-single-cell-data-census-data">
-<h3>Census single-cell data <code class="docutils literal notranslate"><span class="pre">&quot;census_data&quot;</span></code><a class="headerlink" href="#census-single-cell-data-census-data" title="Permalink to this heading"></a></h3>
-<p>Data for each organism is stored in independent <code class="docutils literal notranslate"><span class="pre">SOMAExperiment</span></code> objects which are a specialized form of a <code class="docutils literal notranslate"><span class="pre">SOMACollection</span></code>. Each of these store a data matrix (cell by genes), cell metadata, gene metadata, and feature presence matrix:</p>
+<h3>Census Single-Cell Data <code class="docutils literal notranslate"><span class="pre">&quot;census_data&quot;</span></code><a class="headerlink" href="#census-single-cell-data-census-data" title="Permalink to this heading"></a></h3>
+<p>Data for each organism is stored in independent <code class="docutils literal notranslate"><span class="pre">SOMAExperiment</span></code> objects, which are a specialized form of a <code class="docutils literal notranslate"><span class="pre">SOMACollection</span></code>. Each of these stores a data matrix (cell by genes), cell metadata, gene metadata, and feature presence matrix.</p>
 <p>This is how the data is organized for one organism – <em>Homo sapiens</em>:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">[&quot;homo_sapiens&quot;].obs</span></code>: Cell metadata.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">[&quot;homo_sapiens&quot;].ms[&quot;RNA&quot;].X</span></code>: Data matrices: raw counts in <code class="docutils literal notranslate"><span class="pre">X[&quot;raw&quot;]</span></code>, and library-size normalized counts in <code class="docutils literal notranslate"><span class="pre">X[&quot;normalized&quot;]</span></code> (only avialble in Census schema V1.1.0 and above).</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">[&quot;homo_sapiens&quot;].ms[&quot;RNA&quot;].var</span></code>: Gene Metadata.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">[&quot;homo_sapiens&quot;].ms[&quot;RNA&quot;][&quot;feature_dataset_presence_matrix&quot;]</span></code>: a sparse boolean array indicating which genes were measured in each dataset.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[&quot;homo_sapiens&quot;].ms[&quot;RNA&quot;].X</span></code>: Data matrices: raw counts in <code class="docutils literal notranslate"><span class="pre">X[&quot;raw&quot;]</span></code>, and library-size normalized counts in <code class="docutils literal notranslate"><span class="pre">X[&quot;normalized&quot;]</span></code> (only available in Census schema V1.1.0 and above).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[&quot;homo_sapiens&quot;].ms[&quot;RNA&quot;].var</span></code>: Gene metadata.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[&quot;homo_sapiens&quot;].ms[&quot;RNA&quot;][&quot;feature_dataset_presence_matrix&quot;]</span></code>: A sparse boolean array indicating which genes were measured in each dataset.</p></li>
 </ul>
 </section>
-</section>
+<hr class="docutils" />
 <section id="data-included-in-the-census">
-<h2>Data included in the Census<a class="headerlink" href="#data-included-in-the-census" title="Permalink to this heading"></a></h2>
+<h3>Data Included in the Census<a class="headerlink" href="#data-included-in-the-census" title="Permalink to this heading"></a></h3>
 <p>All data from <a class="reference external" href="https://cellxgene.cziscience.com/">CZ CELLxGENE Discover</a> that adheres to the following criteria is included in the Census:</p>
 <ul class="simple">
 <li><p>Cells from human or mouse.</p></li>
-<li><p>Non-spatial RNA data, see full list of sequencing technologies included <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md#assays">here</a>.</p></li>
+<li><p><strong>Spatial and non-spatial RNA data</strong>, see the full list of sequencing technologies included <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md#assays">here</a>.</p></li>
 <li><p>Raw counts.</p></li>
 <li><p>Only standardized cell and gene metadata as described in the CELLxGENE Discover dataset <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md">schema</a>.</p></li>
 </ul>
 <p>⚠️ Note that the data includes:</p>
 <ul class="simple">
-<li><p><strong>Full-gene sequencing read counts</strong> (e.g. Smart-Seq2) and <strong>molecule counts</strong> (e.g. 10X).</p></li>
-<li><p><strong>Duplicate cells</strong> present across multiple datasets, these can be filtered in or out using the cell metadata variable <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code>.</p></li>
+<li><p><strong>Full-gene sequencing read counts</strong> (e.g., Smart-Seq2) and <strong>molecule counts</strong> (e.g., 10X).</p></li>
+<li><p><strong>Duplicate cells</strong> present across multiple datasets. These can be filtered in or out using the cell metadata variable <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code>.</p></li>
 </ul>
 </section>
+<hr class="docutils" />
 <section id="soma-objects">
-<h2>SOMA objects<a class="headerlink" href="#soma-objects" title="Permalink to this heading"></a></h2>
+<h3>SOMA Objects<a class="headerlink" href="#soma-objects" title="Permalink to this heading"></a></h3>
 <p>You can find the full SOMA specification <a class="reference external" href="https://github.com/single-cell-data/SOMA/blob/main/abstract_specification.md#foundational-types">here</a>.</p>
-<p>The following is short description of the main SOMA objects used by the Census:</p>
+<p>The following is a short description of the main SOMA objects used by the Census:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">DenseNDArray</span></code> is a dense, N-dimensional array, with offset (zero-based) integer indexing on each dimension.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">SparseNDArray</span></code> is the same as <code class="docutils literal notranslate"><span class="pre">DenseNDArray</span></code> but sparse, and supports point indexing (disjoint index access).</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">DataFrame</span></code> is a multi-column table with a user-defined columns names and value types, with support for point indexing.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Collection</span></code> is a persistent container of named SOMA objects.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Experiment</span></code> is a class that represents a single-cell experiment. It always contains two objects:</p>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">DenseNDArray</span></code></strong>: A dense, N-dimensional array, with offset (zero-based) integer indexing on each dimension.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">SparseNDArray</span></code></strong>: The same as <code class="docutils literal notranslate"><span class="pre">DenseNDArray</span></code> but sparse, and supports point indexing (disjoint index access).</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">DataFrame</span></code></strong>: A multi-column table with user-defined column names and value types, with support for point indexing.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">Collection</span></code></strong>: A persistent container of named SOMA objects.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">Experiment</span></code></strong>: A class that represents a single-cell experiment. It always contains two objects:</p>
 <ul>
-<li><p><code class="docutils literal notranslate"><span class="pre">obs</span></code>: a  <code class="docutils literal notranslate"><span class="pre">DataFrame</span></code> with primary annotations on the observation axis.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">ms</span></code>: a  <code class="docutils literal notranslate"><span class="pre">Collection</span></code> of measurements, each composed of <code class="docutils literal notranslate"><span class="pre">X</span></code> matrices and axis annotation matrices or data frames (e.g. <code class="docutils literal notranslate"><span class="pre">var</span></code>, <code class="docutils literal notranslate"><span class="pre">varm</span></code>, <code class="docutils literal notranslate"><span class="pre">obsm</span></code>, etc).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">obs</span></code>: A <code class="docutils literal notranslate"><span class="pre">DataFrame</span></code> with primary annotations on the observation axis.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ms</span></code>: A <code class="docutils literal notranslate"><span class="pre">Collection</span></code> of measurements, each composed of <code class="docutils literal notranslate"><span class="pre">X</span></code> matrices and axis annotation matrices or data frames (e.g., <code class="docutils literal notranslate"><span class="pre">var</span></code>, <code class="docutils literal notranslate"><span class="pre">varm</span></code>, <code class="docutils literal notranslate"><span class="pre">obsm</span></code>, etc.).</p></li>
 </ul>
 </li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">SOMAScene</span></code></strong>: A <code class="docutils literal notranslate"><span class="pre">Collection</span></code> of <code class="docutils literal notranslate"><span class="pre">obsl</span></code>, <code class="docutils literal notranslate"><span class="pre">varl</span></code>, and <code class="docutils literal notranslate"><span class="pre">img</span></code>.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">Spatial</span></code></strong>: A collection of <code class="docutils literal notranslate"><span class="pre">Scene</span></code> objects.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">obs_spatial_presence</span></code></strong>: A <code class="docutils literal notranslate"><span class="pre">DataFrame</span></code> to map observations to <code class="docutils literal notranslate"><span class="pre">Scene</span></code> objects.</p></li>
 </ul>
+</section>
 </section>
 </section>
 
