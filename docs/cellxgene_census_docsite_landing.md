@@ -1,4 +1,4 @@
-<span style="background-color: #f3bfcb; color; font-size: 18px"> 🚀 Now in testing: Spatial! From Jan 16th, latest builds will include data from Slide-seq and Visium assays. ⚠️ Opening these builds requires `tiledbsoma>=1.15.3`. ⚠️
+<span style="background-color: #f3bfcb; color; font-size: 18px"> 🚀 Now in testing: Spatial! From Jan 16th, latest builds will include data from Slide-seq and Visium assays. ⚠️ Opening these builds requires `tiledbsoma>=1.15.3` ⚠️. [Learn more](articles/2025/20250117-spatial.md)!
 
 <span style="background-color: #f3bfcb; color; font-size: 18px"> 🚀 New to the Census: Train PyTorch models directly with Census data with our efficient and easy-to-use PyTorch loaders. [Learn more](https://chanzuckerberg.github.io/cellxgene-census/articles/2024/20240709-pytorch.html)!
 
