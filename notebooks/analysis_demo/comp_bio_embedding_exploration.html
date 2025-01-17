@@ -5,14 +5,6 @@
 <head>
   <meta charset="utf-8">
   <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
-<meta property="og:title" content="Exploring biologically relevant clusters in Census embeddings" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://chanzuckerberg.github.io/cellxgene-census/notebooks/analysis_demo/comp_bio_embedding_exploration.html" />
-<meta property="og:site_name" content="cellxgene-census" />
-<meta property="og:description" content="In this notebook, we explore biologically relevant clusters in Census embeddings using UMAP as a visualization tool. This demonstration assumes knowledge of how to access both, collaboration and ho..." />
-<meta property="og:image" content="https://chanzuckerberg.github.io/cellxgene-census/_static/img/cellxGene-newsletter-logo.svg" />
-<meta property="og:image:alt" content="CZ CELLxGENE Logo" />
-<meta name="description" content="In this notebook, we explore biologically relevant clusters in Census embeddings using UMAP as a visualization tool. This demonstration assumes knowledge of how to access both, collaboration and ho..." />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
@@ -280,18 +272,18 @@ technical biases or a combination of both biological and technical factors. Comp
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span>
 
-<span class="kn">import</span> <span class="nn">anndata</span>
-<span class="kn">import</span> <span class="nn">cellxgene_census</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">scanpy</span> <span class="k">as</span> <span class="nn">sc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">anndata</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">cellxgene_census</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scanpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
 
 <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">remove_missing_embedding_cells</span><span class="p">(</span><span class="n">adata</span><span class="p">:</span> <span class="n">anndata</span><span class="o">.</span><span class="n">AnnData</span><span class="p">,</span> <span class="n">emb_names</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">remove_missing_embedding_cells</span><span class="p">(</span><span class="n">adata</span><span class="p">:</span> <span class="n">anndata</span><span class="o">.</span><span class="n">AnnData</span><span class="p">,</span> <span class="n">emb_names</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Embeddings with missing data contain all NaN,</span>
 <span class="sd">    so we must find the intersection of non-NaN rows in the fetched embeddings</span>
 <span class="sd">    and subset the AnnData accordingly.</span>
@@ -306,7 +298,7 @@ technical biases or a combination of both biological and technical factors. Comp
     <span class="k">return</span> <span class="n">adata</span>
 
 
-<span class="k">def</span> <span class="nf">generate_umaps_from_embeddings</span><span class="p">(</span><span class="n">adata</span><span class="p">:</span> <span class="n">anndata</span><span class="o">.</span><span class="n">AnnData</span><span class="p">,</span> <span class="n">emb_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s2">&quot;euclidean&quot;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">generate_umaps_from_embeddings</span><span class="p">(</span><span class="n">adata</span><span class="p">:</span> <span class="n">anndata</span><span class="o">.</span><span class="n">AnnData</span><span class="p">,</span> <span class="n">emb_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s2">&quot;euclidean&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate UMAPs from embeddings stored in `adata.obsm`.</span>
 <span class="sd">    `emb_names` is a list that contains keys present in `adata.obsm`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -550,10 +542,10 @@ fuller representations of the data.</p></li>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">hdbscan</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">scipy.spatial.distance</span> <span class="kn">import</span> <span class="n">pdist</span><span class="p">,</span> <span class="n">squareform</span>
-<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">normalized_mutual_info_score</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">hdbscan</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.spatial.distance</span><span class="w"> </span><span class="kn">import</span> <span class="n">pdist</span><span class="p">,</span> <span class="n">squareform</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">normalized_mutual_info_score</span>
 
 <span class="c1"># subset anndata</span>
 <span class="n">adata_rbn</span> <span class="o">=</span> <span class="n">adata</span><span class="p">[</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;retinal bipolar neuron&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>

@@ -5,14 +5,6 @@
 <head>
   <meta charset="utf-8">
   <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
-<meta property="og:title" content="Quick start" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://chanzuckerberg.github.io/cellxgene-census/cellxgene_census_docsite_quick_start.html" />
-<meta property="og:site_name" content="cellxgene-census" />
-<meta property="og:description" content="This page provides details to start using the Census. Click here for more detailed Python tutorials (R vignettes coming soon). Contents: Installation., Python quick start., R quick start.. Installa..." />
-<meta property="og:image" content="https://chanzuckerberg.github.io/cellxgene-census/_static/img/cellxGene-newsletter-logo.svg" />
-<meta property="og:image:alt" content="CZ CELLxGENE Logo" />
-<meta name="description" content="This page provides details to start using the Census. Click here for more detailed Python tutorials (R vignettes coming soon). Contents: Installation., Python quick start., R quick start.. Installa..." />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
@@ -232,7 +224,7 @@
 <section id="python-quick-start">
 <h2>Python quick start<a class="headerlink" href="#python-quick-start" title="Permalink to this heading"></a></h2>
 <p>Below are 3 examples of common operations you can do with the Census. As a reminder, the reference documentation for the API can be accessed via <code class="docutils literal notranslate"><span class="pre">help()</span></code>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">cellxgene_census</span>
 
 <span class="n">help</span><span class="p">(</span><span class="n">cellxgene_census</span><span class="p">)</span>
 <span class="n">help</span><span class="p">(</span><span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_anndata</span><span class="p">)</span>
@@ -242,7 +234,7 @@
 <section id="querying-a-slice-of-cell-metadata">
 <h3>Querying a slice of cell metadata<a class="headerlink" href="#querying-a-slice-of-cell-metadata" title="Permalink to this heading"></a></h3>
 <p>The following reads the cell metadata and filters <code class="docutils literal notranslate"><span class="pre">female</span></code> cells of cell type <code class="docutils literal notranslate"><span class="pre">microglial</span> <span class="pre">cell</span></code> or <code class="docutils literal notranslate"><span class="pre">neuron</span></code>, and selects the columns <code class="docutils literal notranslate"><span class="pre">assay</span></code>, <code class="docutils literal notranslate"><span class="pre">cell_type</span></code>, <code class="docutils literal notranslate"><span class="pre">tissue</span></code>, <code class="docutils literal notranslate"><span class="pre">tissue_general</span></code>, <code class="docutils literal notranslate"><span class="pre">suspension_type</span></code>, and <code class="docutils literal notranslate"><span class="pre">disease</span></code>.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">cellxgene_census</span>
 
 <span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
 
@@ -283,7 +275,7 @@
 <section id="obtaining-a-slice-as-anndata">
 <h3>Obtaining a slice as AnnData<a class="headerlink" href="#obtaining-a-slice-as-anndata" title="Permalink to this heading"></a></h3>
 <p>The following creates an <code class="docutils literal notranslate"><span class="pre">anndata.AnnData</span></code> object on-demand with the same cell filtering criteria as above and filtering only the genes <code class="docutils literal notranslate"><span class="pre">ENSG00000161798</span></code>, <code class="docutils literal notranslate"><span class="pre">ENSG00000188229</span></code>.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">cellxgene_census</span>
 
 <span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
     <span class="n">adata</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_anndata</span><span class="p">(</span>
@@ -308,8 +300,8 @@
 <h3>Memory-efficient queries<a class="headerlink" href="#memory-efficient-queries" title="Permalink to this heading"></a></h3>
 <p>This example provides a demonstration to access the data for larger-than-memory operations using <strong>TileDB-SOMA</strong> operations.</p>
 <p>First we initiate a lazy-evaluation query to access all brain and male cells from human. This query needs to be closed — <code class="docutils literal notranslate"><span class="pre">query.close()</span></code> — or called in a context manager — <code class="docutils literal notranslate"><span class="pre">with</span> <span class="pre">...</span></code>.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
-<span class="kn">import</span> <span class="nn">tiledbsoma</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">cellxgene_census</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tiledbsoma</span>
 
 <span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
 

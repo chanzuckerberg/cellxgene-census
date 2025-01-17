@@ -5,14 +5,6 @@
 <head>
   <meta charset="utf-8">
   <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
-<meta property="og:title" content="Exploring all data from a tissue" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://chanzuckerberg.github.io/cellxgene-census/notebooks/analysis_demo/comp_bio_explore_and_load_lung_data.html" />
-<meta property="og:site_name" content="cellxgene-census" />
-<meta property="og:description" content="This tutorial provides a series of examples for how to explore and query the Census in the context of a single tissue, lung. We will summarize cell and gene metadata, then fetch the single-cell exp..." />
-<meta property="og:image" content="https://chanzuckerberg.github.io/cellxgene-census/_static/img/cellxGene-newsletter-logo.svg" />
-<meta property="og:image:alt" content="CZ CELLxGENE Logo" />
-<meta name="description" content="This tutorial provides a series of examples for how to explore and query the Census in the context of a single tissue, lung. We will summarize cell and gene metadata, then fetch the single-cell exp..." />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
@@ -250,10 +242,10 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">scanpy</span> <span class="k">as</span> <span class="nn">sc</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">cellxgene_census</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scanpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
 
 <span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span>
 </pre></div>
@@ -1981,7 +1973,7 @@ AnnData object with n_obs × n_vars = 100000 × 11595
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">n_cell_types</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">lung_adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">())</span>
 
-<span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">randint</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">random</span><span class="w"> </span><span class="kn">import</span> <span class="n">randint</span>
 
 <span class="n">colors</span> <span class="o">=</span> <span class="p">[]</span>
 

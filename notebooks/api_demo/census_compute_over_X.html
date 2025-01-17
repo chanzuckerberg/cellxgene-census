@@ -5,14 +5,6 @@
 <head>
   <meta charset="utf-8">
   <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
-<meta property="og:title" content="Computing on X using online (incremental) algorithms" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://chanzuckerberg.github.io/cellxgene-census/notebooks/api_demo/census_compute_over_X.html" />
-<meta property="og:site_name" content="cellxgene-census" />
-<meta property="og:description" content="This tutorial showcases computing a variety of per-gene and per-cell statistics for a user-defined query using out-of-core operations. NOTE: when query results are small enough to fit in memory, it..." />
-<meta property="og:image" content="https://chanzuckerberg.github.io/cellxgene-census/_static/img/cellxGene-newsletter-logo.svg" />
-<meta property="og:image:alt" content="CZ CELLxGENE Logo" />
-<meta name="description" content="This tutorial showcases computing a variety of per-gene and per-cell statistics for a user-defined query using out-of-core operations. NOTE: when query results are small enough to fit in memory, it..." />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
@@ -238,11 +230,11 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">tiledbsoma</span> <span class="k">as</span> <span class="nn">soma</span>
-<span class="kn">from</span> <span class="nn">tiledbsoma.experiment_query</span> <span class="kn">import</span> <span class="n">X_as_series</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">cellxgene_census</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tiledbsoma</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">soma</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tiledbsoma.experiment_query</span><span class="w"> </span><span class="kn">import</span> <span class="n">X_as_series</span>
 </pre></div>
 </div>
 </div>
@@ -445,15 +437,15 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numba</span>
-<span class="kn">import</span> <span class="nn">numpy.typing</span> <span class="k">as</span> <span class="nn">npt</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numba</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">npt</span>
 
 
-<span class="k">class</span> <span class="nc">OnlineMatrixMeanVariance</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">OnlineMatrixMeanVariance</span><span class="p">:</span>
     <span class="n">n_samples</span><span class="p">:</span> <span class="nb">int</span>
     <span class="n">n_variables</span><span class="p">:</span> <span class="nb">int</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_variables</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_variables</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute mean and variance for n_variables over n_samples, encoded</span>
 <span class="sd">        in a COO format. Equivalent to:</span>
 <span class="sd">            numpy.mean(data, axis=0)</span>
@@ -467,10 +459,10 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
         <span class="bp">self</span><span class="o">.</span><span class="n">u_a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_variables</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">M2_a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_variables</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coord_vec</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">],</span> <span class="n">value_vec</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coord_vec</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">],</span> <span class="n">value_vec</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">_mean_variance_update</span><span class="p">(</span><span class="n">coord_vec</span><span class="p">,</span> <span class="n">value_vec</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">u_a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">M2_a</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">finalize</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">],</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">finalize</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">],</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns tuple containing mean and variance&quot;&quot;&quot;</span>
         <span class="n">u</span><span class="p">,</span> <span class="n">M2</span> <span class="o">=</span> <span class="n">_mean_variance_finalize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">u_a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">M2_a</span><span class="p">)</span>
 
@@ -481,7 +473,7 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
 
 
 <span class="nd">@numba</span><span class="o">.</span><span class="n">jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">_mean_variance_update</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_mean_variance_update</span><span class="p">(</span>
     <span class="n">col_arr</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">],</span>
     <span class="n">val_arr</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">],</span>
     <span class="n">n</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">],</span>
@@ -500,7 +492,7 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
 
 
 <span class="nd">@numba</span><span class="o">.</span><span class="n">jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">_mean_variance_finalize</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_mean_variance_finalize</span><span class="p">(</span>
     <span class="n">n_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">n_a</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">],</span>
     <span class="n">u_a</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">],</span>

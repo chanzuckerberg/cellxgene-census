@@ -5,14 +5,6 @@
 <head>
   <meta charset="utf-8">
   <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
-<meta property="og:title" content="scVI for cell type prediction and data projection" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://chanzuckerberg.github.io/cellxgene-census/notebooks/analysis_demo/comp_bio_scvi_model_use.html" />
-<meta property="og:site_name" content="cellxgene-census" />
-<meta property="og:description" content="This notebook provides examples to utilize the pretrained scVI model with user data. For more information on the model please refer to the Census model page. IMPORTANT: This tutorial requires cellx..." />
-<meta property="og:image" content="https://chanzuckerberg.github.io/cellxgene-census/_static/img/cellxGene-newsletter-logo.svg" />
-<meta property="og:image:alt" content="CZ CELLxGENE Logo" />
-<meta name="description" content="This notebook provides examples to utilize the pretrained scVI model with user data. For more information on the model please refer to the Census model page. IMPORTANT: This tutorial requires cellx..." />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
@@ -281,8 +273,8 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
-<span class="kn">import</span> <span class="nn">cellxgene_census.experimental</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">cellxgene_census</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">cellxgene_census.experimental</span>
 
 <span class="n">census_version</span> <span class="o">=</span> <span class="s2">&quot;2023-12-15&quot;</span>
 <span class="n">organism</span> <span class="o">=</span> <span class="s2">&quot;homo_sapiens&quot;</span>
@@ -331,16 +323,16 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">warnings</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 
 <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
 
-<span class="kn">import</span> <span class="nn">anndata</span>
-<span class="kn">import</span> <span class="nn">cellxgene_census</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">scanpy</span> <span class="k">as</span> <span class="nn">sc</span>
-<span class="kn">import</span> <span class="nn">scvi</span>
-<span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestClassifier</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">anndata</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">cellxgene_census</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scanpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scvi</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.ensemble</span><span class="w"> </span><span class="kn">import</span> <span class="n">RandomForestClassifier</span>
 </pre></div>
 </div>
 </div>

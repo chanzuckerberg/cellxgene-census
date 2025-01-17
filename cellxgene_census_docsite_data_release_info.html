@@ -5,14 +5,6 @@
 <head>
   <meta charset="utf-8">
   <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
-<meta property="og:title" content="Census data releases" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://chanzuckerberg.github.io/cellxgene-census/cellxgene_census_docsite_data_release_info.html" />
-<meta property="og:site_name" content="cellxgene-census" />
-<meta property="og:description" content="Last edited: July 8th, 2024. Contents: What is a Census data release?, List of LTS Census data releases, Compatibility with package versions. What is a Census data release?: It is a Census build th..." />
-<meta property="og:image" content="https://chanzuckerberg.github.io/cellxgene-census/_static/img/cellxGene-newsletter-logo.svg" />
-<meta property="og:image:alt" content="CZ CELLxGENE Logo" />
-<meta name="description" content="Last edited: July 8th, 2024. Contents: What is a Census data release?, List of LTS Census data releases, Compatibility with package versions. What is a Census data release?: It is a Census build th..." />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
@@ -262,7 +254,7 @@ a <a class="reference external" href="https://github.com/single-cell-data/TileDB
 </ul>
 <p>The most recent LTS Census data release is the default opened by the APIs and recognized as <code class="docutils literal notranslate"><span class="pre">census_version</span> <span class="pre">=</span> <span class="pre">&quot;stable&quot;</span></code>. To open previous LTS Census data releases, you can directly specify the version via its build date <code class="docutils literal notranslate"><span class="pre">census_version</span> <span class="pre">=</span> <span class="pre">&quot;[YYYY]-[MM]-[DD]&quot;</span></code>.</p>
 <p>Python</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">cellxgene_census</span>
 <span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">(</span><span class="n">census_version</span> <span class="o">=</span> <span class="s2">&quot;stable&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -280,7 +272,7 @@ a <a class="reference external" href="https://github.com/single-cell-data/TileDB
 </ul>
 <p>The most recent weekly release can be opened by the APIs by specifying <code class="docutils literal notranslate"><span class="pre">census_version</span> <span class="pre">=</span> <span class="pre">&quot;latest&quot;</span></code>.</p>
 <p>Python</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">cellxgene_census</span>
 <span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">(</span><span class="n">census_version</span> <span class="o">=</span> <span class="s2">&quot;latest&quot;</span><span class="p">)</span>
 </pre></div>
 </div>

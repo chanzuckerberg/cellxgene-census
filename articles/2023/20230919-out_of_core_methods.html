@@ -5,14 +5,6 @@
 <head>
   <meta charset="utf-8">
   <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
-<meta property="og:title" content="Memory-efficient implementations of commonly used single-cell methods" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://chanzuckerberg.github.io/cellxgene-census/articles/2023/20230919-out_of_core_methods.html" />
-<meta property="og:site_name" content="cellxgene-census" />
-<meta property="og:description" content="Published: September 18, 2023 By: Pablo Garcia-Nieto The Census team is thrilled to officially announce memory-efficient implementations of some of the most widely used single-cell algorithms. With..." />
-<meta property="og:image" content="https://chanzuckerberg.github.io/cellxgene-census/_static/img/cellxGene-newsletter-logo.svg" />
-<meta property="og:image:alt" content="CZ CELLxGENE Logo" />
-<meta name="description" content="Published: September 18, 2023 By: Pablo Garcia-Nieto The Census team is thrilled to officially announce memory-efficient implementations of some of the most widely used single-cell algorithms. With..." />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
@@ -240,9 +232,9 @@
 <h3>Example: <em>KRAS</em> and <em>AQP4</em> average and variance expression in lung epithelial cells<a class="headerlink" href="#example-kras-and-aqp4-average-and-variance-expression-in-lung-epithelial-cells" title="Permalink to this heading"></a></h3>
 <p>The following calculates the average and variance values for the genes <em>KRAS</em> and <em>AQP4</em> in all epithelial cells of the human lung.</p>
 <p>Users can easily switch the calculation, and obtain average and variance for each cell across the genes in the query. This is controlled by the <code class="docutils literal notranslate"><span class="pre">axis</span></code> argument of <code class="docutils literal notranslate"><span class="pre">mean_variance</span></code>.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
-<span class="kn">import</span> <span class="nn">tiledbsoma</span> <span class="k">as</span> <span class="nn">soma</span>
-<span class="kn">from</span> <span class="nn">cellxgene_census.experimental.pp</span> <span class="kn">import</span> <span class="n">mean_variance</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">cellxgene_census</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tiledbsoma</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">soma</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">cellxgene_census.experimental.pp</span><span class="w"> </span><span class="kn">import</span> <span class="n">mean_variance</span>
 
 <span class="c1"># Open the Census</span>
 <span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span>
@@ -299,8 +291,8 @@
 <section id="example-finding-highly-variable-genes-for-all-cells-of-the-human-esophagus">
 <h3>Example: Finding highly variable genes for all cells of the human esophagus<a class="headerlink" href="#example-finding-highly-variable-genes-for-all-cells-of-the-human-esophagus" title="Permalink to this heading"></a></h3>
 <p>The following example identifies the top 1000 highly variable genes for all human esophagus cells. As a general rule of thumb it is good to use <code class="docutils literal notranslate"><span class="pre">dataset_id</span></code> as the batch variable.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
-<span class="kn">from</span> <span class="nn">cellxgene_census.experimental.pp</span> <span class="kn">import</span> <span class="n">get_highly_variable_genes</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">cellxgene_census</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">cellxgene_census.experimental.pp</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_highly_variable_genes</span>
 
 <span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span>
 

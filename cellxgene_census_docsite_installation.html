@@ -5,14 +5,6 @@
 <head>
   <meta charset="utf-8">
   <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
-<meta property="og:title" content="Installation" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://chanzuckerberg.github.io/cellxgene-census/cellxgene_census_docsite_installation.html" />
-<meta property="og:site_name" content="cellxgene-census" />
-<meta property="og:description" content="Requirements: The Census API requires a Linux or MacOS system with: Python 3.10 to Python 3.12. Or R, supported versions TBD., Recommended: >16 GB of memory., Recommended: >5 Mbps internet connecti..." />
-<meta property="og:image" content="https://chanzuckerberg.github.io/cellxgene-census/_static/img/cellxGene-newsletter-logo.svg" />
-<meta property="og:image:alt" content="CZ CELLxGENE Logo" />
-<meta name="description" content="Requirements: The Census API requires a Linux or MacOS system with: Python 3.10 to Python 3.12. Or R, supported versions TBD., Recommended: >16 GB of memory., Recommended: >5 Mbps internet connecti..." />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
@@ -252,7 +244,7 @@
 <span class="nf">install.packages</span><span class="p">(</span><span class="s">&quot;Seurat&quot;</span><span class="p">)</span>
 
 <span class="c1"># SingleCellExperiment</span>
-<span class="nf">if </span><span class="p">(</span><span class="o">!</span><span class="nf">require</span><span class="p">(</span><span class="s">&quot;BiocManager&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">quietly</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">TRUE</span><span class="p">))</span>
+<span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="nf">require</span><span class="p">(</span><span class="s">&quot;BiocManager&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">quietly</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">TRUE</span><span class="p">))</span>
 <span class="w">    </span><span class="nf">install.packages</span><span class="p">(</span><span class="s">&quot;BiocManager&quot;</span><span class="p">)</span>
 
 <span class="n">BiocManager</span><span class="o">::</span><span class="nf">install</span><span class="p">(</span><span class="s">&quot;SingleCellExperiment&quot;</span><span class="p">)</span>

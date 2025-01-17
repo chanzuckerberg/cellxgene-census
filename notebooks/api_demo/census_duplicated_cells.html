@@ -5,14 +5,6 @@
 <head>
   <meta charset="utf-8">
   <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
-<meta property="og:title" content="Understanding and filtering out duplicate cells" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://chanzuckerberg.github.io/cellxgene-census/notebooks/api_demo/census_duplicated_cells.html" />
-<meta property="og:site_name" content="cellxgene-census" />
-<meta property="og:description" content="This tutorial provides an explanation for the existence of duplicate cells in the Census, and it showcases different ways to handle these cells when performing queries on the Census using the is_pr..." />
-<meta property="og:image" content="https://chanzuckerberg.github.io/cellxgene-census/_static/img/cellxGene-newsletter-logo.svg" />
-<meta property="og:image:alt" content="CZ CELLxGENE Logo" />
-<meta name="description" content="This tutorial provides an explanation for the existence of duplicate cells in the Census, and it showcases different ways to handle these cells when performing queries on the Census using the is_pr..." />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
@@ -270,7 +262,7 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">cellxgene_census</span>
 
 <span class="n">tabula_muris_dataset_id</span> <span class="o">=</span> <span class="s2">&quot;48b37086-25f7-4ecd-be66-f5bb378e3aea&quot;</span>
 <span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span>
@@ -568,7 +560,7 @@ The &#34;stable&#34; release is currently 2023-05-15. Specify &#39;census_versio
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">tiledbsoma</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">tiledbsoma</span>
 
 <span class="n">human</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span>
 

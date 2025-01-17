@@ -5,14 +5,6 @@
 <head>
   <meta charset="utf-8">
   <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
-<meta property="og:title" content="Introducing a normalized layer and pre-calculated cell and gene statistics in Census" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://chanzuckerberg.github.io/cellxgene-census/articles/2023/20231012-normalized_layer_precalc_stats.html" />
-<meta property="og:site_name" content="cellxgene-census" />
-<meta property="og:description" content="Published: October 12, 2023 By: Maximilian Lombardo and Pablo Garcia-Nieto The Census team is happy to announce the introduction of two new data features, tailored to empower your single-cell resea..." />
-<meta property="og:image" content="https://chanzuckerberg.github.io/cellxgene-census/_static/img/cellxGene-newsletter-logo.svg" />
-<meta property="og:image:alt" content="CZ CELLxGENE Logo" />
-<meta name="description" content="Published: October 12, 2023 By: Maximilian Lombardo and Pablo Garcia-Nieto The Census team is happy to announce the introduction of two new data features, tailored to empower your single-cell resea..." />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
@@ -264,7 +256,7 @@
 <section id="exporting-the-normalized-data-to-existing-single-cell-toolkits">
 <h3>Exporting the normalized data to existing single-cell toolkits<a class="headerlink" href="#exporting-the-normalized-data-to-existing-single-cell-toolkits" title="Permalink to this heading"></a></h3>
 <p>In Python, the normalized data can be exported into AnnData specifying the <code class="docutils literal notranslate"><span class="pre">X_name</span> <span class="pre">=</span> <span class="pre">&quot;normalized&quot;</span></code> argument of the <code class="docutils literal notranslate"><span class="pre">cellxgene.get_anndata()</span></code> method.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">cellxgene_census</span>
 
 <span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">(</span><span class="n">census_version</span> <span class="o">=</span> <span class="s2">&quot;latest&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">census</span>
     <span class="n">adata</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_anndata</span>
@@ -317,8 +309,8 @@
 <h3>Accessing library-size normalized data layer via TileDB-SOMA<a class="headerlink" href="#accessing-library-size-normalized-data-layer-via-tiledb-soma" title="Permalink to this heading"></a></h3>
 <p>For memory-efficient data retrieval, you can use TileDB-SOMA as outlined below. In Python this looks like the following.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span>
-<span class="kn">import</span> <span class="nn">cellxgene_census</span>
-<span class="kn">import</span> <span class="nn">tiledbsoma</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">cellxgene_census</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tiledbsoma</span>
 
 <span class="c1"># Open context manager</span>
 <span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">(</span><span class="n">census_version</span> <span class="o">=</span> <span class="s2">&quot;latest&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
@@ -373,7 +365,7 @@
 <h3>Utilizing pre-calculated stats for querying <code class="docutils literal notranslate"><span class="pre">obs</span></code> and <code class="docutils literal notranslate"><span class="pre">var</span></code><a class="headerlink" href="#utilizing-pre-calculated-stats-for-querying-obs-and-var" title="Permalink to this heading"></a></h3>
 <p>To filter cells or genes based on pre-calculated statistics and export to AnnData, you can use the new metadata variables as value filters.</p>
 <p>For example, you can add a filter to query cells with more than 500 genes expressed, along with other filters. In Python this looks like the following.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">cellxgene_census</span>
 
 <span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">(</span><span class="n">census_version</span> <span class="o">=</span> <span class="s2">&quot;latest&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
     <span class="n">adata</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_anndata</span><span class="p">(</span>

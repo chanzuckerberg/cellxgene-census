@@ -5,14 +5,6 @@
 <head>
   <meta charset="utf-8">
   <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
-<meta property="og:title" content="CZ CELLxGENE Discover Census in AWS" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://chanzuckerberg.github.io/cellxgene-census/cellxgene_census_aws_open_data.html" />
-<meta property="og:site_name" content="cellxgene-census" />
-<meta property="og:description" content="The single-cell data from CZ CELLxGENE Discover Census are available for public access via Amazon Web Services (AWS). This page describes what Census data are available in AWS and how to access the..." />
-<meta property="og:image" content="https://chanzuckerberg.github.io/cellxgene-census/_static/img/cellxGene-newsletter-logo.svg" />
-<meta property="og:image:alt" content="CZ CELLxGENE Logo" />
-<meta name="description" content="The single-cell data from CZ CELLxGENE Discover Census are available for public access via Amazon Web Services (AWS). This page describes what Census data are available in AWS and how to access the..." />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
@@ -291,7 +283,7 @@
 <h3>CELLxGENE Census API (Python and R)<a class="headerlink" href="#cellxgene-census-api-python-and-r" title="Permalink to this heading"></a></h3>
 <p>This is the recommend method for accessing Census data. Please follow the <a class="reference internal" href="cellxgene_census_docsite_quick_start.html"><span class="std std-doc">Census API quick start guide</span></a> for a full guide.</p>
 <p>For example, in Python users can create an iterator for the cell metadata Data Frame as follows:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">cellxgene_census</span>
 
 <span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
     <span class="n">cell_metadata</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span>
@@ -301,7 +293,7 @@
 </pre></div>
 </div>
 <p>If a <strong>local copy</strong> of the Census data exists, users can access it by providing the path to the <code class="docutils literal notranslate"><span class="pre">soma/</span></code> folder.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">cellxgene_census</span>
 
 <span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">(</span><span class="n">uri</span><span class="o">=</span><span class="s2">&quot;local/path/to/soma/&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
    <span class="o">...</span>
@@ -310,7 +302,7 @@
 <p>If a copy of the Census data exists in a <strong>private S3 bucket</strong>, users can access it by providing the URI <code class="docutils literal notranslate"><span class="pre">soma/</span></code>
 folder in the S3 bucket. This will also require customizing TileDB configuration options to specify the
 bucket’s AWS region and that signed requests should be used for S3 API calls. This can be done as follows:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">cellxgene_census</span>
 
 <span class="n">uri</span> <span class="o">=</span> <span class="s2">&quot;s3://my-private-data-bucket/cell-census/2023-07-25/soma/&quot;</span>
 
@@ -326,8 +318,8 @@ bucket’s AWS region and that signed requests should be used for S3 API calls. 
 <h3>TileDB-SOMA API (Python and R)<a class="headerlink" href="#tiledb-soma-api-python-and-r" title="Permalink to this heading"></a></h3>
 <p>The Census API provides convenience wrappers for TileDB-SOMA to access the Census Data hosted at AWS. Users can interact directly with the Census TileDB data directly via the TileDB-SOMA APIs. Please refer to the <a class="reference external" href="https://tiledbsoma.readthedocs.io/en/latest/">TileDb-SOMA documentation</a> for full details on usage.</p>
 <p>For example, in Python users can create an iterator for the cell metadata Data Frame as follows:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
-<span class="kn">import</span> <span class="nn">tiledbsoma</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">cellxgene_census</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tiledbsoma</span>
 
 <span class="n">uri</span> <span class="o">=</span> <span class="s2">&quot;s3://cellxgene-census-public-us-west-2/cell-census/2023-07-25/soma/&quot;</span>
 <span class="n">ctx</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_default_soma_context</span><span class="p">()</span>

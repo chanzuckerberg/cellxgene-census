@@ -5,14 +5,6 @@
 <head>
   <meta charset="utf-8">
   <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
-<meta property="og:title" content="Querying data using the gget cellxgene module" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://chanzuckerberg.github.io/cellxgene-census/notebooks/api_demo/census_gget_demo.html" />
-<meta property="og:site_name" content="cellxgene-census" />
-<meta property="og:description" content="By Laura Luebbert, lauralubbert@gmail.com. gget is a free, open-source command-line tool and Python package that enables efficient querying of genomic databases. gget consists of a collection of se..." />
-<meta property="og:image" content="https://chanzuckerberg.github.io/cellxgene-census/_static/img/cellxGene-newsletter-logo.svg" />
-<meta property="og:image:alt" content="CZ CELLxGENE Logo" />
-<meta name="description" content="By Laura Luebbert, lauralubbert@gmail.com. gget is a free, open-source command-line tool and Python package that enables efficient querying of genomic databases. gget consists of a collection of se..." />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
@@ -250,7 +242,7 @@
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># The cellxgene module was added to gget in version 0.25.7</span>
 <span class="o">!</span>pip<span class="w"> </span>install<span class="w"> </span>-q<span class="w"> </span>gget<span class="w"> </span>&gt;<span class="o">=</span><span class="m">0</span>.25.7
 
-<span class="kn">import</span> <span class="nn">gget</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">gget</span>
 
 <span class="n">gget</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="s2">&quot;cellxgene&quot;</span><span class="p">)</span>
 </pre></div>
@@ -629,7 +621,7 @@ AnnData object with n_obs × n_vars = 3679 × 3
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">scanpy</span> <span class="k">as</span> <span class="nn">sc</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">scanpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
 
 <span class="c1"># retina increases the resolution of plots displayed in notebooks</span>
 <span class="o">%</span><span class="k">config</span> InlineBackend.figure_format=&quot;retina&quot;

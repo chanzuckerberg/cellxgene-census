@@ -5,14 +5,6 @@
 <head>
   <meta charset="utf-8">
   <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
-<meta property="og:title" content="Training a PyTorch Model" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://chanzuckerberg.github.io/cellxgene-census/notebooks/experimental/pytorch.html" />
-<meta property="og:site_name" content="cellxgene-census" />
-<meta property="og:description" content="This tutorial shows how to train a Logistic Regression model in PyTorch using the Census API’s experimental.ml.ExperimentDataPipe class. This is intended only to demonstrate the use of the Experime..." />
-<meta property="og:image" content="https://chanzuckerberg.github.io/cellxgene-census/_static/img/cellxGene-newsletter-logo.svg" />
-<meta property="og:image:alt" content="CZ CELLxGENE Logo" />
-<meta name="description" content="This tutorial shows how to train a Logistic Regression model in PyTorch using the Census API’s experimental.ml.ExperimentDataPipe class. This is intended only to demonstrate the use of the Experime..." />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
@@ -244,7 +236,7 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">cellxgene_census</span>
 
 <span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span>
 </pre></div>
@@ -266,8 +258,8 @@ The &#34;stable&#34; release is currently 2024-07-01. Specify &#39;census_versio
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census.experimental.ml</span> <span class="k">as</span> <span class="nn">census_ml</span>
-<span class="kn">import</span> <span class="nn">tiledbsoma</span> <span class="k">as</span> <span class="nn">soma</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">cellxgene_census.experimental.ml</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">census_ml</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tiledbsoma</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">soma</span>
 
 <span class="n">experiment</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span>
 
@@ -304,8 +296,12 @@ avoiding having to load the entire training dataset into memory at once. (Note: 
 <p>To retrieve a subset of the Experiment’s data, along either the <code class="docutils literal notranslate"><span class="pre">obs</span></code> or <code class="docutils literal notranslate"><span class="pre">var</span></code> axes, you may specify query filters via the <code class="docutils literal notranslate"><span class="pre">obs_query</span></code> and <code class="docutils literal notranslate"><span class="pre">var_query</span></code> parameters, which are both <code class="docutils literal notranslate"><span class="pre">soma.AxisQuery</span></code> objects.</p>
 <p>The values for the prediction label(s) that you intend to use for training are specified via the <code class="docutils literal notranslate"><span class="pre">obs_column_names</span></code> array.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">batch_size</span></code> allows you to specify the number of obs rows (cells) to be returned by each return PyTorch tensor. You may exclude this parameter if you want single rows (<code class="docutils literal notranslate"><span class="pre">batch_size=1</span></code>).</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">shuffle</span></code> flag allows you to randomize the ordering of the training data for each training epoch. Note: * You should use this flag instead of the <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> <code class="docutils literal notranslate"><span class="pre">shuffle</span></code> flag, as <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> does not support shuffling when used with an <code class="docutils literal notranslate"><span class="pre">IterDataPipe</span></code> dataset. * PyTorch’s TorchData library provides a <a class="reference external" href="https://pytorch.org/data/main/generated/torchdata.datapipes.iter.Shuffler.html">Shuffler</a> <code class="docutils literal notranslate"><span class="pre">DataPipe</span></code>, which is alternate mechanism one can use to perform shuffling of an
-<code class="docutils literal notranslate"><span class="pre">IterDataPipe</span></code>. However, the <code class="docutils literal notranslate"><span class="pre">Shuffler</span></code> will not “globally” randomize the training data, as it only “locally” randomizes the ordering of the training data within fixed-size “windows”. Due to the layout of Census data, a given “window” of Census data may be highly homogeneous in terms of its <code class="docutils literal notranslate"><span class="pre">obs</span></code> axis attribute values, and so this shuffling strategy may not provide sufficient randomization for certain types of models.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">shuffle</span></code> flag allows you to randomize the ordering of the training data for each training epoch. Note:</p>
+<ul class="simple">
+<li><p>You should use this flag instead of the <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> <code class="docutils literal notranslate"><span class="pre">shuffle</span></code> flag, as <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> does not support shuffling when used with an <code class="docutils literal notranslate"><span class="pre">IterDataPipe</span></code> dataset.</p></li>
+<li><p>PyTorch’s TorchData library provides a <a class="reference external" href="https://pytorch.org/data/main/generated/torchdata.datapipes.iter.Shuffler.html">Shuffler</a> <code class="docutils literal notranslate"><span class="pre">DataPipe</span></code>, which is alternate mechanism one can use to perform shuffling of an <code class="docutils literal notranslate"><span class="pre">IterDataPipe</span></code>. However, the <code class="docutils literal notranslate"><span class="pre">Shuffler</span></code> will not “globally” randomize the training data, as it only “locally” randomizes the ordering of the training data within fixed-size “windows”. Due to the layout of Census data, a given “window” of Census data may be highly homogeneous in
+terms of its <code class="docutils literal notranslate"><span class="pre">obs</span></code> axis attribute values, and so this shuffling strategy may not provide sufficient randomization for certain types of models.</p></li>
+</ul>
 <p>The <code class="docutils literal notranslate"><span class="pre">soma_chunk_size</span></code> sets the number of rows of data that are retrieved from the Census and held in memory at a given time. This controls the maximum memory usage of the <code class="docutils literal notranslate"><span class="pre">ExperimentDataPipe</span></code>. Smaller values will require less memory but will also result in lower read performance. If you are running out of memory when training a model, try reducing this value. The default is set to retrieve ~1GB of data per chunk, which takes into account how many <code class="docutils literal notranslate"><span class="pre">var</span></code> (gene) columns are being requested.
 This parameter also affects the granularity of the “global” shuffling step when <code class="docutils literal notranslate"><span class="pre">shuffle=True</span></code> (see <code class="docutils literal notranslate"><span class="pre">shuffle</span></code> parameter API docs for details).</p>
 <p>You can inspect the shape of the full dataset, without causing the full dataset to be loaded:</p>
@@ -360,15 +356,15 @@ This parameter also affects the granularity of the “global” shuffling step w
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">torch</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
 
-<span class="k">class</span> <span class="nc">LogisticRegression</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_dim</span><span class="p">,</span> <span class="n">output_dim</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">LogisticRegression</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_dim</span><span class="p">,</span> <span class="n">output_dim</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">LogisticRegression</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>  <span class="c1"># noqa: UP008</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">linear</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">input_dim</span><span class="p">,</span> <span class="n">output_dim</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="n">outputs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">linear</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">outputs</span>
 </pre></div>
@@ -379,7 +375,7 @@ This parameter also affects the granularity of the “global” shuffling step w
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">train_epoch</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">train_dataloader</span><span class="p">,</span> <span class="n">loss_fn</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">device</span><span class="p">):</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">train_epoch</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">train_dataloader</span><span class="p">,</span> <span class="n">loss_fn</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">device</span><span class="p">):</span>
     <span class="n">model</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
     <span class="n">train_loss</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">train_correct</span> <span class="o">=</span> <span class="mi">0</span>
@@ -584,7 +580,7 @@ array([&#39;leukocyte&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;leu
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 
 <span class="n">display</span><span class="p">(</span>
     <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>

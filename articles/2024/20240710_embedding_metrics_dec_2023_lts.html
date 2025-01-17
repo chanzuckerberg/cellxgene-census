@@ -5,14 +5,6 @@
 <head>
   <meta charset="utf-8">
   <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
-<meta property="og:title" content="Benchmarks of single-cell Census models" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://chanzuckerberg.github.io/cellxgene-census/articles/2024/20240710_embedding_metrics_dec_2023_lts.html" />
-<meta property="og:site_name" content="cellxgene-census" />
-<meta property="og:description" content="Published: July 11th, 2024 Updated: July 19th, 2024. Model names fixed. By: Emanuele Bezzi, Pablo Garcia-Nieto In 2023, the Census team released a series of cells embeddings (available at the Censu..." />
-<meta property="og:image" content="https://chanzuckerberg.github.io/cellxgene-census/_static/img/cellxGene-newsletter-logo.svg" />
-<meta property="og:image:alt" content="CZ CELLxGENE Logo" />
-<meta name="description" content="Published: July 11th, 2024 Updated: July 19th, 2024. Model names fixed. By: Emanuele Bezzi, Pablo Garcia-Nieto In 2023, the Census team released a series of cells embeddings (available at the Censu..." />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
@@ -235,12 +227,12 @@
 <section id="accessing-the-embeddings-included-in-the-benchmark">
 <h2>Accessing the embeddings included in the benchmark<a class="headerlink" href="#accessing-the-embeddings-included-in-the-benchmark" title="Permalink to this heading"></a></h2>
 <p>Please the <a class="reference external" href="https://cellxgene.cziscience.com/census-models">Census Model page</a> for full details. Shortly, you can see the embeddings available for the Census LTS version <code class="docutils literal notranslate"><span class="pre">census_version=&quot;2023-12-15&quot;</span></code> using the Census API as follows.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census.experimental.get_all_available_embeddings</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">cellxgene_census.experimental.get_all_available_embeddings</span>
 <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">experimental</span><span class="o">.</span><span class="n">get_all_available_embeddings</span><span class="p">(</span><span class="n">census_version</span><span class="o">=</span><span class="s2">&quot;2023-12-15&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>With the exception of NMF factors, all other human embeddings were included in the benchmarks below. If you would want to access the embeddings for any slice of data you can utilize the parameter <code class="docutils literal notranslate"><span class="pre">obs_embeddings</span></code> from  the<code class="docutils literal notranslate"><span class="pre">get_anndata()</span></code> method of the Census API, for example:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">cellxgene_census</span>
 <span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">(</span><span class="n">census_version</span><span class="o">=</span><span class="s2">&quot;2023-12-15&quot;</span><span class="p">)</span>
 <span class="n">adata</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_anndata</span><span class="p">(</span>
     <span class="n">census</span><span class="p">,</span>
@@ -389,7 +381,7 @@
 <section id="source-data">
 <h2>Source data<a class="headerlink" href="#source-data" title="Permalink to this heading"></a></h2>
 <p>All data was obtained from the Census API, to fetch the data used in this report you can execute the following in Python. To get the cell subclass and cell class please refer to the <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-ontology-guide/tree/main">CellxGene Ontology Guide API</a>.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">cellxgene_census</span>
 
 <span class="n">val_filters</span> <span class="o">=</span> <span class="p">{</span>
    <span class="s2">&quot;adipose&quot;</span><span class="p">:</span> <span class="s2">&quot;tissue_general == &#39;adipose tissue&#39; and is_primary_data == True&quot;</span><span class="p">,</span>
