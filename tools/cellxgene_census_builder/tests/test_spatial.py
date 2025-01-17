@@ -125,6 +125,13 @@ def test_locations(spatial_build):
     # TODO: Test that locations match the anndata
 
 
+def test_no_normalized_matrix(spatial_build):
+    census = cellxgene_census.open_soma(uri=str(spatial_build.soma_path))
+    spatial = census["census_spatial"]["homo_sapiens"]
+
+    assert ["raw"] == list(spatial.ms["RNA"]["X"].keys())
+
+
 def test_images(spatial_build):
     # TODO: check the metadata of the images
     census = cellxgene_census.open_soma(uri=str(spatial_build.soma_path))
