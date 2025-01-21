@@ -850,7 +850,8 @@ def validate_X_layers_schema(
             assert n_vars == exp.ms[MEASUREMENT_RNA_NAME].var.count
 
             if n_obs > 0:
-                for lyr in CENSUS_X_LAYERS:
+                layers = CENSUS_X_LAYERS if not eb.is_exclusively_spatial() else {"raw": pa.float32()}
+                for lyr in layers:
                     assert soma.SparseNDArray.exists(exp.ms[MEASUREMENT_RNA_NAME].X[lyr].uri)
                     X = exp.ms[MEASUREMENT_RNA_NAME].X[lyr]
                     assert X.schema.field("soma_dim_0").type == pa.int64()
@@ -983,12 +984,15 @@ def validate_internal_consistency(
                 # Assertion 1 - counts are mutually consistent
                 assert obs.nnz.sum() == var.nnz.sum(), f"{eb.name}: axis NNZ mismatch."
                 assert obs.nnz.sum() == exp.ms[MEASUREMENT_RNA_NAME].X["raw"].nnz, f"{eb.name}: axis / X NNZ mismatch."
-                assert (
-                    exp.ms[MEASUREMENT_RNA_NAME].X["raw"].nnz == exp.ms[MEASUREMENT_RNA_NAME].X["normalized"].nnz
-                ), "X['raw'] and X['normalized'] nnz differ."
-                assert (
-                    exp.ms[MEASUREMENT_RNA_NAME].X["raw"].shape == exp.ms[MEASUREMENT_RNA_NAME].X["normalized"].shape
-                ), "X['raw'] and X['normalized'] shape differ."
+                if "normalized" in exp.ms[MEASUREMENT_RNA_NAME].X:
+                    # Checks on assumptions of normalized layer, which is not present for all experiments
+                    assert (
+                        exp.ms[MEASUREMENT_RNA_NAME].X["raw"].nnz == exp.ms[MEASUREMENT_RNA_NAME].X["normalized"].nnz
+                    ), "X['raw'] and X['normalized'] nnz differ."
+                    assert (
+                        exp.ms[MEASUREMENT_RNA_NAME].X["raw"].shape
+                        == exp.ms[MEASUREMENT_RNA_NAME].X["normalized"].shape
+                    ), "X['raw'] and X['normalized'] shape differ."
                 assert exp.ms[MEASUREMENT_RNA_NAME].X["raw"].nnz == var.nnz.sum(), "X['raw'] and axis nnz sum differ."
 
                 # Assertion 2 - obs.n_measured_vars is consistent with presence matrix

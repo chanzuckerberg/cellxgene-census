@@ -238,7 +238,8 @@ class ExperimentBuilder:
         # SOMA does not currently support empty arrays, so special case this corner-case.
         if self.n_obs > 0:
             assert self.n_var > 0
-            for layer_name in CENSUS_X_LAYERS:
+            layers = CENSUS_X_LAYERS if not self.specification.is_exclusively_spatial() else {"raw": pa.float32()}
+            for layer_name in layers:
                 rna_measurement["X"].add_new_sparse_ndarray(
                     layer_name,
                     type=CENSUS_X_LAYERS[layer_name],
@@ -533,6 +534,10 @@ def dispatch_X_chunk(
     local_var_joinids = adata.var.join(global_var_joinids).soma_joinid.to_numpy()
     assert (local_var_joinids >= 0).all(), f"Illegal join id, {dataset_id}"
 
+    _is_spatial_assay = np.isin(adata.obs.assay_ontology_term_id.to_numpy(), ALLOWED_SPATIAL_ASSAYS)
+    if is_spatial_assay := _is_spatial_assay.any():
+        assert _is_spatial_assay.all(), f"Mix of spatial and non-spatial assays in the same dataset: {dataset_id}"
+
     _is_full_gene_assay = np.isin(adata.obs.assay_ontology_term_id.to_numpy(), FULL_GENE_ASSAY)
     if _is_full_gene_assay.any():
         is_full_gene_assay: npt.NDArray[np.bool_] | None = _is_full_gene_assay
@@ -596,15 +601,15 @@ def dispatch_X_chunk(
         del X
         gc.collect()
 
-        if is_full_gene_assay is not None:
+        if is_spatial_assay:
+            pass
+        elif is_full_gene_assay is not None:
             assert feature_length is not None
             is_full_gene_assay_mask = is_full_gene_assay[idx : idx + minor_stride]
             xNormD = np.where(is_full_gene_assay_mask[xI], xD / feature_length[xJ], xD).astype(np.float32)
             xNormD = _divide_by_row_sum(n_obs, xI, xNormD)  # in-place operation
         else:
             xNormD = _divide_by_row_sum(n_obs, xI, xD.copy())  # in-place operation
-        _roundHalfToEven(xNormD, keepbits=15)  # in-place operation
-        xNormD[xNormD == 0] = sigma
 
         # reindex coordinates
         xI += idx + dataset_obs_joinid_start
@@ -615,10 +620,16 @@ def dispatch_X_chunk(
             X_raw.write(pa.Table.from_pydict({"soma_dim_0": xI, "soma_dim_1": xJ, "soma_data": xD}))
         del xD
         gc.collect()
-        with soma.open(urlcat(*path_to_X, "normalized"), mode="w", context=SOMA_TileDB_Context()) as X_normalized:
-            X_normalized.write(pa.Table.from_pydict({"soma_dim_0": xI, "soma_dim_1": xJ, "soma_data": xNormD}))
 
-        del xI, xJ, xNormD
+        if not is_spatial_assay:
+            _roundHalfToEven(xNormD, keepbits=15)  # in-place operation
+            xNormD[xNormD == 0] = sigma
+
+            with soma.open(urlcat(*path_to_X, "normalized"), mode="w", context=SOMA_TileDB_Context()) as X_normalized:
+                X_normalized.write(pa.Table.from_pydict({"soma_dim_0": xI, "soma_dim_1": xJ, "soma_data": xNormD}))
+            del xNormD
+
+        del xI, xJ
         gc.collect()
 
     return result
