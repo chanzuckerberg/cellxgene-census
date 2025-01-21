@@ -38,7 +38,7 @@ from .globals import (
     CENSUS_OBS_STATS_COLUMNS,
     CENSUS_OBS_TABLE_SPEC,
     CENSUS_SCHEMA_VERSION,
-    CENSUS_SPATIAL_NAME,
+    CENSUS_SPATIAL_SEQUENCING_NAME,
     CENSUS_SUMMARY_CELL_COUNTS_NAME,
     CENSUS_SUMMARY_CELL_COUNTS_TABLE_SPEC,
     CENSUS_SUMMARY_NAME,
@@ -84,7 +84,7 @@ def assert_all(__iterable: Iterable[object]) -> bool:
 
 
 def get_census_data_collection_name(eb: ExperimentSpecification) -> str:
-    return CENSUS_SPATIAL_NAME if eb.is_exclusively_spatial() else CENSUS_DATA_NAME
+    return CENSUS_SPATIAL_SEQUENCING_NAME if eb.is_exclusively_spatial() else CENSUS_DATA_NAME
 
 
 def get_experiment_unique_key(es: ExperimentSpecification) -> str:

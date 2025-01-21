@@ -54,7 +54,7 @@ CENSUS_INFO_NAME = "census_info"
 CENSUS_DATA_NAME = "census_data"
 
 # top-level SOMA collection
-CENSUS_SPATIAL_NAME = "census_spatial"
+CENSUS_SPATIAL_SEQUENCING_NAME = "census_spatial_sequencing"
 
 # "census_info"/"summary_cell_counts" SOMA Dataframe
 CENSUS_SUMMARY_CELL_COUNTS_NAME = "summary_cell_counts"  # object name

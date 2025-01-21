@@ -113,7 +113,7 @@ def spatial_build(spatial_manifest, tmp_path_factory) -> SpatialBuild:
 def test_spatial_build(spatial_build):
     manifest = load_manifest(str(spatial_build.manifest_path), str(spatial_build.blocklist))
     census = cellxgene_census.open_soma(uri=str(spatial_build.soma_path))
-    obs = census["census_spatial"]["homo_sapiens"].obs.read().concat().to_pandas()
+    obs = census["census_spatial_sequencing"]["homo_sapiens"].obs.read().concat().to_pandas()
     assert set(obs["dataset_id"].unique()) == {d.dataset_id for d in manifest}
 
 
@@ -123,7 +123,7 @@ def _to_df(somadf: tiledbsoma.DataFrame) -> pd.DataFrame:
 
 def test_locations(spatial_build):
     census = cellxgene_census.open_soma(uri=str(spatial_build.soma_path))
-    spatial = census["census_spatial"]["homo_sapiens"]
+    spatial = census["census_spatial_sequencing"]["homo_sapiens"]
     obs_spatial_presence = _to_df(spatial["obs_spatial_presence"])
 
     # Test that the obs_spatial_presence join id + dataset work with locations
@@ -136,7 +136,7 @@ def test_locations(spatial_build):
 
 def test_no_normalized_matrix(spatial_build):
     census = cellxgene_census.open_soma(uri=str(spatial_build.soma_path))
-    spatial = census["census_spatial"]["homo_sapiens"]
+    spatial = census["census_spatial_sequencing"]["homo_sapiens"]
 
     assert ["raw"] == list(spatial.ms["RNA"]["X"].keys())
 
@@ -147,7 +147,7 @@ def test_images(spatial_build):
     manifest = load_manifest(str(spatial_build.manifest_path), str(spatial_build.blocklist))
 
     h5ads = {d.dataset_id: Path(d.dataset_asset_h5ad_uri) for d in manifest}
-    spatial = census["census_spatial"]["homo_sapiens"]["spatial"]
+    spatial = census["census_spatial_sequencing"]["homo_sapiens"]["spatial"]
 
     for dataset_id, h5ad_path in h5ads.items():
         with h5py.File(h5ad_path) as f:
@@ -163,7 +163,7 @@ def test_images(spatial_build):
 def test_obs_spatial_presence(spatial_build):
     census = cellxgene_census.open_soma(uri=str(spatial_build.soma_path))
 
-    experiment = census["census_spatial"]["homo_sapiens"]
+    experiment = census["census_spatial_sequencing"]["homo_sapiens"]
 
     obs = _to_df(experiment.obs)
     obs_spatial_presence = _to_df(experiment["obs_spatial_presence"])
@@ -180,7 +180,7 @@ def test_obs_spatial_presence(spatial_build):
 def test_scene(spatial_build):
     # TODO: Figure out what else needs checking here
     census = cellxgene_census.open_soma(uri=str(spatial_build.soma_path))
-    experiment = census["census_spatial"]["homo_sapiens"]
+    experiment = census["census_spatial_sequencing"]["homo_sapiens"]
 
     for scene in experiment.spatial.values():
         assert isinstance(scene, tiledbsoma.Scene)
@@ -188,7 +188,7 @@ def test_scene(spatial_build):
 
 def test_spatialdata_query_export(spatial_build):
     census = cellxgene_census.open_soma(uri=str(spatial_build.soma_path))
-    experiment = census["census_spatial"]["homo_sapiens"]
+    experiment = census["census_spatial_sequencing"]["homo_sapiens"]
 
     obs = experiment["obs"].read().concat().to_pandas()
     joinids = obs["soma_joinid"].iloc[:100].values
