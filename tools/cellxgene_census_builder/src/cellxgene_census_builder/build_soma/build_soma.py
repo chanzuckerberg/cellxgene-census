@@ -498,6 +498,11 @@ def add_image_collection(
     scene.add_new_collection("img")
 
     hires_image = np.transpose(image_dict["hires"], (2, 0, 1))
+
+    if hires_image.shape[0] == 4:
+        # We have an RGBA image, but only want RGB
+        hires_image = hires_image[:3]
+
     multiscale_image = scene.add_new_multiscale_image(
         key=key,
         subcollection="img",
