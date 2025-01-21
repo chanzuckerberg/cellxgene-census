@@ -64,6 +64,7 @@ dependencies= [
     "filelock",
     "spatialdata",
     "pooch",
+    "pytest-xdist",
 ]
 
 [project.urls]
