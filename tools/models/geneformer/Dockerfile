@@ -19,7 +19,7 @@ RUN pip uninstall -y transformer-engine
 
 # Set the tiledbsoma version used to write the embeddings SparseNDArray, to ensure
 # compatibility with the Census embeddings curator
-ARG EMBEDDINGS_TILEDBSOMA_VERSION=1.9.5
+ARG EMBEDDINGS_TILEDBSOMA_VERSION=1.11.4
 ARG CELLXGENE_CENSUS_VERSION=main
 ARG GENEFORMER_VERSION=ebc1e096
 
