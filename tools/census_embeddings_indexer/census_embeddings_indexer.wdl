@@ -43,6 +43,7 @@ task indexer {
         set -euxo pipefail
 
         python3 << 'EOF'
+        import sys
         import math
         import tiledb
         import tiledb.vector_search as vs
@@ -54,6 +55,7 @@ task indexer {
         with tiledb.open(source_uri, config=config) as emb_array:
             N, M = emb_array.shape
         input_vectors_per_work_item = 1_500_000_000 // M  # controls memory usage
+        print(f"N={N} M={M} input_vectors_per_work_item={input_vectors_per_work_item}", file=sys.stderr)
 
         vs.ingest(
             config=config,
@@ -70,7 +72,7 @@ task indexer {
         )
 
         final_index = vs.ivf_flat_index.IVFFlatIndex(uri="./~{embeddings_name}", memory_budget=1024*1048756)
-        assert final_index.size == N
+        assert final_index.size == N, f"final_index.size=={final_index.size} != N=={N}"
         EOF
     >>>
 

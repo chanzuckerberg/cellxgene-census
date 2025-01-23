@@ -2,7 +2,7 @@
 
 This is a Docker+WDL pipeline to build [TileDB-Vector-Search](https://github.com/TileDB-Inc/TileDB-Vector-Search) indexes for Census cell embeddings, supporting cell similarity search in embedding space. It's meant to run on the AWS HealthOmics workflow service using the [miniwdl-omics-run](https://github.com/miniwdl-ext/miniwdl-omics-run) launcher (assuming account setup documented there).
 
-The pipeline consumes one or more of the existing TileDB arrays for hosted and contributed [Census embeddings](https://cellxgene.cziscience.com/census-models) stored on S3. The resulting indexes are themselves TileDB groups to be stored on S3.
+The pipeline consumes one or more of the existing TileDB arrays for [Census embeddings](https://cellxgene.cziscience.com/census-models) stored on S3. The resulting indexes are themselves TileDB groups to be stored on S3.
 
 ```bash
 export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
@@ -30,4 +30,4 @@ miniwdl-omics-run census_embeddings_indexer.wdl \
 
 (The `embeddings_s3_uris=s3_//...` with `s3_//` instead of `s3://` is a workaround for an AWS-side existence check that doesn't seem to work right on public buckets.)
 
-The Dockerfile has an argument for the TileDB-Vector-Search version to use. We should use the newest version that doesn't need a newer version of TileDB than the intended client tiledbsoma/cellxgene_census.
+The [Dockerfile](Dockerfile) has arguments for the TileDB-Py and TileDB-Vector-Search versions to use; see comments there for guidance on setting them.
