@@ -10,7 +10,7 @@ RUN git lfs install
 
 ENV GIT_SSL_NO_VERIFY=true
 RUN pip install --upgrade pip setuptools setuptools_scm
-RUN pip install torch torchdata<0.10 --index-url https://download.pytorch.org/whl/cu118
+RUN pip install torch 'torchdata<0.10' --index-url https://download.pytorch.org/whl/cu118
                                                                              # ^^^ match the base image CUDA version!
 RUN pip install owlready2 boto3 transformers[torch]
 # workaround for unknown problem blocking `import geneformer`:
