@@ -62,7 +62,7 @@ dependencies= [
     "tiledb",
     # Spatial testing
     "filelock",
-    "spatialdata",
+    "spatialdata>=0.2.5",
     "pooch",
     "pytest-xdist",
 ]
