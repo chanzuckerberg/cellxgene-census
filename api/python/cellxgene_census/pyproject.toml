@@ -32,7 +32,7 @@ dependencies= [
     # Make sure this version does not fall behind the builder's tiledbsoma version.
     "tiledbsoma>=1.15.3",
     "anndata",
-    "numpy>=1.23,<2.0",
+    "numpy>=1.23",
     "requests",
     "typing_extensions",
     "s3fs>=2021.06.1",
