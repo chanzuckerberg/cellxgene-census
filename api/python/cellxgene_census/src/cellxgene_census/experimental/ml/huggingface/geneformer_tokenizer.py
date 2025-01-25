@@ -78,8 +78,8 @@ class GeneformerTokenizer(CellDatasetBuilder):
         - `obs_query`: obs AxisQuery defining the set of Census cells to process (default all)
         - `obs_column_names`: obs dataframe columns (cell metadata) to propagate into attributes
            of each Dataset item
-        - `max_input_tokens`: maximum length of Geneformer input token sequence (default 2048)
-        - `special_token`: whether to affix separator tokens to the sequence (default False)
+        - `max_input_tokens`: maximum length of Geneformer input token sequence (default 4096)
+        - `special_token`: whether to affix separator tokens to the sequence (default True)
         - `token_dictionary_file`, `gene_median_file`: pickle files supplying the mapping of
           Ensembl human gene IDs onto Geneformer token numbers and median expression values.
           By default, these will be loaded from the Geneformer package.
