@@ -10,8 +10,7 @@ sudo add-apt-repository -y ppa:deadsnakes/ppa
 sudo apt -y update 
 sudo apt -y install python3.11
 sudo apt -y install python3.11-venv
-curl -sS https://bootstrap.pypa.io/get-pip.py | python3.11 
-sudo update-alternatives --install /usr/bin/python python /usr/bin/python2 1
+curl -sS https://bootstrap.pypa.io/get-pip.py | python3.11
 sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.8 2
 sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.11 3
 sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 1
