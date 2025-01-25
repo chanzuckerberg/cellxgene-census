@@ -330,7 +330,7 @@ def make_anndata_cell_filter(filter_spec: AnnDataFilterSpec) -> AnnDataFilterFun
     def _filter(ad: AnnDataProxy) -> AnnDataProxy:
         """Filter observations and features per Census schema."""
         var_mask = ad.var.feature_biotype == "gene"
-        obs_mask = ad.obs.tissue_type == "tissue"
+        obs_mask = ad.obs.tissue_type.isin(["tissue", "organoid"])
 
         # Handle multi-species edge case
         var_organisms = set(ad.var.feature_reference[var_mask].unique())

@@ -71,7 +71,7 @@ if __name__ == "__main__":
     gc.collect()
 
     with open("latent-idx.npy", "wb") as f:
-        np.save(f, idx)
+        np.save(f, idx.flatten())
 
     with open("latent.npy", "wb") as f:
         np.save(f, qz_m)

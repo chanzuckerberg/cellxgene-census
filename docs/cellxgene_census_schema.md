@@ -1,8 +1,8 @@
 # CZ CELLxGENE Discover Census Schema
 
-**Version**: 2.1.0
+**Version**: 2.2.0
 
-**Last edited**: June, 2024.
+**Last edited**: January, 2025.
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED" "MAY", and "OPTIONAL" in this document are to be interpreted as described in [BCP 14](https://tools.ietf.org/html/bcp14), [RFC2119](https://www.rfc-editor.org/rfc/rfc2119.txt), and [RFC8174](https://www.rfc-editor.org/rfc/rfc8174.txt) when, and only when, they appear in all capitals, as shown here.
 
@@ -147,7 +147,7 @@ Per the CELLxGENE dataset schema, [all RNA assays MUST include UMI or read count
 
 #### Sample types
 
-Only observations (cells) from primary tissue MUST be included in the Census. Thus, ONLY those observations with a [`tissue_type`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.2.0/schema.md#tissue_type) value equal to "tissue" MUST be included; other values of `tissue_type` MUST NOT be included.
+Observations (cells) with a [`tissue_type`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.2.0/schema.md#tissue_type) value equal to "tissue" or "organoid" MUST be included in the Census. Observations with all other values of `tissue_type` such as "cell culture" MUST NOT be included.
 
 #### Repeated data
 
@@ -873,6 +873,10 @@ Cell metadata MUST be encoded as a `SOMADataFrame` with the following columns:
 </table>
 
 ## Changelog
+
+### Version 2.2.0
+
+* Allow organoid data, i.e. `tissue_type` can now be `organoid` other than `tissue`.
 
 ### Version 2.1.0
 
