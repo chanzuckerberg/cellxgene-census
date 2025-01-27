@@ -336,6 +336,9 @@ def build_step4a_add_spatial(
             )
             scene.coordinate_space = coord_space
 
+            # Default value. Will be redefined if the dataset is visium (e.g. has a radius defined)
+            point_radius = 2.0
+
             with h5py.File(h5ad_path / d.dataset_h5ad_path) as f:
                 tissue_pos = read_elem(f["obsm/spatial"])
                 is_single = read_elem(f["uns/spatial/is_single"])
@@ -352,7 +355,14 @@ def build_step4a_add_spatial(
                     library_id = _keys[0]
                     del _keys
                     # There are images
-                    write_tasks.extend(add_image_collection(scene, library_id, coord_space, spatial_group[library_id]))
+                    spatial_library_info: h5py.Group = spatial_group[library_id]
+                    scale_factors = read_elem(spatial_library_info["scalefactors"])
+                    point_radius = scale_factors["spot_diameter_fullres"] / 2
+                    write_tasks.extend(
+                        add_image_collection(
+                            scene, library_id, coord_space, spatial_group[library_id], scale_factors=scale_factors
+                        )
+                    )
 
             obs = cast(pd.DataFrame, eb.obs_df).query(f"dataset_id == '{d.dataset_id}'")
 
@@ -376,9 +386,7 @@ def build_step4a_add_spatial(
             ) as loc_sink:
                 loc_sink.write(loc_pa)
 
-                # Added so we read as shape
-                # TODO: correct radius value (2.0 is a placeholder)
-                loc_sink.metadata["soma_geometry"] = 2.0
+                loc_sink.metadata["soma_geometry"] = point_radius
                 loc_sink.metadata["soma_geometry_type"] = "radius"
 
             obs_spatial_presences.append(obs[["soma_joinid", "dataset_id"]].rename(columns={"dataset_id": "scene_id"}))
@@ -453,14 +461,12 @@ def add_image_collection(
     coordinate_space,
     # spatial_library_info: dict[str, Any],
     spatial_library_info: h5py.Group,
+    scale_factors: dict[str, float],
 ) -> None:
-    from anndata.experimental import read_elem
     from somacore import (
         ScaleTransform,
     )
 
-    # img_collection = scene.add_new_collection("img")
-    scale_factors = read_elem(spatial_library_info["scalefactors"])
     image_dict = {
         k: read_elem_as_dask(spatial_library_info["images"][k]) for k in spatial_library_info["images"].keys()
     }

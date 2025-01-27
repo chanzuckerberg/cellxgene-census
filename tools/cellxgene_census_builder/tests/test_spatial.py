@@ -123,13 +123,21 @@ def _to_df(somadf: tiledbsoma.DataFrame) -> pd.DataFrame:
 
 def test_locations(spatial_build):
     census = cellxgene_census.open_soma(uri=str(spatial_build.soma_path))
-    spatial = census["census_spatial_sequencing"]["homo_sapiens"]
-    obs_spatial_presence = _to_df(spatial["obs_spatial_presence"])
+    exp = census["census_spatial_sequencing"]["homo_sapiens"]
+    obs_spatial_presence = _to_df(exp["obs_spatial_presence"])
 
     # Test that the obs_spatial_presence join id + dataset work with locations
     for scene_id, subdf in obs_spatial_presence.groupby("scene_id"):
-        locations = _to_df(spatial["spatial"][scene_id]["obsl"]["loc"])
+        sdata = exp.axis_query(
+            "RNA", obs_query=tiledbsoma.AxisQuery(value_filter=f"dataset_id == '{scene_id}'")
+        ).to_spatialdata(X_name="raw")
+        locations_tdb = exp["spatial"][scene_id]["obsl"]["loc"]
+        locations_key = list(sdata.shapes.keys())[0]
+        locations = sdata.shapes[locations_key]
         assert locations["soma_joinid"].isin(subdf["soma_joinid"]).all()
+        assert len(locations["radius"].unique()) == 1
+        # TODO: check values of radius
+        # TODO: check values of locations
 
     # TODO: Test that locations match the anndata
 
