@@ -9,7 +9,7 @@ import pathlib
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Self, TypeVar
+from typing import Any, Self, TypeVar, cast
 
 import dask
 import numpy as np
@@ -543,13 +543,14 @@ def validate_X_layers_presence(
     3. Presence mask per dataset is correct for each dataset
     """
 
-    def _read_var_names(path: str) -> npt.NDArray[object]:
+    def _read_var_names(path: str) -> npt.NDArray[np.object_]:
         import h5py
         from anndata.io import read_elem
 
         with h5py.File(path) as f:
             index_key = f["var"].attrs["_index"]
-            return read_elem(f["var"][index_key])
+            var_names = read_elem(f["var"][index_key])
+            return cast(npt.NDArray[np.object_], var_names)
 
     @logit(logger)
     def _validate_X_layers_presence_general(experiment_specifications: list[ExperimentSpecification]) -> bool:
