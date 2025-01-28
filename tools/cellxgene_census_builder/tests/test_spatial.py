@@ -124,6 +124,10 @@ def _to_df(somadf: tiledbsoma.DataFrame) -> pd.DataFrame:
 def test_locations(spatial_build):
     census = cellxgene_census.open_soma(uri=str(spatial_build.soma_path))
     exp = census["census_spatial_sequencing"]["homo_sapiens"]
+
+    manifest = load_manifest(str(spatial_build.manifest_path), str(spatial_build.blocklist))
+    h5ads = {d.dataset_id: Path(d.dataset_asset_h5ad_uri) for d in manifest}
+
     obs_spatial_presence = _to_df(exp["obs_spatial_presence"])
 
     # Test that the obs_spatial_presence join id + dataset work with locations
@@ -131,15 +135,19 @@ def test_locations(spatial_build):
         sdata = exp.axis_query(
             "RNA", obs_query=tiledbsoma.AxisQuery(value_filter=f"dataset_id == '{scene_id}'")
         ).to_spatialdata(X_name="raw")
-        locations_tdb = exp["spatial"][scene_id]["obsl"]["loc"]
         locations_key = list(sdata.shapes.keys())[0]
         locations = sdata.shapes[locations_key]
+
         assert locations["soma_joinid"].isin(subdf["soma_joinid"]).all()
         assert len(locations["radius"].unique()) == 1
-        # TODO: check values of radius
-        # TODO: check values of locations
 
-    # TODO: Test that locations match the anndata
+        # Check against values from original file
+        with h5py.File(h5ads[scene_id]) as f:
+            locations_orig = read_elem(f["obsm/spatial"])
+            library_id = list(filter(lambda x: x != "is_single", f["uns/spatial"].keys()))[0]
+            radius_orig = f[f"uns/spatial/{library_id}/scalefactors/spot_diameter_fullres"][()] / 2
+        np.testing.assert_allclose(locations_orig, locations.sort_values("soma_joinid").get_coordinates(), atol=1e-6)
+        np.testing.assert_allclose(radius_orig, locations["radius"].unique()[0], atol=1e-6)
 
 
 def test_no_normalized_matrix(spatial_build):
