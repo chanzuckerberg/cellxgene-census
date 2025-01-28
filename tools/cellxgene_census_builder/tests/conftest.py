@@ -160,8 +160,8 @@ def datasets(census_build_args: CensusBuildArgs) -> list[Dataset]:
             h5ad = get_anndata(
                 organism, GENE_IDS[i], no_zero_counts=False, assay_ontology_term_id=ASSAY_IDS[i], X_format=X_FORMAT[i]
             )
-            h5ad_path = f"{assets_path}/{organism.name}_{i}.h5ad"
-            h5ad.write_h5ad(h5ad_path)
+            h5ad_name = f"{organism.name}_{i}.h5ad"
+            h5ad.write_h5ad(f"{assets_path}/{h5ad_name}")
             datasets.append(
                 Dataset(
                     dataset_id=f"{organism.name}_{i}",
@@ -170,7 +170,7 @@ def datasets(census_build_args: CensusBuildArgs) -> list[Dataset]:
                     collection_id=f"id_{organism.name}",
                     collection_name=f"collection_{organism.name}",
                     dataset_asset_h5ad_uri="mock",
-                    dataset_h5ad_path=h5ad_path,
+                    dataset_h5ad_path=h5ad_name,
                     dataset_version_id=f"{organism.name}_{i}_v0",
                 ),
             )
