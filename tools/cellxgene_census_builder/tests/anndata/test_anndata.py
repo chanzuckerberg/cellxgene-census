@@ -108,7 +108,8 @@ def test_make_anndata_cell_filter_filters_out_organoids_cell_culture(
     filtered_adata_with_organoids_and_cell_culture = func(adata_with_organoids_and_cell_culture)
 
     assert adata_with_organoids_and_cell_culture.var.equals(filtered_adata_with_organoids_and_cell_culture.var)
-    assert filtered_adata_with_organoids_and_cell_culture.obs.shape[0] == 2
+    # tissue(2) and organoid(1). cell_culture should be excluded
+    assert filtered_adata_with_organoids_and_cell_culture.obs.shape[0] == 3
 
 
 def test_make_anndata_cell_filter_organism(tmp_path: pathlib.Path, h5ad_with_organism: str) -> None:
