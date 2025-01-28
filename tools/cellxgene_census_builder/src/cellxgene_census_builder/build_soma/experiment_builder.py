@@ -132,7 +132,7 @@ class ExperimentBuilder:
         self.experiment: soma.Experiment | None = None  # initialized in create()
         self.experiment_uri: str | None = None  # initialized in create()
         self.global_var_joinids: pd.DataFrame | None = None
-        self.presence: dict[int, tuple[npt.NDArray[np.bool_], npt.NDArray[np.int64]]] = {}
+        self.presence: dict[int, npt.NDArray[np.int64]] = {}
 
     @property
     def name(self) -> str:
@@ -242,9 +242,8 @@ class ExperimentBuilder:
 
             # LIL is fast way to create spmatrix
             pm = sparse.lil_matrix((max_dataset_joinid + 1, self.n_var), dtype=bool)
-            for dataset_joinid, presence in self.presence.items():
-                data, cols = presence
-                pm[dataset_joinid, cols] = data  # This should always be 1
+            for dataset_joinid, cols in self.presence.items():
+                pm[dataset_joinid, cols] = 1
 
             pm = pm.tocoo()
             pm.eliminate_zeros()
@@ -713,11 +712,7 @@ def populate_X_layers(
 
         for presence in eb_summary["presence"]:
             assert presence.eb_name == eb.name
-            eb.presence[presence.dataset_soma_joinid] = (
-                # If a gene was in the `.var_names` of the h5ad, it counts as present regardless of whether any values were greater than 1
-                np.broadcast_to(True, presence.cols.shape),
-                presence.cols,
-            )
+            eb.presence[presence.dataset_soma_joinid] = presence.cols
 
 
 class SummaryStats(TypedDict):
