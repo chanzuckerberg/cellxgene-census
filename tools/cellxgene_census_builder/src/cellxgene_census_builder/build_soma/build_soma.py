@@ -332,7 +332,7 @@ def build_step4a_add_spatial(
             scene = spatial_collection.add_new_collection(d.dataset_id, kind=Scene)
 
             coord_space = CoordinateSpace(
-                (Axis(name="y", unit="micrometers"), Axis(name="x", unit="micrometers"))  # type: ignore[arg-type]
+                (Axis(name="y", unit="pixels"), Axis(name="x", unit="pixels"))  # type: ignore[arg-type]
             )
             scene.coordinate_space = coord_space
 
