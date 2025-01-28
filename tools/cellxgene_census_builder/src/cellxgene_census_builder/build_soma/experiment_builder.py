@@ -52,10 +52,8 @@ logger = logging.getLogger(__name__)
 
 @attrs.define
 class PresenceResult:
-    dataset_id: str
     dataset_soma_joinid: int
     eb_name: str
-    data: npt.NDArray[np.bool_]
     cols: npt.NDArray[np.int64]
 
 
@@ -65,10 +63,6 @@ class AxisStats:
     eb_name: str
     obs_stats: pd.DataFrame
     var_stats: pd.DataFrame
-
-
-AccumulateXResult = tuple[PresenceResult, AxisStats]
-AccumulateXResults = Sequence[AccumulateXResult]
 
 
 def _assert_open_for_write(obj: somacore.SOMAObject | None) -> None:
@@ -460,10 +454,8 @@ def compute_X_file_stats(
     var_stats["n_measured_obs"] = n_obs
     res["presence"].append(
         PresenceResult(
-            dataset_id,
             dataset_soma_joinid,
             eb_name,
-            (var_stats.nnz > 0).to_numpy(),
             var_stats.index.to_numpy(),
         ),
     )
