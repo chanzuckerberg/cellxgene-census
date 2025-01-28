@@ -543,6 +543,14 @@ def validate_X_layers_presence(
     3. Presence mask per dataset is correct for each dataset
     """
 
+    def _read_var_names(path: str) -> npt.NDArray[object]:
+        import h5py
+        from anndata.io import read_elem
+
+        with h5py.File(path) as f:
+            index_key = f["var"].attrs["_index"]
+            return read_elem(f["var"][index_key])
+
     @logit(logger)
     def _validate_X_layers_presence_general(experiment_specifications: list[ExperimentSpecification]) -> bool:
         for es in experiment_specifications:
@@ -585,6 +593,9 @@ def validate_X_layers_presence(
                 )
                 if len(obs_df) > 0:  # skip empty experiments
                     X_raw = exp.ms[MEASUREMENT_RNA_NAME].X["raw"]
+                    feature_ids = pd.Index(
+                        exp.ms[MEASUREMENT_RNA_NAME].var.read(column_names=["feature_id"]).concat().to_pandas()
+                    )
 
                     presence_accumulator = np.zeros((X_raw.shape[1]), dtype=np.bool_)
                     for block, _ in (
@@ -600,6 +611,12 @@ def validate_X_layers_presence(
                         .tables()
                         .concat()
                     )
+
+                    # Get soma_joinids for feature in the original h5ad
+                    orig_feature_ids = _read_var_names(dataset.dataset_h5ad_path)
+                    orig_indices = np.sort(feature_ids.get_indexer(feature_ids.intersection(orig_feature_ids)))
+
+                    np.testing.assert_array_equal(presence["soma_dim_1"], orig_indices)
 
                     assert np.array_equal(presence_accumulator, presence), "Presence value does not match X[raw]"
 
