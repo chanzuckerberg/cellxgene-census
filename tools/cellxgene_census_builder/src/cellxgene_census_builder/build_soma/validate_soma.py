@@ -36,7 +36,6 @@ from .globals import (
     CENSUS_DATASETS_TABLE_SPEC,
     CENSUS_INFO_NAME,
     CENSUS_OBS_STATS_COLUMNS,
-    CENSUS_OBS_TABLE_SPEC,
     CENSUS_SCHEMA_VERSION,
     CENSUS_SPATIAL_SEQUENCING_NAME,
     CENSUS_SUMMARY_CELL_COUNTS_NAME,
@@ -44,8 +43,6 @@ from .globals import (
     CENSUS_SUMMARY_NAME,
     CENSUS_VAR_TABLE_SPEC,
     CENSUS_X_LAYERS,
-    CXG_OBS_COLUMNS_READ,
-    CXG_OBS_TERM_COLUMNS,
     CXG_SCHEMA_VERSION,
     CXG_VAR_COLUMNS_READ,
     FEATURE_DATASET_PRESENCE_MATRIX_NAME,
@@ -198,16 +195,18 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_specifications: l
 def validate_axis_dataframes_schema(soma_path: str, experiment_specifications: list[ExperimentSpecification]) -> bool:
     """Validate axis dataframe schema matches spec."""
     with soma.Collection.open(soma_path, context=SOMA_TileDB_Context()) as census:
-        census_data = census[CENSUS_DATA_NAME]
-
         # check schema
         for eb in experiment_specifications:
+            census_data = census[eb.root_collection]
             obs = census_data[eb.name].obs
             var = census_data[eb.name].ms[MEASUREMENT_RNA_NAME].var
-            assert sorted(obs.keys()) == sorted(CENSUS_OBS_TABLE_SPEC.field_names())
+
+            assert (
+                sorted(obs.keys()) == sorted(eb.obs_table_spec.field_names())
+            ), f"Found unexpected fields: {set(obs.keys()).difference(eb.obs_table_spec.field_names())}, and missing fields: {set(eb.obs_table_spec.field_names()).difference(obs.keys())}"
             assert sorted(var.keys()) == sorted(CENSUS_VAR_TABLE_SPEC.field_names())
             for field in obs.schema:
-                assert CENSUS_OBS_TABLE_SPEC.field(field.name).is_type_equivalent(
+                assert eb.obs_table_spec.field(field.name).is_type_equivalent(
                     field.type
                 ), f"Unexpected type in {field.name}: {field.type}"
             for field in var.schema:
@@ -310,7 +309,7 @@ def validate_axis_dataframes(
                 ad = open_anndata(
                     dataset,
                     base_path=assets_path,
-                    obs_column_names=CXG_OBS_COLUMNS_READ,
+                    obs_column_names=tuple([f.name for f in eb.obs_term_fields_read]),
                     var_column_names=CXG_VAR_COLUMNS_READ,
                     filter_spec=eb.anndata_cell_filter_spec,
                 )
@@ -326,7 +325,7 @@ def validate_axis_dataframes(
 
                 dataset_obs = (
                     se.obs.read(
-                        column_names=list(CENSUS_OBS_TABLE_SPEC.field_names()),
+                        column_names=list(eb.obs_table_spec.field_names()),
                         value_filter=f"dataset_id == '{dataset_id}'",
                     )
                     .concat()
@@ -357,11 +356,14 @@ def validate_axis_dataframes(
                     eb_info[eb_info_key].n_obs += ad.n_obs
                     eb_info[eb_info_key].dataset_ids.add(dataset_id)
                     eb_info[eb_info_key].vars |= set(ad.var.index.array)
-                    ad_obs = ad.obs[list(set(CXG_OBS_TERM_COLUMNS) - set(CENSUS_OBS_STATS_COLUMNS))].reset_index(
-                        drop=True
+                    # TODO: Make this comparison work in the case where slide-seq data does not have the visium specific obs columns
+                    # Ideally, we fill the ad.obs with a fill value for cases where the column is optional
+                    common_cols = ad.obs.columns.intersection(
+                        list({f.name for f in eb.obs_term_fields} - set(CENSUS_OBS_STATS_COLUMNS))
                     )
+                    ad_obs = ad.obs[common_cols].reset_index(drop=True)
                     assert (
-                        (dataset_obs.sort_index(axis=1) == ad_obs.sort_index(axis=1)).all().all()
+                        (dataset_obs[common_cols].sort_index(axis=1) == ad_obs.sort_index(axis=1)).all().all()
                     ), f"{dataset.dataset_id}/{eb.name} obs content, mismatch"
 
         return eb_info
@@ -791,7 +793,7 @@ def validate_X_layers_raw_contents(
                     np.add.at(raw_sum, rows_by_position, X_raw_data)
                     assert np.allclose(
                         raw_sum.astype(
-                            CENSUS_OBS_TABLE_SPEC.field("raw_sum").to_pandas_dtype()
+                            es.obs_table_spec.field("raw_sum").to_pandas_dtype()
                         ),  # cast to the storage type
                         obs_df.raw_sum.iloc[idx : idx + STRIDE].to_numpy(),
                     )

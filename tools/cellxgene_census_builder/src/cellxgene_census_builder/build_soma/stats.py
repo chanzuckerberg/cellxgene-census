@@ -6,13 +6,15 @@ import numpy.typing as npt
 import pandas as pd
 import scipy.sparse as sparse
 
-from .globals import CENSUS_OBS_TABLE_SPEC, CENSUS_VAR_TABLE_SPEC
+from .globals import CENSUS_OBS_STATS_FIELDS, CENSUS_VAR_TABLE_SPEC
 
 
 def get_obs_stats(
     raw_X: sparse.csr_matrix | sparse.csc_matrix,
 ) -> pd.DataFrame:
     """Compute summary stats for obs axis, and return as a dataframe."""
+    stats_types = {x.name: x for x in CENSUS_OBS_STATS_FIELDS}
+
     if not isinstance(raw_X, sparse.csr_matrix) and not isinstance(raw_X, sparse.csc_matrix):
         raise NotImplementedError(f"get_obs_stats: unsupported type {type(raw_X)}")
 
@@ -25,12 +27,10 @@ def get_obs_stats(
 
     obs_stats = pd.DataFrame(
         data={
-            "raw_sum": raw_sum.astype(CENSUS_OBS_TABLE_SPEC.field("raw_sum").to_pandas_dtype()),
-            "nnz": nnz.astype(CENSUS_OBS_TABLE_SPEC.field("nnz").to_pandas_dtype()),
-            "raw_mean_nnz": raw_mean_nnz.astype(CENSUS_OBS_TABLE_SPEC.field("raw_mean_nnz").to_pandas_dtype()),
-            "raw_variance_nnz": raw_variance_nnz.astype(
-                CENSUS_OBS_TABLE_SPEC.field("raw_variance_nnz").to_pandas_dtype()
-            ),
+            "raw_sum": raw_sum.astype(stats_types["raw_sum"].to_pandas_dtype()),
+            "nnz": nnz.astype(stats_types["nnz"].to_pandas_dtype()),
+            "raw_mean_nnz": raw_mean_nnz.astype(stats_types["raw_mean_nnz"].to_pandas_dtype()),
+            "raw_variance_nnz": raw_variance_nnz.astype(stats_types["raw_variance_nnz"].to_pandas_dtype()),
             "n_measured_vars": -1,  # placeholder
         }
     )
