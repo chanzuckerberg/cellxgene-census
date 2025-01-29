@@ -53,7 +53,9 @@ task indexer {
 
         source_uri = "~{embeddings_s3_uri}".replace("s3_//", "s3://")
         with tiledb.open(source_uri, config=config) as emb_array:
-            N, M = emb_array.shape
+            (_, N), (_, M) = emb_array.nonempty_domain() # FIXME should be "current domain"
+        N += 1  # ASSUMES contiguous soma_joinid's [0, N)
+        M += 1
         input_vectors_per_work_item = 1_500_000_000 // M  # controls memory usage
         print(f"N={N} M={M} input_vectors_per_work_item={input_vectors_per_work_item}", file=sys.stderr)
 
@@ -61,7 +63,8 @@ task indexer {
             config=config,
             source_uri=source_uri,
             source_type="TILEDB_SPARSE_ARRAY",
-            dimensions=M,
+            size=N,
+            dimensions_override=M,  # FIXME: see Dockerfile
             index_type="IVF_FLAT",
             index_uri="./~{embeddings_name}",
             partitions=math.ceil(math.sqrt(N)),
