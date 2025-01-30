@@ -26,21 +26,22 @@ from .anndata import AnnDataFilterSpec, AnnDataProxy, open_anndata
 from .datasets import Dataset
 from .globals import (
     ALLOWED_SPATIAL_ASSAYS,
-    CENSUS_OBS_PLATFORM_CONFIG,
-    CENSUS_OBS_TABLE_SPEC,
+    CENSUS_OBS_CORE_FIELDS,
+    CENSUS_OBS_FIELDS_MAPPED,
+    CENSUS_OBS_STATS_FIELDS,
     CENSUS_VAR_PLATFORM_CONFIG,
     CENSUS_VAR_TABLE_SPEC,
     CENSUS_X_LAYERS,
     CENSUS_X_LAYERS_PLATFORM_CONFIG,
-    CXG_OBS_COLUMNS_READ,
     CXG_VAR_COLUMNS_READ,
     DONOR_ID_IGNORE,
     FEATURE_DATASET_PRESENCE_MATRIX_NAME,
     FULL_GENE_ASSAY,
     MEASUREMENT_RNA_NAME,
+    USE_ARROW_DICTIONARY,
     SOMA_TileDB_Context,
 )
-from .schema_util import TableSpec
+from .schema_util import FieldSpec, TableSpec
 from .stats import get_obs_stats, get_var_stats
 from .summary_cell_counts import (
     accumulate_summary_counts,
@@ -96,23 +97,90 @@ class ExperimentSpecification:
 
     name: str
     label: str
+    root_collection: str
     anndata_cell_filter_spec: AnnDataFilterSpec
     organism_ontology_term_id: str
+    obs_term_fields: list[FieldSpec]
+    obs_term_fields_read: list[FieldSpec]
 
     @classmethod
     def create(
         cls,
         name: str,
         label: str,
+        root_collection: str,
         anndata_cell_filter_spec: AnnDataFilterSpec,
         organism_ontology_term_id: str,
+        obs_term_fields: list[FieldSpec],
+        obs_term_fields_read: list[FieldSpec],
     ) -> Self:
         """Factory method. Do not instantiate the class directly."""
-        return cls(name, label, anndata_cell_filter_spec, organism_ontology_term_id)
+        return cls(
+            name,
+            label,
+            root_collection,
+            anndata_cell_filter_spec,
+            organism_ontology_term_id,
+            obs_term_fields,
+            obs_term_fields_read,
+        )
 
     def is_exclusively_spatial(self) -> bool:
         """Returns True if the experiment specification EXCLUSIVELY involves spatial assays."""
         return self.anndata_cell_filter_spec["assay_ontology_term_ids"] == ALLOWED_SPATIAL_ASSAYS
+
+    @property
+    def obs_table_spec(self) -> TableSpec:
+        return TableSpec.create(
+            CENSUS_OBS_CORE_FIELDS + self.obs_term_fields + CENSUS_OBS_FIELDS_MAPPED + CENSUS_OBS_STATS_FIELDS,
+            use_arrow_dictionary=USE_ARROW_DICTIONARY,
+        )
+
+    @property
+    def obs_platform_config(self) -> dict[str, Any]:
+        """Materialization (filter pipelines, capacity, etc) of obs/var schema in TileDB is tuned by empirical testing."""
+        # Numeric cols
+        _NumericObsAttrs = ["raw_sum", "nnz", "raw_mean_nnz", "raw_variance_nnz", "n_measured_vars"]
+        if self.is_exclusively_spatial():
+            _NumericObsAttrs += ["array_row", "array_col", "in_tissue"]
+        # Categorical/dict-like columns
+        _DictLikeObsAttrs = [
+            f.name
+            for f in self.obs_table_spec.fields
+            if isinstance(f, FieldSpec) and f.is_dictionary
+            if f.is_dictionary and f.name not in (_NumericObsAttrs + ["soma_joinid"])
+        ]
+        # Dict filter varies depending on whether we are using dictionary types in the schema
+        _AllOtherObsAttrs = [
+            f.name
+            for f in self.obs_table_spec.fields
+            if f.name not in (_DictLikeObsAttrs + _NumericObsAttrs + ["soma_joinid"])
+        ]
+        # Dict filter varies depending on whether we are using dictionary types in the schema
+        _DictLikeFilter: list[Any] = (
+            [{"_type": "ZstdFilter", "level": 9}]
+            if USE_ARROW_DICTIONARY
+            else ["DictionaryFilter", {"_type": "ZstdFilter", "level": 19}]
+        )
+
+        return {
+            "tiledb": {
+                "create": {
+                    "capacity": 2**16,
+                    "dims": {"soma_joinid": {"filters": ["DoubleDeltaFilter", {"_type": "ZstdFilter", "level": 19}]}},
+                    "attrs": {
+                        **{
+                            k: {"filters": ["ByteShuffleFilter", {"_type": "ZstdFilter", "level": 9}]}
+                            for k in _NumericObsAttrs
+                        },
+                        **{k: {"filters": _DictLikeFilter} for k in _DictLikeObsAttrs},
+                        **{k: {"filters": [{"_type": "ZstdFilter", "level": 19}]} for k in _AllOtherObsAttrs},
+                    },
+                    "offsets_filters": ["DoubleDeltaFilter", {"_type": "ZstdFilter", "level": 19}],
+                    "allows_duplicates": True,
+                }
+            }
+        }
 
 
 class ExperimentBuilder:
@@ -169,8 +237,8 @@ class ExperimentBuilder:
         assert self.experiment is not None
         _assert_open_for_write(self.experiment)
 
-        obs_df = CENSUS_OBS_TABLE_SPEC.recategoricalize(self.obs_df)
-        obs_schema = CENSUS_OBS_TABLE_SPEC.to_arrow_schema(obs_df)
+        obs_df = self.specification.obs_table_spec.recategoricalize(self.obs_df)
+        obs_schema = self.specification.obs_table_spec.to_arrow_schema(obs_df)
 
         if obs_df is None or obs_df.empty:
             domain = None
@@ -182,7 +250,7 @@ class ExperimentBuilder:
             "obs",
             schema=obs_schema,
             index_column_names=["soma_joinid"],
-            platform_config=CENSUS_OBS_PLATFORM_CONFIG,
+            platform_config=self.specification.obs_platform_config,
             domain=domain,
         )
 
@@ -301,7 +369,7 @@ def accumulate_axes_dataframes(
             dataset,
             base_path=base_path,
             filter_spec=spec.anndata_cell_filter_spec,
-            obs_column_names=CXG_OBS_COLUMNS_READ,
+            obs_column_names=tuple(field.name for field in spec.obs_term_fields_read),
             var_column_names=CXG_VAR_COLUMNS_READ,
         ) as adata:
             logger.debug(f"{dataset.dataset_id}/{spec.name} - found {adata.n_obs} cells")
@@ -311,7 +379,8 @@ def accumulate_axes_dataframes(
                 logger.debug(f"{spec.name} - H5AD has no data after filtering, skipping {dataset.dataset_id}")
                 return pd.DataFrame(), pd.DataFrame()
 
-            obs_df = adata.obs.copy()
+            # Converting dtypes to pandas nullables dtypes to account for when datasets don't provide all columns
+            obs_df = adata.obs.copy().convert_dtypes()
             obs_df["dataset_id"] = dataset.dataset_id
 
             var_df = (
@@ -387,7 +456,7 @@ def post_acc_axes_processing(accumulated: list[tuple[ExperimentBuilder, tuple[pd
 
         # add columns to be completed later, e.g., summary stats such as mean of X
         add_placeholder_columns(
-            obs, CENSUS_OBS_TABLE_SPEC, default={np.int64: np.iinfo(np.int64).min, np.float64: np.nan}
+            obs, eb.specification.obs_table_spec, default={np.int64: np.iinfo(np.int64).min, np.float64: np.nan}
         )
         add_placeholder_columns(var, CENSUS_VAR_TABLE_SPEC, default={np.int64: 0})
 

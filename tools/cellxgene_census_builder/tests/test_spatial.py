@@ -32,6 +32,7 @@ VISIUM_DATASET_URIS = [
 VISIUM_DATASET_IDS = [
     "fee901ce-87ea-46cd-835a-c15906a4aa6d",  # Homo sapiens Visium
     "e944a0f7-e398-4e8f-a060-94dae8a08fb3",  # Homo sapiens Visium
+    "db4b5e64-71bd-4ed8-8ec9-21471194485b",  # Homo sapiens Slide-seq
 ]
 
 
@@ -126,12 +127,15 @@ def test_locations(spatial_build):
     exp = census["census_spatial_sequencing"]["homo_sapiens"]
 
     manifest = load_manifest(str(spatial_build.manifest_path), str(spatial_build.blocklist))
+    obs = census["census_spatial_sequencing"]["homo_sapiens"].obs.read().concat().to_pandas()
+    assay_types = obs[["dataset_id", "assay"]].drop_duplicates().set_index("dataset_id")["assay"]
     h5ads = {d.dataset_id: Path(d.dataset_asset_h5ad_uri) for d in manifest}
 
     obs_spatial_presence = _to_df(exp["obs_spatial_presence"])
 
     # Test that the obs_spatial_presence join id + dataset work with locations
     for scene_id, subdf in obs_spatial_presence.groupby("scene_id"):
+        assay = assay_types.loc[scene_id]
         sdata = exp.axis_query(
             "RNA", obs_query=tiledbsoma.AxisQuery(value_filter=f"dataset_id == '{scene_id}'")
         ).to_spatialdata(X_name="raw")
@@ -142,12 +146,15 @@ def test_locations(spatial_build):
         assert len(locations["radius"].unique()) == 1
 
         # Check against values from original file
-        with h5py.File(h5ads[scene_id]) as f:
-            locations_orig = read_elem(f["obsm/spatial"])
-            library_id = list(filter(lambda x: x != "is_single", f["uns/spatial"].keys()))[0]
-            radius_orig = f[f"uns/spatial/{library_id}/scalefactors/spot_diameter_fullres"][()] / 2
-        np.testing.assert_allclose(locations_orig, locations.sort_values("soma_joinid").get_coordinates(), atol=1e-6)
-        np.testing.assert_allclose(radius_orig, locations["radius"].unique()[0], atol=1e-6)
+        if assay == "Visium Spatial Gene Expression":
+            with h5py.File(h5ads[scene_id]) as f:
+                locations_orig = read_elem(f["obsm/spatial"])
+                library_id = list(filter(lambda x: x != "is_single", f["uns/spatial"].keys()))[0]
+                radius_orig = f[f"uns/spatial/{library_id}/scalefactors/spot_diameter_fullres"][()] / 2
+            np.testing.assert_allclose(
+                locations_orig, locations.sort_values("soma_joinid").get_coordinates(), atol=1e-6
+            )
+            np.testing.assert_allclose(radius_orig, locations["radius"].unique()[0], atol=1e-6)
 
 
 def test_no_normalized_matrix(spatial_build):
@@ -163,17 +170,24 @@ def test_images(spatial_build):
     manifest = load_manifest(str(spatial_build.manifest_path), str(spatial_build.blocklist))
 
     h5ads = {d.dataset_id: Path(d.dataset_asset_h5ad_uri) for d in manifest}
+    obs = census["census_spatial_sequencing"]["homo_sapiens"].obs.read().concat().to_pandas()
+    assay_types = obs[["dataset_id", "assay"]].drop_duplicates().set_index("dataset_id")["assay"]
     spatial = census["census_spatial_sequencing"]["homo_sapiens"]["spatial"]
 
     for dataset_id, h5ad_path in h5ads.items():
-        with h5py.File(h5ad_path) as f:
-            library_id = list(filter(lambda x: x != "is_single", f["uns/spatial"].keys()))[0]
-            spatial_dict = read_elem(f[f"uns/spatial/{library_id}"])
-        image_collection = spatial[dataset_id]["img"][library_id]
-        for k in image_collection.keys():
-            from_census = image_collection[k].read().to_numpy()
-            from_h5ad = np.transpose(spatial_dict["images"][k], (2, 0, 1))  ## TODO figure out why we do this
-            np.testing.assert_array_equal(from_h5ad, from_census)
+        assay = assay_types.loc[dataset_id]
+        if assay == "Slide-seqV2":
+            # No images should be stored for slide-seq
+            assert not hasattr(spatial[dataset_id], "img") or len(spatial[dataset_id].img) == 0
+        elif assay == "Visium Spatial Gene Expression":
+            with h5py.File(h5ad_path) as f:
+                library_id = list(filter(lambda x: x != "is_single", f["uns/spatial"].keys()))[0]
+                spatial_dict = read_elem(f[f"uns/spatial/{library_id}"])
+            image_collection = spatial[dataset_id]["img"][library_id]
+            for k in image_collection.keys():
+                from_census = image_collection[k].read().to_numpy()
+                from_h5ad = np.transpose(spatial_dict["images"][k], (2, 0, 1))  ## TODO figure out why we do this
+                np.testing.assert_array_equal(from_h5ad, from_census)
 
 
 def test_obs_spatial_presence(spatial_build):
