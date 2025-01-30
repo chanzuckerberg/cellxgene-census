@@ -379,6 +379,7 @@ def accumulate_axes_dataframes(
                 logger.debug(f"{spec.name} - H5AD has no data after filtering, skipping {dataset.dataset_id}")
                 return pd.DataFrame(), pd.DataFrame()
 
+            # Converting dtypes to pandas nullables dtypes to account for when datasets don't provide all columns
             obs_df = adata.obs.copy().convert_dtypes()
             obs_df["dataset_id"] = dataset.dataset_id
 
