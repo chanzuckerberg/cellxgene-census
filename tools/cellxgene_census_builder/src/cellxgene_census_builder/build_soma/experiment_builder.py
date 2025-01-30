@@ -52,10 +52,8 @@ logger = logging.getLogger(__name__)
 
 @attrs.define
 class PresenceResult:
-    dataset_id: str
     dataset_soma_joinid: int
     eb_name: str
-    data: npt.NDArray[np.bool_]
     cols: npt.NDArray[np.int64]
 
 
@@ -65,10 +63,6 @@ class AxisStats:
     eb_name: str
     obs_stats: pd.DataFrame
     var_stats: pd.DataFrame
-
-
-AccumulateXResult = tuple[PresenceResult, AxisStats]
-AccumulateXResults = Sequence[AccumulateXResult]
 
 
 def _assert_open_for_write(obj: somacore.SOMAObject | None) -> None:
@@ -132,7 +126,7 @@ class ExperimentBuilder:
         self.experiment: soma.Experiment | None = None  # initialized in create()
         self.experiment_uri: str | None = None  # initialized in create()
         self.global_var_joinids: pd.DataFrame | None = None
-        self.presence: dict[int, tuple[npt.NDArray[np.bool_], npt.NDArray[np.int64]]] = {}
+        self.presence: dict[int, npt.NDArray[np.int64]] = {}
 
     @property
     def name(self) -> str:
@@ -242,9 +236,8 @@ class ExperimentBuilder:
 
             # LIL is fast way to create spmatrix
             pm = sparse.lil_matrix((max_dataset_joinid + 1, self.n_var), dtype=bool)
-            for dataset_joinid, presence in self.presence.items():
-                data, cols = presence
-                pm[dataset_joinid, cols] = data
+            for dataset_joinid, cols in self.presence.items():
+                pm[dataset_joinid, cols] = 1
 
             pm = pm.tocoo()
             pm.eliminate_zeros()
@@ -457,14 +450,12 @@ def compute_X_file_stats(
 
     obs_stats = res["obs_stats"]
     var_stats = res["var_stats"]
-    obs_stats["n_measured_vars"] = (var_stats.nnz > 0).sum()
-    var_stats.loc[var_stats.nnz > 0, "n_measured_obs"] = n_obs
+    obs_stats["n_measured_vars"] = var_stats.shape[0]
+    var_stats["n_measured_obs"] = n_obs
     res["presence"].append(
         PresenceResult(
-            dataset_id,
             dataset_soma_joinid,
             eb_name,
-            (var_stats.nnz > 0).to_numpy(),
             var_stats.index.to_numpy(),
         ),
     )
@@ -713,10 +704,7 @@ def populate_X_layers(
 
         for presence in eb_summary["presence"]:
             assert presence.eb_name == eb.name
-            eb.presence[presence.dataset_soma_joinid] = (
-                presence.data,
-                presence.cols,
-            )
+            eb.presence[presence.dataset_soma_joinid] = presence.cols
 
 
 class SummaryStats(TypedDict):

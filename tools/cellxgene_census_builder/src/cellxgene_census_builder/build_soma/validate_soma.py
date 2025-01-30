@@ -9,7 +9,7 @@ import pathlib
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Self, TypeVar
+from typing import Any, Self, TypeVar, cast
 
 import dask
 import numpy as np
@@ -533,7 +533,7 @@ def validate_X_layers_has_unique_coords(
 
 
 def validate_X_layers_presence(
-    soma_path: str, datasets: list[Dataset], experiment_specifications: list[ExperimentSpecification]
+    soma_path: str, datasets: list[Dataset], experiment_specifications: list[ExperimentSpecification], assets_path: str
 ) -> Delayed[bool]:
     """Validate that the presence matrix accurately summarizes X[raw] for each experiment.
 
@@ -542,6 +542,15 @@ def validate_X_layers_presence(
     2. No duplicate coordinates
     3. Presence mask per dataset is correct for each dataset
     """
+
+    def _read_var_names(path: str) -> npt.NDArray[np.object_]:
+        import h5py
+        from anndata.experimental import read_elem
+
+        with h5py.File(path) as f:
+            index_key = f["var"].attrs["_index"]
+            var_names = read_elem(f["var"][index_key])
+            return cast(npt.NDArray[np.object_], var_names)
 
     @logit(logger)
     def _validate_X_layers_presence_general(experiment_specifications: list[ExperimentSpecification]) -> bool:
@@ -570,29 +579,29 @@ def validate_X_layers_presence(
 
     @logit(logger, msg="{0.dataset_id}")
     def _validate_X_layers_presence(
-        dataset: Dataset, experiment_specifications: list[ExperimentSpecification], soma_path: str
+        dataset: Dataset,
+        experiment_specifications: list[ExperimentSpecification],
+        soma_path: str,
+        assets_path: str,
     ) -> bool:
         """For a given dataset and experiment, confirm that the presence matrix matches contents of X[raw]."""
         for es in experiment_specifications:
             with open_experiment(soma_path, es) as exp:
                 obs_df = (
                     exp.obs.read(
-                        value_filter=f"dataset_id == '{dataset.soma_joinid}'",
+                        value_filter=f"dataset_id == '{dataset.dataset_id}'",
                         column_names=["soma_joinid", "n_measured_vars"],
                     )
                     .concat()
                     .to_pandas()
                 )
                 if len(obs_df) > 0:  # skip empty experiments
-                    X_raw = exp.ms[MEASUREMENT_RNA_NAME].X["raw"]
-
-                    presence_accumulator = np.zeros((X_raw.shape[1]), dtype=np.bool_)
-                    for block, _ in (
-                        X_raw.read(coords=(obs_df.soma_joinids.to_numpy(), slice(None)))
-                        .blockwise(axis=0, size=2**20, eager=False, reindex_disable_on_axis=[0, 1])
-                        .tables()
-                    ):
-                        presence_accumulator[block["soma_dim_1"].to_numpy()] = 1
+                    feature_ids = pd.Index(
+                        exp.ms[MEASUREMENT_RNA_NAME]
+                        .var.read(column_names=["feature_id"])
+                        .concat()
+                        .to_pandas()["feature_id"]
+                    )
 
                     presence = (
                         exp.ms[MEASUREMENT_RNA_NAME][FEATURE_DATASET_PRESENCE_MATRIX_NAME]
@@ -601,17 +610,22 @@ def validate_X_layers_presence(
                         .concat()
                     )
 
-                    assert np.array_equal(presence_accumulator, presence), "Presence value does not match X[raw]"
+                    # Get soma_joinids for feature in the original h5ad
+                    orig_feature_ids = _read_var_names(f"{assets_path}/{dataset.dataset_h5ad_path}")
+                    orig_indices = np.sort(feature_ids.get_indexer(feature_ids.intersection(orig_feature_ids)))
 
-                    assert (
-                        obs_df.n_measured_vars.to_numpy() == presence_accumulator.sum()
-                    ).all(), f"{es.name}:{dataset.dataset_id} obs.n_measured_vars incorrect."
+                    np.testing.assert_array_equal(presence["soma_dim_1"], orig_indices)
 
         return True
 
     check_presence_values = (
         dask.bag.from_sequence(datasets, partition_size=8)
-        .map(_validate_X_layers_presence, soma_path=soma_path, experiment_specifications=experiment_specifications)
+        .map(
+            _validate_X_layers_presence,
+            soma_path=soma_path,
+            experiment_specifications=experiment_specifications,
+            assets_path=assets_path,
+        )
         .reduction(all, all)
         .to_delayed()
     )
@@ -968,9 +982,14 @@ def validate_internal_consistency(
                 """
                 datasets_df["presence_sum_var_axis"] = presence.sum(axis=1).A1
                 tmp = obs.merge(datasets_df, left_on="dataset_id", right_on="dataset_id")
-                assert (
-                    tmp.n_measured_vars == tmp.presence_sum_var_axis
-                ).all(), f"{eb.name}: obs.n_measured_vars does not match presence matrix."
+                try:
+                    np.testing.assert_array_equal(
+                        tmp["n_measured_vars"],
+                        tmp["presence_sum_var_axis"],
+                    )
+                except AssertionError as e:
+                    e.add_note(f"{eb.name}: obs.n_measured_vars does not match presence matrix.")
+                    raise
                 del tmp
 
                 # Assertion 3 - var.n_measured_obs is consistent with presence matrix
@@ -1091,7 +1110,7 @@ def validate_soma(args: CensusBuildArgs, client: dask.distributed.Client) -> das
                         dask.delayed(validate_X_layers_schema)(soma_path, experiment_specifications, eb_info),
                         validate_X_layers_normalized(soma_path, experiment_specifications),
                         validate_X_layers_has_unique_coords(soma_path, experiment_specifications),
-                        validate_X_layers_presence(soma_path, datasets, experiment_specifications),
+                        validate_X_layers_presence(soma_path, datasets, experiment_specifications, assets_path),
                     )
                 )
             ],
