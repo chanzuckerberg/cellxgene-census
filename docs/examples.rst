@@ -14,6 +14,7 @@ Learn how to stream the single-cell data and metadata from Census into your mach
     notebooks/api_demo/census_query_extract.ipynb
     notebooks/api_demo/census_citation_generation.ipynb
     notebooks/api_demo/census_gget_demo.ipynb
+    notebooks/api_demo/census_spatial.ipynb
 
 [NEW! 🚀] Using integrated embeddings and models
 ------------------------------------------------
