@@ -46,6 +46,7 @@ intersphinx_mapping = {
     'numpy': ('http://docs.scipy.org/doc/numpy', None),
     'scipy': ('http://docs.scipy.org/doc/scipy/reference', None),
     'anndata': ('https://anndata.readthedocs.io/en/latest/', None),
+    'spatialdata': ("https://spatialdata.scverse.org/en/stable/", None),
     'pandas': ('https://pandas.pydata.org/docs/', None),
     'scanpy': ('https://scanpy.readthedocs.io/en/stable/', None),
     'torch': ('https://pytorch.org/docs/stable/', None),
