@@ -53,6 +53,9 @@ experimental = [
     #"git+https://huggingface.co/ctheodoris/Geneformer",
     # instead, experimental/ml/geneformer_tokenizer.py catches ImportError to ask user to install that.
 ]
+spatial = [
+    "spatialdata>=0.2.5",
+]
 doc = [
     "nbsphinx",
     "myst-parser",
