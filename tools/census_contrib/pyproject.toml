@@ -5,7 +5,7 @@ dynamic = ["version"]
 dependencies= [
     "attrs",
     "cattrs>=23.2.2",
-    "tiledbsoma==1.11.4",  # IMPORTANT: this must match the Census Builder version
+    "tiledbsoma==1.15.3",  # IMPORTANT: this must match the Census Builder version
     "cellxgene-census==1.15.0",  # IMPORTANT: this must match the Census Builder version
     "pyyaml",
     "requests",
