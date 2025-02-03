@@ -20,11 +20,14 @@
       ~CellDatasetBuilder.close
       ~CellDatasetBuilder.obs
       ~CellDatasetBuilder.obs_joinids
+      ~CellDatasetBuilder.obs_scene_ids
       ~CellDatasetBuilder.obsm
       ~CellDatasetBuilder.obsp
       ~CellDatasetBuilder.to_anndata
+      ~CellDatasetBuilder.to_spatialdata
       ~CellDatasetBuilder.var
       ~CellDatasetBuilder.var_joinids
+      ~CellDatasetBuilder.var_scene_ids
       ~CellDatasetBuilder.varm
       ~CellDatasetBuilder.varp
    

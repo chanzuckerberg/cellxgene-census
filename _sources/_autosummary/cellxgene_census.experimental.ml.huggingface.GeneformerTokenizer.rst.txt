@@ -20,11 +20,14 @@
       ~GeneformerTokenizer.close
       ~GeneformerTokenizer.obs
       ~GeneformerTokenizer.obs_joinids
+      ~GeneformerTokenizer.obs_scene_ids
       ~GeneformerTokenizer.obsm
       ~GeneformerTokenizer.obsp
       ~GeneformerTokenizer.to_anndata
+      ~GeneformerTokenizer.to_spatialdata
       ~GeneformerTokenizer.var
       ~GeneformerTokenizer.var_joinids
+      ~GeneformerTokenizer.var_scene_ids
       ~GeneformerTokenizer.varm
       ~GeneformerTokenizer.varp
    

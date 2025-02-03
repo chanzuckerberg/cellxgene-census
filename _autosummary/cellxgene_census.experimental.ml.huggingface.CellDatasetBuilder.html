@@ -289,14 +289,20 @@ ExperimentAxisQuery.</p>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">obs_joinids</span></code>()</p></td>
 <td><p>Returns <code class="docutils literal notranslate"><span class="pre">obs</span></code> <code class="docutils literal notranslate"><span class="pre">soma_joinids</span></code> as an Arrow array.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">obsm</span></code>(layer)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">obs_scene_ids</span></code>()</p></td>
+<td><p>Returns a pyarrow array with scene ids that contain obs from this query.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">obsm</span></code>(layer)</p></td>
 <td><p>Returns an <code class="docutils literal notranslate"><span class="pre">obsm</span></code> layer as a sparse read.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">obsp</span></code>(layer)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">obsp</span></code>(layer)</p></td>
 <td><p>Returns an <code class="docutils literal notranslate"><span class="pre">obsp</span></code> layer as a sparse read.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_anndata</span></code>(X_name, *[, column_names, ...])</p></td>
-<td><p>Executes the query and return result as an <code class="docutils literal notranslate"><span class="pre">AnnData</span></code> in-memory object.</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_anndata</span></code>(X_name, *[, column_names, ...])</p></td>
+<td><p>Exports the query to an in-memory <code class="docutils literal notranslate"><span class="pre">AnnData</span></code> object.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_spatialdata</span></code>(X_name, *[, column_names, ...])</p></td>
+<td><p>Returns a SpatialData object containing the query results</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">var</span></code>(*[, column_names, batch_size, ...])</p></td>
 <td><p><p>Returns <code class="docutils literal notranslate"><span class="pre">var</span></code> as an <a class="reference external" href="https://arrow.apache.org/docs/python/generated/pyarrow.Table.html">Arrow table</a> iterator.</p>
@@ -305,10 +311,13 @@ ExperimentAxisQuery.</p>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">var_joinids</span></code>()</p></td>
 <td><p>Returns <code class="docutils literal notranslate"><span class="pre">var</span></code> <code class="docutils literal notranslate"><span class="pre">soma_joinids</span></code> as an Arrow array.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">varm</span></code>(layer)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">var_scene_ids</span></code>()</p></td>
+<td><p>Return a pyarrow array with scene ids that contain var from this query.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">varm</span></code>(layer)</p></td>
 <td><p>Returns a <code class="docutils literal notranslate"><span class="pre">varm</span></code> layer as a sparse read.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">varp</span></code>(layer)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">varp</span></code>(layer)</p></td>
 <td><p>Returns a <code class="docutils literal notranslate"><span class="pre">varp</span></code> layer as a sparse read.</p></td>
 </tr>
 </tbody>

@@ -211,15 +211,15 @@
 <strong>By:</strong> Cathy Stolitzka, Isaac Virshup, Maximilian Lombardo</p>
 <p>The Census team is pleased to announce the release of Spatial data on Census!</p>
 <p>This has been a large joint effort between the Census team and TileDB to create an easy-to-use and backwards-compatible spatial schema that enables easy analysis with non-spatial and spatial data!</p>
-<p>This first release is a <strong>beta release</strong> with the ability to export all spatial data (10x Visium and Slideseq) from an <code class="docutils literal notranslate"><span class="pre">obs/var</span></code> query in <code class="docutils literal notranslate"><span class="pre">SpatialData</span></code>. The ability to export <code class="docutils literal notranslate"><span class="pre">SpatialData</span></code> with spatial-based filters, transforms, etc., is not supported and will be implemented in a future release.</p>
+<p>This first release is a <strong>beta release</strong> with the ability to export all spatial data (10x Visium Spatial Gene Expression and Slide-seqV2) from an <code class="docutils literal notranslate"><span class="pre">obs/var</span></code> query to <a class="reference external" href="https://spatialdata.scverse.org/en/stable/api/SpatialData.html#spatialdata.SpatialData" title="(in Project name not set v0.3.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">SpatialData</span></code></a> (<a class="reference external" href="https://spatialdata.scverse.org/en/stable/">spatialdata.scverse.org</a>). The ability to query census with spatial-based filters, transforms, etc., is not supported and will be implemented in a future release.</p>
 <hr class="docutils" />
 <section id="soma-spatial-data-model">
 <h2>SOMA Spatial Data Model<a class="headerlink" href="#soma-spatial-data-model" title="Permalink to this heading"></a></h2>
 <p><img alt="Updated CELLxGENE Census Schema with spatial data" src="../../_images/census-spatial-schema.svg" /></p>
 <section id="building-blocks">
 <h3>Building Blocks<a class="headerlink" href="#building-blocks" title="Permalink to this heading"></a></h3>
-<section id="somaexperiment">
-<h4><strong>SOMAExperiment</strong><a class="headerlink" href="#somaexperiment" title="Permalink to this heading"></a></h4>
+<section id="tiledbsoma-experiment">
+<h4><strong><a class="reference external" href="https://tiledbsoma.readthedocs.io/en/latest/python-tiledbsoma-experiment.html#tiledbsoma.Experiment" title="(in TileDB-SOMA-Py)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tiledbsoma.Experiment</span></code></a></strong><a class="headerlink" href="#tiledbsoma-experiment" title="Permalink to this heading"></a></h4>
 <p>A collection encapsulating data from one or more single-cell datasets, with reserved attributes:</p>
 <table class="docutils align-default">
 <thead>
@@ -232,7 +232,7 @@
 <td><p>A DataFrame for observation metadata</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ms</span></code></p></td>
-<td><p>A collection (<code class="docutils literal notranslate"><span class="pre">SOMAMeasurement</span></code>), with cell-by-gene data matrices and a gene metadata DataFrame</p></td>
+<td><p>A collection (<code class="docutils literal notranslate"><span class="pre">Measurement</span></code>), with cell-by-gene data matrices and a gene metadata DataFrame</p></td>
 </tr>
 <tr class="row-even"><td><p><strong>[NEW] <code class="docutils literal notranslate"><span class="pre">spatial</span></code></strong></p></td>
 <td><p>A collection of <code class="docutils literal notranslate"><span class="pre">Scene</span></code> objects (see below)</p></td>
@@ -244,8 +244,8 @@
 </table>
 </section>
 <hr class="docutils" />
-<section id="new-somascene">
-<h4><strong>[NEW] SOMAScene</strong><a class="headerlink" href="#new-somascene" title="Permalink to this heading"></a></h4>
+<section id="new-tiledbsoma-scene">
+<h4><strong>[NEW] <a class="reference external" href="https://tiledbsoma.readthedocs.io/en/latest/python-tiledbsoma-scene.html#tiledbsoma.Scene" title="(in TileDB-SOMA-Py)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tiledbsoma.Scene</span></code></a></strong><a class="headerlink" href="#new-tiledbsoma-scene" title="Permalink to this heading"></a></h4>
 <p>A collection of spatial assets. All assets in one <code class="docutils literal notranslate"><span class="pre">Scene</span></code> should correspond to the same physical coordinate system. The collection provides operations for getting, setting, and transforming between coordinate systems, with reserved attributes:</p>
 <table class="docutils align-default">
 <thead>
@@ -255,21 +255,21 @@
 </thead>
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">obsl</span></code></p></td>
-<td><p>A collection of spatial arrays and collections. The rows in these arrays correspond to observations and may correspond to <code class="docutils literal notranslate"><span class="pre">obs</span></code> of a <code class="docutils literal notranslate"><span class="pre">SOMAExperiment</span></code>.</p></td>
+<td><p>A collection of spatial arrays and collections. The rows in these arrays correspond to observations and may correspond to <code class="docutils literal notranslate"><span class="pre">obs</span></code> of an <code class="docutils literal notranslate"><span class="pre">Experiment</span></code>.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">varl</span></code></p></td>
-<td><p>A collection of collections for spatial arrays on the <code class="docutils literal notranslate"><span class="pre">SOMAMeasurements</span></code>. The top-level collection is indexed by measurement name. The rows in the contained arrays correspond to features and may correspond to <code class="docutils literal notranslate"><span class="pre">var</span></code> of the associated <code class="docutils literal notranslate"><span class="pre">SOMAMeasurement</span></code>.</p></td>
+<td><p>A collection of collections for spatial arrays on the <code class="docutils literal notranslate"><span class="pre">Measurement</span></code>s. The top-level collection is indexed by measurement name. The rows in the contained arrays correspond to features and may correspond to <code class="docutils literal notranslate"><span class="pre">var</span></code> of the associated <code class="docutils literal notranslate"><span class="pre">Measurement</span></code>.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">img</span></code></p></td>
-<td><p>A <code class="docutils literal notranslate"><span class="pre">SOMAImageCollection</span></code> of images (single and multi-resolution).</p></td>
+<td><p>A <code class="docutils literal notranslate"><span class="pre">Collection</span></code> of <code class="docutils literal notranslate"><span class="pre">MultiscaleImage</span></code>s</p></td>
 </tr>
 </tbody>
 </table>
 </section>
 <hr class="docutils" />
-<section id="new-somaimagecollection">
-<h4><strong>[NEW] SOMAImageCollection</strong><a class="headerlink" href="#new-somaimagecollection" title="Permalink to this heading"></a></h4>
-<p>A group of multi-resolution images that can be accessed by levels. Below are some sample operations on this collection type. Every <code class="docutils literal notranslate"><span class="pre">SOMAImageNDArray</span></code> in the collection must be mappable to the same physical space by translation and scaling only.</p>
+<section id="new-tiledbsoma-multiscaleimage">
+<h4><strong>[NEW] <a class="reference external" href="https://tiledbsoma.readthedocs.io/en/latest/python-tiledbsoma-multiscaleimage.html#tiledbsoma.MultiscaleImage" title="(in TileDB-SOMA-Py)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tiledbsoma.MultiscaleImage</span></code></a></strong><a class="headerlink" href="#new-tiledbsoma-multiscaleimage" title="Permalink to this heading"></a></h4>
+<p>A group of multi-resolution images that can be accessed by levels. Below are some sample operations on this collection type. Every  <a class="reference external" href="https://tiledbsoma.readthedocs.io/en/latest/python-tiledbsoma-densendarray.html#tiledbsoma.DenseNDArray" title="(in TileDB-SOMA-Py)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DenseNDArray</span></code></a> in the collection must be mappable to the same physical space by scaling only.</p>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Operation</p></th>
@@ -277,14 +277,14 @@
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">levels</span></code></p></td>
-<td><p>Sequence of level numbers in the slide</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">.levels()</span></code></p></td>
+<td><p>Returns a mapping of <code class="docutils literal notranslate"><span class="pre">{member_name:</span> <span class="pre">(uri,</span> <span class="pre">shape)}</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">dimensions</span></code></p></td>
-<td><p>A <code class="docutils literal notranslate"><span class="pre">(width,</span> <span class="pre">height)</span></code> tuple for level 0 of the slide</p></td>
+<tr class="row-odd"><td><p><a class="reference external" href="https://tiledbsoma.readthedocs.io/en/latest/_generated/tiledbsoma.MultiscaleImage.coordinate_space.html#tiledbsoma.MultiscaleImage.coordinate_space" title="(in TileDB-SOMA-Py)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">coordinate_space</span></code></a></p></td>
+<td><p>Coordinate space for the base level of this <code class="docutils literal notranslate"><span class="pre">MultiscaleImage</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">level_dimensions</span></code></p></td>
-<td><p>A sequence of down-sample factors for each level of the slide</p></td>
+<tr class="row-even"><td><p><a class="reference external" href="https://tiledbsoma.readthedocs.io/en/latest/_generated/tiledbsoma.MultiscaleImage.get_transform_to_level.html#tiledbsoma.MultiscaleImage.get_transform_to_level" title="(in TileDB-SOMA-Py)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_transform_to_level</span></code></a> / <a class="reference external" href="https://tiledbsoma.readthedocs.io/en/latest/_generated/tiledbsoma.MultiscaleImage.get_transform_from_level.html#tiledbsoma.MultiscaleImage.get_transform_from_level" title="(in TileDB-SOMA-Py)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_transform_from_level</span></code></a></p></td>
+<td><p>Get <code class="docutils literal notranslate"><span class="pre">ScaleTransform</span></code> to and from specified level to base level of image</p></td>
 </tr>
 </tbody>
 </table>

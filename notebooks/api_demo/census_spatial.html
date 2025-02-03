@@ -1,0 +1,1022 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Accessing Spatial Data in Census &mdash; cellxgene-census  documentation</title>
+  
+
+  
+  <link rel="icon" type="image/png" sizes="32x32" href="../../_static/img/favicon_32x32_v2.png"/>
+  <link rel="icon" type="image/png" sizes="16x16" href="../../_static/img/favicon_16x16_v2.png"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/nbsphinx-code-cells.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script data-domain="chanzuckerberg.github.io/cellxgene-census" defer="defer" src="https://plausible.io/js/script.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Access CELLxGENE collaboration embeddings (scVI, Geneformer)" href="census_access_maintained_embeddings.html" />
+    <link rel="prev" title="Querying data using the gget cellxgene module" href="census_gget_demo.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+  <div style="height: 100vh; overflow: hidden;">
+     
+    <!-- top 56px for navbar height -->
+    <div class="navbar-cxg">
+        <div style="padding: 0 16px; display: flex; height: inherit; align-items: center; justify-content: space-between;">
+            <span style="display:flex; gap: 32px; align-items: center;">
+                <a href="https://cellxgene.cziscience.com/">
+                  <img src="../../_static/img/cellxgene-discover-logo.svg" />
+                </a>
+                <span class="navbar-cxg-nav-wrapper">
+                  <span class="navbar-cxg-section">
+                    <span class="navbar-cxg-nav-section-title">Application</span>
+                    <span class="navbar-cxg-nav-item-container">
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/collections">Collections</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/datasets">Datasets</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/cellguide">Cell Guide</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/differential-expression">Differential Expression</a>
+                        <div style="height: 16px!important; display: flex;">
+                          <span class="beta">NEW</span>
+                        </div>
+                      </span>
+                    </span>
+                  </span>
+                  <hr class="navbar-divider"/>
+                  <span class="navbar-cxg-section">
+                    <span class="navbar-cxg-nav-section-title">Census</span>
+                    <span class="navbar-cxg-nav-item-container">
+                      <span class="navbar-cxg-link active-link">
+                        <a class="navbar-cxg-anchor" href="/cellxgene-census/index.html">API</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/census-models">Models</a>
+                      </span>
+                    </span>
+                  </span>
+                </span>
+            </span>
+
+            <span class="navbar-cxg-link">
+              <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/docs">Help & Documentation</a>
+            </span>
+        </div>
+    </div>
+    <div style="width: 100%; height: 100%; overflow: auto; padding-top: 56px;">
+        
+        <!-- top 56px for navbar height -->
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side" style="top: 56px;" >
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search" >
+            
+
+            
+                <a href="../../index.html" class="icon icon-home"> cellxgene-census
+            
+
+            
+            </a>
+
+            
+
+            
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+            
+            </div>
+
+            
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+            
+                
+                
+                
+                
+                
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_quick_start.html">Quick start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../articles.html">What’s new?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_aws_open_data.html">Census in AWS ☁️</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_schema.html">Census data and schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_data_release_info.html">Census data releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python-api.html">Python API</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../examples.html">Python tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#exporting-data">Exporting data</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../examples.html#new-accesing-spatial-transcriptomics-data-with-census">[NEW! 🚀] Accesing spatial transcriptomics data with Census</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Accessing Spatial Data in Census</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Introduction:-Accessing-Spatial-Data-via-CELLxGENE-Census-API">Introduction: Accessing Spatial Data via CELLxGENE Census API</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Environment-and-dependencies">Environment and dependencies</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Census-Metadata">Census Metadata</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Query-the-Census-Spatial-Sequencing-object">Query the Census Spatial Sequencing object</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Spatial-Data-Export">Spatial Data Export</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Plotting">Plotting</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#using-integrated-embeddings-and-models">Using integrated embeddings and models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#understanding-census-data">Understanding Census data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#analyzing-census-data">Analyzing Census data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#scalable-computing">Scalable computing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#scalable-machine-learning">Scalable machine learning</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/r/index.html">R API &amp; tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_FAQ.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/releases">Release notes</a></li>
+</ul>
+
+                
+            
+            </div>
+            
+        </div>
+        </nav>
+
+        <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+        
+        <nav class="wy-nav-top" aria-label="top navigation">
+            
+            <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+            <a href="../../index.html">cellxgene-census</a>
+            
+        </nav>
+
+
+        <div class="wy-nav-content">
+            
+            <div class="rst-content">
+            
+            <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../examples.html">Python tutorials</a></li>
+      <li class="breadcrumb-item active">Accessing Spatial Data in Census</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/notebooks/api_demo/census_spatial.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+            <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div itemprop="articleBody">
+                
+  <section id="Accessing-Spatial-Data-in-Census">
+<h1>Accessing Spatial Data in Census<a class="headerlink" href="#Accessing-Spatial-Data-in-Census" title="Permalink to this heading"></a></h1>
+<section id="Introduction:-Accessing-Spatial-Data-via-CELLxGENE-Census-API">
+<h2>Introduction: Accessing Spatial Data via CELLxGENE Census API<a class="headerlink" href="#Introduction:-Accessing-Spatial-Data-via-CELLxGENE-Census-API" title="Permalink to this heading"></a></h2>
+<p>We are excited to announce that spatial data is now accessible in <strong>Census</strong>. Users can query and retrieve spatial datasets from the CELLxGENE spatial corpus. Currently, the following spatial assays are supported:</p>
+<ul class="simple">
+<li><p><strong>Visium</strong></p></li>
+<li><p><strong>Slide-seq V2</strong></p></li>
+</ul>
+<p>This functionality is available starting from:</p>
+<ul class="simple">
+<li><p><strong>CELLxGENE Census</strong>: Version <code class="docutils literal notranslate"><span class="pre">v1.16.2</span></code></p></li>
+<li><p><strong>TileDB-SOMA</strong>: Version <code class="docutils literal notranslate"><span class="pre">v1.15.5</span></code></p></li>
+</ul>
+<section id="Key-Features">
+<h3>Key Features<a class="headerlink" href="#Key-Features" title="Permalink to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Query Spatial Data</strong>: Use the Census spatial object to perform queries and retrieve spatial slides from the CELLxGENE spatial corpus. Filter based on categorical metadata and gene expression.</p></li>
+<li><p><strong>Export to SpatialData</strong>: Retrieved spatial data can be exported to the SpatialData library for further analysis and visualization.</p></li>
+</ol>
+<p>We will now demonstrate how to query the spatial census object, export to <a class="reference external" href="https://spatialdata.scverse.org/en/stable/">SpatialData</a> plot spatial data retrieved from Census.</p>
+</section>
+</section>
+<section id="Environment-and-dependencies">
+<h2>Environment and dependencies<a class="headerlink" href="#Environment-and-dependencies" title="Permalink to this heading"></a></h2>
+<p>We recommend that you set up a new environment to avoid conflicts with any existing packages you may have in your regular or system python environment. Here is an example using <a class="reference external" href="https://anaconda.org/anaconda/conda">conda</a>:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>conda create --name spatial-census-dev python=3.11 -y # create virtual env
+conda activate spatial-census-dev
+conda install -c conda-forge jupyterlab # or &quot;pip install jupyterlab&quot; if not using conda
+</pre></div>
+</div>
+<section id="Install">
+<h3>Install<a class="headerlink" href="#Install" title="Permalink to this heading"></a></h3>
+<p>To get started, ensure you have the necessary dependencies installed (we recommend doing this in a virtual environment). You’ll need TileDB-SOMA (v1.15.3 or later) and SpatialData (including the extras for spatial support). You can install them using the following commands:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>pip install cellxgene-census &quot;tiledbsoma&gt;=1.15.5&quot; &quot;spatialdata[extra]&gt;=0.2.5&quot;
+</pre></div>
+</div>
+</section>
+<section id="Load">
+<h3>Load<a class="headerlink" href="#Load" title="Permalink to this heading"></a></h3>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">cellxgene_census</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tiledbsoma</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">spatialdata</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">spatialdata_plot</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/ubuntu/miniforge3/envs/census-spatial/lib/python3.11/site-packages/dask/dataframe/__init__.py:31: FutureWarning: The legacy Dask DataFrame implementation is deprecated and will be removed in a future version. Set the configuration option `dataframe.query-planning` to `True` or None to enable the new Dask Dataframe implementation and silence this warning.
+  warnings.warn(
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#versions of required libraries for this tutorial</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;cellxgene_census&quot;</span><span class="p">,</span><span class="n">cellxgene_census</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;tiledbsoma&quot;</span><span class="p">,</span> <span class="n">tiledbsoma</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;spatialdata&quot;</span><span class="p">,</span> <span class="n">sd</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;spatialdata plot&quot;</span><span class="p">,</span> <span class="n">spatialdata_plot</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+cellxgene_census 1.16.2
+tiledbsoma 1.15.5
+spatialdata 0.3.0
+spatialdata plot 0.2.9
+</pre></div></div>
+</div>
+</section>
+</section>
+<section id="Census-Metadata">
+<h2>Census Metadata<a class="headerlink" href="#Census-Metadata" title="Permalink to this heading"></a></h2>
+<p>We can find Census level metadata in the <code class="docutils literal notranslate"><span class="pre">census_info</span></code> slot. In this slot we can also view a complete list of datasets in this release of the census - note the inclusion of spatial datasets in the sample data table printed below. Additionally, we can print out the keys associated with the <code class="docutils literal notranslate"><span class="pre">census_spatial_sequencing</span></code> slot giving us access to Visium and Slide seq V2 assays performed in either mouse or human. Also note that for spatial data within census, we make no normalized expression data
+layer available.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">(</span><span class="n">census_version</span><span class="o">=</span><span class="s2">&quot;2025-01-30&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
+    <span class="c1">#Print Census level metadata</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Census level metadata</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_info&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Census datasets info</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_info&quot;</span><span class="p">][</span><span class="s2">&quot;datasets&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Census spatial keys</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_spatial_sequencing&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+
+    <span class="c1">#[optional] not run - spatial data obs metadata table</span>
+    <span class="c1">#print(census[&quot;census_spatial_sequencing&quot;][&quot;homo_sapiens&quot;][&quot;obs&quot;].read().concat().to_pandas().head())</span>
+
+    <span class="c1">#[optional] not run - spatial data var metadata table</span>
+    <span class="c1">#print(census[&quot;census_spatial_sequencing&quot;][&quot;homo_sapiens&quot;][&quot;ms&quot;][&quot;RNA&quot;][&quot;var&quot;].read().concat().to_pandas().head())</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Census level metadata
+
+[&#39;datasets&#39;, &#39;organisms&#39;, &#39;summary&#39;, &#39;summary_cell_counts&#39;]
+
+
+Census datasets info
+
+   soma_joinid                                           citation  \
+0            0  Publication: https://doi.org/10.1016/j.isci.20...
+1            1  Publication: https://doi.org/10.1016/j.isci.20...
+2            2  Publication: https://doi.org/10.1016/j.isci.20...
+3            3  Publication: https://doi.org/10.1016/j.isci.20...
+4            4  Publication: https://doi.org/10.1038/s41591-02...
+
+                          collection_id  \
+0  8e880741-bf9a-4c8e-9227-934204631d2a
+1  8e880741-bf9a-4c8e-9227-934204631d2a
+2  8e880741-bf9a-4c8e-9227-934204631d2a
+3  8e880741-bf9a-4c8e-9227-934204631d2a
+4  a96133de-e951-4e2d-ace6-59db8b3bfb1d
+
+                                     collection_name  \
+0  High Resolution Slide-seqV2 Spatial Transcript...
+1  High Resolution Slide-seqV2 Spatial Transcript...
+2  High Resolution Slide-seqV2 Spatial Transcript...
+3  High Resolution Slide-seqV2 Spatial Transcript...
+4  HTAN/HTAPP Broad - Spatio-molecular dissection...
+
+               collection_doi              collection_doi_label  \
+0  10.1016/j.isci.2022.104097   Marshall et al. (2022) iScience
+1  10.1016/j.isci.2022.104097   Marshall et al. (2022) iScience
+2  10.1016/j.isci.2022.104097   Marshall et al. (2022) iScience
+3  10.1016/j.isci.2022.104097   Marshall et al. (2022) iScience
+4  10.1038/s41591-024-03215-z  Klughammer et al. (2024) Nat Med
+
+                             dataset_id                    dataset_version_id  \
+0  4eb29386-de81-452f-b3c0-e00844e8c7fd  f76861bb-becb-4eb7-82fc-782dc96ccc7f
+1  78d59e4a-82eb-4a61-a1dc-da974d7ea54b  7d7ec1b6-6e3f-4aaa-9442-4b22f3424396
+2  add5eb84-5fc9-4f01-982e-a346dd42ee82  de54aed8-4f73-48f6-9229-418a840e2d82
+3  b020294c-ab82-4547-b5a7-63d8ffa575ed  abe4fce1-0859-4a56-ad1e-734d79f0e6c8
+4  d7476ae2-e320-4703-8304-da5c42627e71  863fc5e4-bd4a-4681-9c3d-0ee7ef54e327
+
+                                      dataset_title  \
+0  Spatial transcriptomics in mouse: Puck_191112_05
+1  Spatial transcriptomics in mouse: Puck_191112_08
+2  Spatial transcriptomics in mouse: Puck_191109_20
+3  Spatial transcriptomics in mouse: Puck_191112_13
+4                      HTAPP-330-SMP-1082 scRNA-seq
+
+                           dataset_h5ad_path  dataset_total_cell_count
+0  4eb29386-de81-452f-b3c0-e00844e8c7fd.h5ad                     10888
+1  78d59e4a-82eb-4a61-a1dc-da974d7ea54b.h5ad                     10250
+2  add5eb84-5fc9-4f01-982e-a346dd42ee82.h5ad                     12906
+3  b020294c-ab82-4547-b5a7-63d8ffa575ed.h5ad                     15161
+4  d7476ae2-e320-4703-8304-da5c42627e71.h5ad                       565
+
+
+Census spatial keys
+
+[&#39;homo_sapiens&#39;, &#39;mus_musculus&#39;]
+</pre></div></div>
+</div>
+<p>Census Spatial datasets are located in a SOMA object that is distinct from Census single cell data. We can see the top level organization of Census with the included Census Spatial object.</p>
+</section>
+<section id="Query-the-Census-Spatial-Sequencing-object">
+<h2>Query the Census Spatial Sequencing object<a class="headerlink" href="#Query-the-Census-Spatial-Sequencing-object" title="Permalink to this heading"></a></h2>
+<p>This example demonstrates how to query spatial single-cell data from the CELLxGENE Census. We extract metadata for human cells that match specific criteria, such as sex and cell type. Here’s what the code does:</p>
+<ul class="simple">
+<li><p><strong>Open the Census</strong>: Access the dataset for the latest build, dated <em>2025-01-21</em>.</p></li>
+<li><p><strong>Filter the Data</strong>: Select cells labeled as “female” and of types “microglial cell” or “neuron.”</p></li>
+<li><p><strong>Retrieve Metadata</strong>: Specify which metadata columns to include in the results.</p></li>
+<li><p><strong>Process the Output</strong>: Convert the filtered data into a pandas DataFrame for further analysis.</p></li>
+</ul>
+<p>The resulting DataFrame contains the metadata for the filtered subset, ready for exploration or downstream use.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">## perform queries</span>
+<span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">(</span><span class="n">census_version</span><span class="o">=</span><span class="s2">&quot;latest&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
+
+    <span class="c1"># Reads SOMADataFrame as a slice</span>
+    <span class="n">cell_metadata</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_spatial_sequencing&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span>
+        <span class="n">value_filter</span> <span class="o">=</span> <span class="s2">&quot;sex == &#39;female&#39; and cell_type in [&#39;microglial cell&#39;, &#39;neuron&#39;]&quot;</span><span class="p">,</span>
+        <span class="n">column_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;assay&quot;</span><span class="p">,</span> <span class="s2">&quot;cell_type&quot;</span><span class="p">,</span> <span class="s2">&quot;tissue&quot;</span><span class="p">,</span> <span class="s2">&quot;tissue_general&quot;</span><span class="p">,</span> <span class="s2">&quot;suspension_type&quot;</span><span class="p">,</span> <span class="s2">&quot;disease&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Concatenates results to pyarrow.Table</span>
+    <span class="n">cell_metadata</span> <span class="o">=</span> <span class="n">cell_metadata</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span>
+
+    <span class="c1"># Converts to pandas.DataFrame</span>
+    <span class="n">cell_metadata</span> <span class="o">=</span> <span class="n">cell_metadata</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">cell_metadata</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+                             assay cell_type tissue tissue_general  \
+0                      Slide-seqV2    neuron  liver          liver
+1                      Slide-seqV2    neuron  liver          liver
+2                      Slide-seqV2    neuron  liver          liver
+3                      Slide-seqV2    neuron  liver          liver
+4                      Slide-seqV2    neuron  liver          liver
+..                             ...       ...    ...            ...
+72                     Slide-seqV2    neuron  liver          liver
+73                     Slide-seqV2    neuron  liver          liver
+74  Visium Spatial Gene Expression    neuron   lung           lung
+75  Visium Spatial Gene Expression    neuron   lung           lung
+76  Visium Spatial Gene Expression    neuron   lung           lung
+
+   suspension_type        disease     sex
+0               na  breast cancer  female
+1               na  breast cancer  female
+2               na  breast cancer  female
+3               na  breast cancer  female
+4               na  breast cancer  female
+..             ...            ...     ...
+72              na  breast cancer  female
+73              na  breast cancer  female
+74              na         normal  female
+75              na         normal  female
+76              na         normal  female
+
+[77 rows x 7 columns]
+</pre></div></div>
+</div>
+</section>
+<section id="Spatial-Data-Export">
+<h2>Spatial Data Export<a class="headerlink" href="#Spatial-Data-Export" title="Permalink to this heading"></a></h2>
+<p>We can export our data to a <code class="docutils literal notranslate"><span class="pre">SpatialData</span></code> object (see documentation <a class="reference external" href="https://spatialdata.scverse.org/en/stable/">here</a> for more information), enabling us to visualize and analyze it. In the next block, we query the human experiment in the census. With <code class="docutils literal notranslate"><span class="pre">axis_query</span></code>, we can set a filter using the <code class="docutils literal notranslate"><span class="pre">obs_query</span></code> argument, where we can specify which spatial slide(s) to return. Note that we demonstrates an alternative to filtering based on categorical metadata, as shown earlier. This approach
+will return only a single slide corresponding to the dataset we have identified. You can find After the query has been formed, we can use the <code class="docutils literal notranslate"><span class="pre">to_spatialdata</span></code> method to export our filtered data to the <code class="docutils literal notranslate"><span class="pre">spatialdata</span></code> format.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">## export to spatialdata</span>
+
+<span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">(</span><span class="n">census_version</span><span class="o">=</span><span class="s2">&quot;2025-01-30&quot;</span><span class="p">)</span> <span class="c1"># similar to the query above, but without the context manager</span>
+
+<span class="n">exp</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_spatial_sequencing&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span>
+
+<span class="c1"># alternative way to perform query with tiledbsoma instead of cellxgene_census</span>
+<span class="k">with</span> <span class="n">exp</span><span class="o">.</span><span class="n">axis_query</span><span class="p">(</span>
+    <span class="n">measurement_name</span><span class="o">=</span><span class="s2">&quot;RNA&quot;</span><span class="p">,</span>
+    <span class="n">obs_query</span><span class="o">=</span><span class="n">tiledbsoma</span><span class="o">.</span><span class="n">AxisQuery</span><span class="p">(</span><span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;dataset_id == &#39;4cceac62-9513-42a4-90e5-2878dbb0192c&#39;&quot;</span><span class="p">)</span> <span class="c1"># query specific dataset instead of by obs metadata</span>
+<span class="p">)</span> <span class="k">as</span> <span class="n">query</span><span class="p">:</span>
+    <span class="n">sdata</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">to_spatialdata</span><span class="p">(</span><span class="n">X_name</span><span class="o">=</span><span class="s2">&quot;raw&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>In the cells below, we explore the structure of the resulting SpatialData object. You can find a more detailed description of the SpatialData definition <a class="reference external" href="https://spatialdata.scverse.org/en/stable/api/SpatialData.html">here</a>. Note that in our current example we have only exported a single dataset, however in the scenario where multiple datasets (slides) match your query - all of those slides will be stored as different “scenes” within the SpatialData object. The corresponding assets for each
+scene will be distinguished by the prepended UUID (i.e. in this example, <code class="docutils literal notranslate"><span class="pre">4cceac62-9513-42a4-90e5-2878dbb0192c</span></code>, refers to the dataset UUID).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sdata</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+SpatialData object
+├── Images
+│     └── &#39;4cceac62-9513-42a4-90e5-2878dbb0192c_library&#39;: DataArray[cyx] (3, 1862, 2000)
+├── Shapes
+│     └── &#39;4cceac62-9513-42a4-90e5-2878dbb0192c_loc&#39;: GeoDataFrame shape: (4992, 3) (2D shapes)
+└── Tables
+      └── &#39;RNA&#39;: AnnData (4992, 44405)
+with coordinate systems:
+    ▸ &#39;4cceac62-9513-42a4-90e5-2878dbb0192c&#39;, with elements:
+        4cceac62-9513-42a4-90e5-2878dbb0192c_library (Images), 4cceac62-9513-42a4-90e5-2878dbb0192c_loc (Shapes)
+</pre></div></div>
+</div>
+<p>Expression data is stored within an AnnData object within the SpatialData object, where you can also find relevant observation metadata in <code class="docutils literal notranslate"><span class="pre">obs</span></code> and variable metadata in <code class="docutils literal notranslate"><span class="pre">var</span></code>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sdata</span><span class="o">.</span><span class="n">tables</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;RNA&#39;: AnnData object with n_obs × n_vars = 4992 × 44405
+    obs: &#39;soma_joinid&#39;, &#39;dataset_id&#39;, &#39;assay&#39;, &#39;assay_ontology_term_id&#39;, &#39;cell_type&#39;, &#39;cell_type_ontology_term_id&#39;, &#39;development_stage&#39;, &#39;development_stage_ontology_term_id&#39;, &#39;disease&#39;, &#39;disease_ontology_term_id&#39;, &#39;donor_id&#39;, &#39;is_primary_data&#39;, &#39;observation_joinid&#39;, &#39;self_reported_ethnicity&#39;, &#39;self_reported_ethnicity_ontology_term_id&#39;, &#39;sex&#39;, &#39;sex_ontology_term_id&#39;, &#39;suspension_type&#39;, &#39;tissue&#39;, &#39;tissue_ontology_term_id&#39;, &#39;tissue_type&#39;, &#39;in_tissue&#39;, &#39;array_row&#39;, &#39;array_col&#39;, &#39;tissue_general&#39;, &#39;tissue_general_ontology_term_id&#39;, &#39;raw_sum&#39;, &#39;nnz&#39;, &#39;raw_mean_nnz&#39;, &#39;raw_variance_nnz&#39;, &#39;n_measured_vars&#39;, &#39;region_key&#39;, &#39;instance_key&#39;
+    var: &#39;soma_joinid&#39;, &#39;feature_id&#39;, &#39;feature_name&#39;, &#39;feature_type&#39;, &#39;feature_length&#39;, &#39;nnz&#39;, &#39;n_measured_obs&#39;
+    uns: &#39;spatialdata_attrs&#39;}
+</pre></div></div>
+</div>
+<p>If we take a quick look at the expression data for this spatial slide, we can see that by default, the SpatialData object exported from the Census has a set of <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code>’s as the default index in <code class="docutils literal notranslate"><span class="pre">var</span></code>. This index is what will be referred to when we try to plot genes in the next section, so we need to set the index to <code class="docutils literal notranslate"><span class="pre">feature_name</span></code> in order to enable plotting by gene symbols.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sdata</span><span class="p">[</span><span class="s2">&quot;RNA&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>soma_joinid</th>
+      <th>feature_id</th>
+      <th>feature_name</th>
+      <th>feature_type</th>
+      <th>feature_length</th>
+      <th>nnz</th>
+      <th>n_measured_obs</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0</td>
+      <td>ENSG00000121410</td>
+      <td>A1BG</td>
+      <td>protein_coding</td>
+      <td>2134</td>
+      <td>156783</td>
+      <td>2793392</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>1</td>
+      <td>ENSG00000268895</td>
+      <td>A1BG-AS1</td>
+      <td>lncRNA</td>
+      <td>1667</td>
+      <td>20214</td>
+      <td>2954787</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2</td>
+      <td>ENSG00000148584</td>
+      <td>A1CF</td>
+      <td>protein_coding</td>
+      <td>2211</td>
+      <td>41417</td>
+      <td>2852627</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>3</td>
+      <td>ENSG00000175899</td>
+      <td>A2M</td>
+      <td>protein_coding</td>
+      <td>590</td>
+      <td>783018</td>
+      <td>2967531</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>4</td>
+      <td>ENSG00000245105</td>
+      <td>A2M-AS1</td>
+      <td>lncRNA</td>
+      <td>2551</td>
+      <td>10592</td>
+      <td>2877056</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#set index of var dataframe for the expression data</span>
+<span class="n">sdata</span><span class="o">.</span><span class="n">tables</span><span class="p">[</span><span class="s2">&quot;RNA&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;feature_name&quot;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Note that our index has changed to consist of gene symbols and we can now use the SpatialData plotting API to plot by our genes of interest.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sdata</span><span class="p">[</span><span class="s2">&quot;RNA&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>soma_joinid</th>
+      <th>feature_id</th>
+      <th>feature_type</th>
+      <th>feature_length</th>
+      <th>nnz</th>
+      <th>n_measured_obs</th>
+    </tr>
+    <tr>
+      <th>feature_name</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>A1BG</th>
+      <td>0</td>
+      <td>ENSG00000121410</td>
+      <td>protein_coding</td>
+      <td>2134</td>
+      <td>156783</td>
+      <td>2793392</td>
+    </tr>
+    <tr>
+      <th>A1BG-AS1</th>
+      <td>1</td>
+      <td>ENSG00000268895</td>
+      <td>lncRNA</td>
+      <td>1667</td>
+      <td>20214</td>
+      <td>2954787</td>
+    </tr>
+    <tr>
+      <th>A1CF</th>
+      <td>2</td>
+      <td>ENSG00000148584</td>
+      <td>protein_coding</td>
+      <td>2211</td>
+      <td>41417</td>
+      <td>2852627</td>
+    </tr>
+    <tr>
+      <th>A2M</th>
+      <td>3</td>
+      <td>ENSG00000175899</td>
+      <td>protein_coding</td>
+      <td>590</td>
+      <td>783018</td>
+      <td>2967531</td>
+    </tr>
+    <tr>
+      <th>A2M-AS1</th>
+      <td>4</td>
+      <td>ENSG00000245105</td>
+      <td>lncRNA</td>
+      <td>2551</td>
+      <td>10592</td>
+      <td>2877056</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+</section>
+<section id="Plotting">
+<h2>Plotting<a class="headerlink" href="#Plotting" title="Permalink to this heading"></a></h2>
+<p>We can use spatialdata-plot to show the H&amp;E stain image. You can refer to the docs page <a class="reference external" href="https://spatialdata.scverse.org/projects/plot/en/latest/plotting.html">here</a> for more information on the SpatialData plotting API.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sdata</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">render_images</span><span class="p">()</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">render_shapes</span><span class="p">()</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+<span class="ansi-blue-fg">INFO    </span> Rasterizing image for faster rendering.
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Clipping input data to the valid range for imshow with RGB data ([0..1] for floats or [0..255] for integers). Got range [0.0..1.008].
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_api_demo_census_spatial_31_2.png" src="../../_images/notebooks_api_demo_census_spatial_31_2.png" />
+</div>
+</div>
+<section id="Plotting-Continuous-Metadata">
+<h3>Plotting Continuous Metadata<a class="headerlink" href="#Plotting-Continuous-Metadata" title="Permalink to this heading"></a></h3>
+<p>We can plot expression data over our tissue image from our exported SpatialData object. We can specify various spatial embedding metadata to overlay on the tissue image. Here we plot gene expression of MALAT1, a continuous metadata field.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">(</span>
+    <span class="n">sdata</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">render_images</span><span class="p">()</span>
+    <span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">render_shapes</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;MALAT1&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+<span class="ansi-blue-fg">INFO    </span> Rasterizing image for faster rendering.
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Clipping input data to the valid range for imshow with RGB data ([0..1] for floats or [0..255] for integers). Got range [0.0..1.008].
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_api_demo_census_spatial_34_2.png" src="../../_images/notebooks_api_demo_census_spatial_34_2.png" />
+</div>
+</div>
+</section>
+<section id="Plotting-Categorical-Metadata">
+<h3>Plotting Categorical Metadata<a class="headerlink" href="#Plotting-Categorical-Metadata" title="Permalink to this heading"></a></h3>
+<p>Below, we will overlay categorical information (<code class="docutils literal notranslate"><span class="pre">cell_type</span></code>) on our tissue image. When exporting data from the Census, categorical metadata stored in the <code class="docutils literal notranslate"><span class="pre">obs</span></code> DataFrame is represented as a <strong>pandas categorical series</strong>.</p>
+<p>Since this DataFrame is a <strong>subset</strong> of the original metadata, its categories still include <strong>all possible values</strong> from the full Census dataset—even if they are not present in our exported slice of data. This can cause issues when plotting, such as <strong>difficulty in automatically assigning a suitable color palette</strong>.</p>
+<p>To resolve this, we will remove <strong>unused categories</strong> from the <code class="docutils literal notranslate"><span class="pre">cell_type</span></code> column before visualization.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Print number of categories before resetting</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Before:&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">sdata</span><span class="p">[</span><span class="s2">&quot;RNA&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">cat</span><span class="o">.</span><span class="n">categories</span><span class="p">))</span>
+
+<span class="c1"># Remove unused categories</span>
+<span class="n">sdata</span><span class="p">[</span><span class="s2">&quot;RNA&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sdata</span><span class="p">[</span><span class="s2">&quot;RNA&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">cat</span><span class="o">.</span><span class="n">remove_unused_categories</span><span class="p">()</span>
+
+<span class="c1"># Print number of categories after resetting</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;After:&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">sdata</span><span class="p">[</span><span class="s2">&quot;RNA&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">cat</span><span class="o">.</span><span class="n">categories</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Before: 228
+After: 7
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">(</span>
+    <span class="n">sdata</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">render_images</span><span class="p">()</span>
+    <span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">render_shapes</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;cell_type&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+<span class="ansi-blue-fg">INFO    </span> Rasterizing image for faster rendering.
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Clipping input data to the valid range for imshow with RGB data ([0..1] for floats or [0..255] for integers). Got range [0.0..1.008].
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_api_demo_census_spatial_37_2.png" src="../../_images/notebooks_api_demo_census_spatial_37_2.png" />
+</div>
+</div>
+<p>This should help you get started with accessing, exporting, and visualizing spatial assays retrieved from the CZ CELLxGENE Census. For any feature requests, questions, issues, or help troubleshooting, please reach out to <a class="reference external" href="mailto:cellxgene&#37;&#52;&#48;chanzuckerberg&#46;com">cellxgene<span>&#64;</span>chanzuckerberg<span>&#46;</span>com</a></p>
+</section>
+</section>
+</section>
+
+
+            </div>
+            
+            </div>
+            <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="census_gget_demo.html" class="btn btn-neutral float-left" title="Querying data using the gget cellxgene module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="census_access_maintained_embeddings.html" class="btn btn-neutral float-right" title="Access CELLxGENE collaboration embeddings (scVI, Geneformer)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Chan Zuckerberg Initiative.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+            </div>
+        </div>
+
+        </section>
+
+    </div>
+    <!-- Newsletter Banner -->
+    <div role="banner" id="newsletter-banner">
+      <span id="newsletter-subscribe-button" role="button">Subscribe</span>&nbsp;to our newsletter to receive updates about new features.
+      <div id="newsletter-banner-close-button" role="button">X</div>
+    </div>
+    <!-- Newsletter Modal -->
+    <dialog id="newsletter-modal">
+      <div id="newsletter-header">
+        <img id="newsletter-logo" src="../../_static/img/cellxGene-newsletter-logo.svg" />
+        <div id="newsletter-close-button" role="button">X</div>
+      </div>
+      <div id="newsletter-content">
+        <div id="newsletter-callout">Join Our Newsletter</div>
+        <div id="newsletter-description">Get a quarterly email with the latest CELLxGENE features and data.</div>
+        <!-- HubSpot Form target -->
+        <div id="newsletter-form-container"></div>
+      </div>
+
+      <div id="newsletter-footnote">Unsubscribe at any time.</div>
+    </dialog>
+    
+  
+
+    <script>
+    // (thuang): 30 days
+    const NEWSLETTER_BANNER_DISMISSED_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+    const NEWSLETTER_BANNER_DISMISSED_KEY = "newsletterBannerDismissed"
+
+    var script = document.createElement('script');
+    script.src = 'https://js.hsforms.net/forms/v2.js';
+    script.defer = true;
+    document.head.appendChild(script);
+
+    // Run the code once the script is loaded
+    script.onload = async function() {
+      await hbspt.forms.create({
+        region: "na1",
+        portalId: "7272273",
+        formId: "eb65b811-0451-414d-8304-7b9b6f468ce5",
+        target: '#newsletter-form-container',
+        onFormReady() {
+          // get element by type "email"
+          const emailInput = document.querySelector('#email-eb65b811-0451-414d-8304-7b9b6f468ce5');
+          emailInput.setAttribute('placeholder', 'Enter email address');
+
+          // remove the label element for emailInput
+          const emailLabel = document.querySelector('#label-email-eb65b811-0451-414d-8304-7b9b6f468ce5');
+          emailLabel.remove();
+        },
+        submitText: 'Subscribe',
+      });
+    };
+
+    checkNewsletterBanner();
+
+    document.querySelector('#newsletter-banner-close-button').addEventListener('click', () => {
+      document.querySelector('#newsletter-banner').remove();
+      localStorage.setItem(NEWSLETTER_BANNER_DISMISSED_KEY, Date.now());
+    });
+
+    const modal = document.querySelector('#newsletter-modal');
+
+    document.querySelector('#newsletter-subscribe-button').addEventListener('click', () => {
+      modal.showModal();
+    });
+
+    document.querySelector('#newsletter-close-button').addEventListener('click', () => {
+      modal.close();
+    });
+
+    function checkNewsletterBanner() {
+      /**
+       * (thuang): Use LocalStorage to store dismissed state for 30 days
+       * NOTE: Currently Census doc page doesn't share the same domain as the main site,
+       * so dismissing the banner on the main site won't dismiss it on the Census doc page.
+       * And vice versa.
+       */
+      const newsletterBannerDismissed = localStorage.getItem('newsletterBannerDismissed');
+
+      if (newsletterBannerDismissed) {
+        return;
+      }
+
+      if (newsletterBannerDismissed && Date.now() - newsletterBannerDismissed > NEWSLETTER_BANNER_DISMISSED_TTL_MS) {
+        localStorage.removeItem(NEWSLETTER_BANNER_DISMISSED_KEY);
+      }
+
+      const newsletterBanner = document.querySelector('#newsletter-banner');
+
+      if (!newsletterBannerDismissed) {
+        newsletterBanner.style.display = 'flex';
+      }
+    }
+  </script>
+  
+  
+    
+   
+
+</body>
+</html>
