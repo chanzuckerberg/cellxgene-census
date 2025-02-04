@@ -75,8 +75,12 @@ task indexer {
         )
 
         final_index = vs.ivf_flat_index.IVFFlatIndex(uri="./~{embeddings_name}", memory_budget=1024*1048756)
+        print(f"VACUUM", file=sys.stderr)
+        final_index.vacuum()
         assert final_index.size == N, f"final_index.size=={final_index.size} != N=={N}"
         EOF
+
+        >&2 ls -lR '~{embeddings_name}'
     >>>
 
     runtime {
@@ -105,6 +109,7 @@ task make_one_directory {
         while read -r dir; do
             cp -r "$dir" '~{directory_name}/'
         done < '~{manifest}'
+        >&2 ls -lR '~{directory_name}'
     >>>
 
     output {
