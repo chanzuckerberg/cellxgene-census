@@ -100,7 +100,7 @@ jobs:
     needs:
       - unit_tests_builder
       - unit_tests_python_api
-    runs-on: [self-hosted, Linux, X64]
+    runs-on: X64
     steps:
       - uses: actions/checkout@v4
         with:
