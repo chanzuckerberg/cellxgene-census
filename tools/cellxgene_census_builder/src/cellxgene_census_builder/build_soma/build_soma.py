@@ -208,14 +208,7 @@ def build_step2_create_root_collection(soma_path: str, experiment_builders: list
         populate_root_collection(root_collection)
 
         for e in experiment_builders:
-            # TODO (spatial): Confirm the decision that we are clearly separating
-            # experiments containing spatial assays from experiments not containing
-            # spatial assays. That is, an experiment should never contain assays from
-            # spatial and non-spatial modalities
-            if e.specification.is_exclusively_spatial():
-                e.create(census_data=root_collection[CENSUS_SPATIAL_SEQUENCING_NAME])
-            else:
-                e.create(census_data=root_collection[CENSUS_DATA_NAME])
+            e.create(census_data=root_collection[e.specification.root_collection])
 
         logger.info("Build step 2 - Create root collection - finished")
         return root_collection
