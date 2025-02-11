@@ -10,7 +10,7 @@ export AWS_DEFAULT_REGION=$(aws configure get region)
 export ECR_ENDPT=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
 export WDL_OUTPUT_BUCKET=mlin-census-scratch
 
-docker build -t ${ECR_ENDPT}/omics:census_embeddings_indexer .
+docker build --platform linux/amd64 -t ${ECR_ENDPT}/omics:census_embeddings_indexer .
 aws ecr get-login-password | docker login --username AWS --password-stdin "$ECR_ENDPT"
 docker push ${ECR_ENDPT}/omics:census_embeddings_indexer
 
