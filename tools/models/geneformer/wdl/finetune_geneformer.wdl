@@ -1,5 +1,7 @@
 version development
 
+# DEPRECATED: see ../README.md
+
 task finetune_geneformer {
     input {
         Directory dataset
