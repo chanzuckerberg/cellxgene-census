@@ -134,24 +134,24 @@ class ExperimentSpecification:
     def obs_platform_config(self) -> dict[str, Any]:
         """Materialization (filter pipelines, capacity, etc) of obs/var schema in TileDB is tuned by empirical testing."""
         # Numeric cols
-        _NumericObsAttrs = ["raw_sum", "nnz", "raw_mean_nnz", "raw_variance_nnz", "n_measured_vars"]
+        numeric_obs_attrs = ["raw_sum", "nnz", "raw_mean_nnz", "raw_variance_nnz", "n_measured_vars"]
         if self.is_exclusively_spatial():
-            _NumericObsAttrs += ["array_row", "array_col", "in_tissue"]
+            numeric_obs_attrs += ["array_row", "array_col", "in_tissue"]
         # Categorical/dict-like columns
-        _DictLikeObsAttrs = [
+        dict_like_obs_attrs = [
             f.name
             for f in self.obs_table_spec.fields
             if isinstance(f, FieldSpec) and f.is_dictionary
-            if f.is_dictionary and f.name not in (_NumericObsAttrs + ["soma_joinid"])
+            if f.is_dictionary and f.name not in (numeric_obs_attrs + ["soma_joinid"])
         ]
         # Dict filter varies depending on whether we are using dictionary types in the schema
-        _AllOtherObsAttrs = [
+        all_other_obs_attrs = [
             f.name
             for f in self.obs_table_spec.fields
-            if f.name not in (_DictLikeObsAttrs + _NumericObsAttrs + ["soma_joinid"])
+            if f.name not in (dict_like_obs_attrs + numeric_obs_attrs + ["soma_joinid"])
         ]
         # Dict filter varies depending on whether we are using dictionary types in the schema
-        _DictLikeFilter: list[Any] = (
+        dict_like_filter: list[Any] = (
             [{"_type": "ZstdFilter", "level": 9}]
             if USE_ARROW_DICTIONARY
             else ["DictionaryFilter", {"_type": "ZstdFilter", "level": 19}]
@@ -165,10 +165,10 @@ class ExperimentSpecification:
                     "attrs": {
                         **{
                             k: {"filters": ["ByteShuffleFilter", {"_type": "ZstdFilter", "level": 9}]}
-                            for k in _NumericObsAttrs
+                            for k in numeric_obs_attrs
                         },
-                        **{k: {"filters": _DictLikeFilter} for k in _DictLikeObsAttrs},
-                        **{k: {"filters": [{"_type": "ZstdFilter", "level": 19}]} for k in _AllOtherObsAttrs},
+                        **{k: {"filters": dict_like_filter} for k in dict_like_obs_attrs},
+                        **{k: {"filters": [{"_type": "ZstdFilter", "level": 19}]} for k in all_other_obs_attrs},
                     },
                     "offsets_filters": ["DoubleDeltaFilter", {"_type": "ZstdFilter", "level": 19}],
                     "allows_duplicates": True,
