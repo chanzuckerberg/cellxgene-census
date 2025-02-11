@@ -53,7 +53,7 @@ task indexer {
 
         source_uri = "~{embeddings_s3_uri}".replace("s3_//", "s3://")
         with tiledb.open(source_uri, config=config) as emb_array:
-            (_, N), (_, M) = emb_array.nonempty_domain() # FIXME should be "current domain"
+            (_, N), (_, M) = emb_array.nonempty_domain() # TODO use "current domain" when supported
         N += 1  # ASSUMES contiguous soma_joinid's [0, N)
         M += 1
         input_vectors_per_work_item = 1_500_000_000 // M  # controls memory usage
