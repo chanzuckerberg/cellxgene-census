@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Can be used to bootstrap a g4dn.* instance with scvi-tools and cellxgene-census
+# Can be used to bootstrap a {g4dn,g5}.* instance with scvi-tools and cellxgene-census
 
 export DEBIAN_FRONTEND=noninteractive
 
