@@ -2,18 +2,25 @@ import logging
 import os
 import pathlib
 from datetime import UTC, datetime
-from typing import cast
+from typing import Any, cast
 
 import dask.array as da
 import dask.distributed
 import h5py
 import numpy as np
+import numpy.typing as npt
 import pandas as pd
 import psutil
 import pyarrow as pa
 import tiledbsoma
 import tiledbsoma as soma
 from anndata.experimental import read_elem_as_dask
+from dask.delayed import Delayed
+from tiledbsoma import (
+    Axis,
+    CoordinateSpace,
+    Scene,
+)
 
 from ..build_state import CensusBuildArgs
 from ..util import clamp, cpu_count
@@ -298,11 +305,6 @@ def build_step4a_add_spatial(
     import h5py
     import pyarrow as pa
     from anndata.experimental import read_elem
-    from tiledbsoma import (
-        Axis,
-        CoordinateSpace,
-        Scene,
-    )
 
     h5ad_path = args.h5ads_path
     client = dask.distributed.Client.current()
@@ -321,9 +323,7 @@ def build_step4a_add_spatial(
             logger.debug(f"Writing spatial info from {d.dataset_id}")
             scene = spatial_collection.add_new_collection(d.dataset_id, kind=Scene)
 
-            coord_space = CoordinateSpace(
-                (Axis(name="y", unit="pixels"), Axis(name="x", unit="pixels"))  # type: ignore[arg-type]
-            )
+            coord_space = CoordinateSpace((Axis(name="y", unit="pixels"), Axis(name="x", unit="pixels")))
             scene.coordinate_space = coord_space
 
             # Default value. Will be redefined if the dataset is visium (e.g. has a radius defined)
@@ -419,17 +419,12 @@ class TileDBSOMADenseArrayWriteWrapper:
         """Wrapper around tiledbsoma dense array that providing and interface compatible with dask.array."""
         self.uri = uri
 
-    def __setitem__(self, k: tuple[slice, ...], v: np.ndarray):
+    def __setitem__(self, k: tuple[slice, ...], v: npt.NDArray[Any]) -> None:
         with tiledbsoma.open(self.uri, mode="w") as soma_array:
             soma_array.write(k, pa.Tensor.from_numpy(v))
 
 
-def write_dask_array_as_tiledbsoma(collection: tiledbsoma.Collection, key: str, value: da.Array):
-    soma_array = collection.add_new_dense_ndarray(key, type=pa.from_numpy_dtype(value.dtype), shape=value.shape)
-    write_dask_array_to_existing_tiledbsoma(soma_array, value)
-
-
-def write_dask_array_to_existing_tiledbsoma(soma_array: tiledbsoma.DenseNDArray, value: da.Array):
+def write_dask_array_to_existing_tiledbsoma(soma_array: tiledbsoma.DenseNDArray, value: da.Array) -> Delayed:
     wrapped_soma_array = TileDBSOMADenseArrayWriteWrapper(soma_array.uri)
 
     return value.store(
@@ -442,11 +437,10 @@ def write_dask_array_to_existing_tiledbsoma(soma_array: tiledbsoma.DenseNDArray,
 def add_image_collection(
     scene: soma.Collection,
     key: str,
-    coordinate_space,
-    # spatial_library_info: dict[str, Any],
+    coordinate_space: CoordinateSpace,
     spatial_library_info: h5py.Group,
     scale_factors: dict[str, float],
-) -> None:
+) -> list[Delayed]:
     from somacore import (
         ScaleTransform,
     )
