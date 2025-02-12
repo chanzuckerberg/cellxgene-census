@@ -1,3 +1,4 @@
+# DEPRECATED: see README.md
 # Name of a categorical column/feature in the Dataset to use as the classifier label
 label_feature: cell_subclass
 # Specific labels to exclude from training and evaluation

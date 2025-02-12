@@ -10,7 +10,7 @@ RUN git lfs install
 
 ENV GIT_SSL_NO_VERIFY=true
 RUN pip install --upgrade pip setuptools setuptools_scm
-RUN pip install torch torchdata --index-url https://download.pytorch.org/whl/cu118
+RUN pip install torch 'torchdata<0.10' --index-url https://download.pytorch.org/whl/cu118
                                                                              # ^^^ match the base image CUDA version!
 RUN pip install owlready2 boto3 transformers[torch]
 # workaround for unknown problem blocking `import geneformer`:
@@ -19,9 +19,9 @@ RUN pip uninstall -y transformer-engine
 
 # Set the tiledbsoma version used to write the embeddings SparseNDArray, to ensure
 # compatibility with the Census embeddings curator
-ARG EMBEDDINGS_TILEDBSOMA_VERSION=1.9.5
+ARG EMBEDDINGS_TILEDBSOMA_VERSION=1.11.4
 ARG CELLXGENE_CENSUS_VERSION=main
-ARG GENEFORMER_VERSION=57f02a4
+ARG GENEFORMER_VERSION=ebc1e096
 
 RUN mkdir /census-geneformer
 WORKDIR /census-geneformer
@@ -44,6 +44,3 @@ RUN python3 -m venv --system-site-packages embeddings_tiledbsoma_venv && \
 COPY helpers ./helpers
 COPY *.py ./
 COPY finetune-geneformer.config.yml .
-
-# FIXME: eliminate once model is published in Geneformer repo
-COPY gf-95m/ ./gf-95m/
