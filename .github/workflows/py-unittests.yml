@@ -38,10 +38,15 @@ jobs:
           cache-dependency-path: |
             api/**/pyproject.toml
             api/**/requirements*.txt
+      - name: Install git-lfs (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install git-lfs
+          git lfs install
       - name: Install dependencies (including experimental)
         run: |
           python -m pip install -U pip setuptools wheel
-          git lfs install
           pip install --use-pep517 accumulation-tree # Geneformer dependency needs --use-pep517 for Cython
           GIT_CLONE_PROTECTION_ACTIVE=false pip install -r ./api/python/cellxgene_census/scripts/requirements-dev.txt
           pip install -e './api/python/cellxgene_census/[experimental]'
