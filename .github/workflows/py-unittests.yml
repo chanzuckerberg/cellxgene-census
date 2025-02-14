@@ -39,7 +39,7 @@ jobs:
             api/**/pyproject.toml
             api/**/requirements*.txt
       - name: Install git-lfs (Linux)
-        if: runner.os == 'Linux'
+        if: matrix.os == 'sc-dev-64g-runner'
         run: |
           sudo apt-get update
           sudo apt-get install git-lfs
