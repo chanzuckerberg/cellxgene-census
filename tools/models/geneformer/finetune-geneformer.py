@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # mypy: ignore-errors
 
+# DEPRECATED: see README.md
+
 import argparse
 import json
 import logging

@@ -108,9 +108,9 @@ task generate_embeddings {
     >>>
 
     runtime {
-        # sizing to g5.2xlarge since EmbExtractor uses only one GPU
-        cpu: 8
-        memory: "30G"
+        # sizing to g5.4xlarge; note EmbExtractor uses only one GPU
+        cpu: 16
+        memory: "60G"
         gpu: true
         acceleratorCount: 1
         acceleratorType: "nvidia-tesla-a10g"
