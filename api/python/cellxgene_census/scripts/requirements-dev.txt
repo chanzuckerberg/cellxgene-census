@@ -5,5 +5,5 @@ twine
 coverage
 nbqa
 transformers[torch]
-git+https://huggingface.co/ctheodoris/Geneformer@471eefc; python_version>='3.10'
+git+https://huggingface.co/ctheodoris/Geneformer@ebc1e096; python_version>='3.10'
 proxy.py

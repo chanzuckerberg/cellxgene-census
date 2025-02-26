@@ -31,7 +31,7 @@ def get_obs_stats(
             "raw_variance_nnz": raw_variance_nnz.astype(
                 CENSUS_OBS_TABLE_SPEC.field("raw_variance_nnz").to_pandas_dtype()
             ),
-            "n_measured_vars": -1,  # placeholder
+            "n_measured_vars": -1,  # handled on dataset level in compute_X_file_stats
         }
     )
     assert len(obs_stats) == raw_X.shape[0]
@@ -53,7 +53,7 @@ def get_var_stats(
     var_stats = pd.DataFrame(
         data={
             "nnz": nnz.astype(CENSUS_VAR_TABLE_SPEC.field("nnz").to_pandas_dtype()),
-            "n_measured_obs": 0,  # placeholder
+            "n_measured_obs": 0,  # handled on dataset level in compute_X_file_stats
         }
     )
     assert len(var_stats) == raw_X.shape[1]

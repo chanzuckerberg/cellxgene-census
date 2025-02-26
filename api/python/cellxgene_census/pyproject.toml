@@ -46,12 +46,13 @@ experimental = [
     "scikit-misc>=0.2,<0.4",  # scikit-misc 0.3 dropped Python 3.8 support, and 0.4 doesn't have MacOS/ARM wheels
     "datasets~=2.0",
     "tdigest~=0.5",
-    # choose newest version of tiledb-vector-search that doesn't need a newer version of tiledb
-    # than tiledbsoma: https://github.com/TileDB-Inc/TileDB-Vector-Search/blob/0.2.2/pyproject.toml
-    "tiledb-vector-search~=0.2",
+    "tiledb-vector-search~=0.11",  # newest version compatible with tiledbsoma's version of TileDB Embedded
     # Not expressible in pyproject.toml:
     #"git+https://huggingface.co/ctheodoris/Geneformer",
     # instead, experimental/ml/geneformer_tokenizer.py catches ImportError to ask user to install that.
+]
+spatial = [
+    "spatialdata>=0.2.5",
 ]
 doc = [
     "nbsphinx",

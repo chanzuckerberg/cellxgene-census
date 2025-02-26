@@ -15,7 +15,7 @@ class GeneformerTokenizer(CellDatasetBuilder):
     cell in CELLxGENE Census ExperimentAxisQuery results (human).
 
     This class requires the Geneformer package to be installed separately with:
-    `pip install git+https://huggingface.co/ctheodoris/Geneformer@eb038a6`
+    `pip install git+https://huggingface.co/ctheodoris/Geneformer@ebc1e096`
 
     Example usage:
 
@@ -64,8 +64,8 @@ class GeneformerTokenizer(CellDatasetBuilder):
         *,
         obs_column_names: Sequence[str] | None = None,
         obs_attributes: Sequence[str] | None = None,
-        max_input_tokens: int = 2048,
-        special_token: bool = False,
+        max_input_tokens: int = 4096,
+        special_token: bool = True,
         token_dictionary_file: str = "",
         gene_median_file: str = "",
         gene_mapping_file: str = "",
@@ -78,8 +78,8 @@ class GeneformerTokenizer(CellDatasetBuilder):
         - `obs_query`: obs AxisQuery defining the set of Census cells to process (default all)
         - `obs_column_names`: obs dataframe columns (cell metadata) to propagate into attributes
            of each Dataset item
-        - `max_input_tokens`: maximum length of Geneformer input token sequence (default 2048)
-        - `special_token`: whether to affix separator tokens to the sequence (default False)
+        - `max_input_tokens`: maximum length of Geneformer input token sequence (default 4096)
+        - `special_token`: whether to affix separator tokens to the sequence (default True)
         - `token_dictionary_file`, `gene_median_file`: pickle files supplying the mapping of
           Ensembl human gene IDs onto Geneformer token numbers and median expression values.
           By default, these will be loaded from the Geneformer package.
@@ -120,19 +120,21 @@ class GeneformerTokenizer(CellDatasetBuilder):
             .set_index("soma_joinid")
         )
 
-        if not (token_dictionary_file and gene_median_file):
+        if not (token_dictionary_file and gene_median_file and gene_mapping_file):
             try:
                 import geneformer
             except ImportError:
                 # pyproject.toml can't express Geneformer git+https dependency
                 raise ImportError(
                     "Please install Geneformer with: "
-                    "pip install git+https://huggingface.co/ctheodoris/Geneformer@eb038a6"
+                    "pip install git+https://huggingface.co/ctheodoris/Geneformer@ebc1e096"
                 ) from None
             if not token_dictionary_file:
                 token_dictionary_file = geneformer.tokenizer.TOKEN_DICTIONARY_FILE
             if not gene_median_file:
                 gene_median_file = geneformer.tokenizer.GENE_MEDIAN_FILE
+            if not gene_mapping_file:
+                gene_mapping_file = geneformer.tokenizer.ENSEMBL_MAPPING_FILE
         with open(token_dictionary_file, "rb") as f:
             gene_token_dict = pickle.load(f)
         with open(gene_median_file, "rb") as f:

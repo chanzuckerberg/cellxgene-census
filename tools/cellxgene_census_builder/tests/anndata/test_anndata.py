@@ -20,12 +20,13 @@ from cellxgene_census_builder.build_state import CensusBuildArgs
 from ..conftest import GENE_IDS, ORGANISMS, get_anndata
 
 
-def test_open_anndata(datasets: list[Dataset]) -> None:
+def test_open_anndata(datasets: list[Dataset], census_build_args: CensusBuildArgs) -> None:
     """`open_anndata` should open the h5ads for each of the dataset in the argument,
     and yield both the dataset and the corresponding AnnData object.
     This test does not involve additional filtering steps.
     The `datasets` used here have no raw layer.
     """
+    assets_path = census_build_args.h5ads_path.as_posix()
 
     def _todense(X: npt.NDArray[np.float32] | sparse.spmatrix) -> npt.NDArray[np.float32]:
         if isinstance(X, np.ndarray):
@@ -33,17 +34,17 @@ def test_open_anndata(datasets: list[Dataset]) -> None:
         else:
             return cast(npt.NDArray[np.float32], X.todense())
 
-    result = [(d, open_anndata(d, base_path=".")) for d in datasets]
+    result = [(d, open_anndata(d, base_path=assets_path)) for d in datasets]
     assert len(result) == len(datasets) and len(datasets) > 0
     for i, (dataset, anndata_obj) in enumerate(result):
         assert dataset == datasets[i]
-        opened_anndata = anndata.read_h5ad(dataset.dataset_h5ad_path)
+        opened_anndata = anndata.read_h5ad(f"{assets_path}/{dataset.dataset_h5ad_path}")
         assert opened_anndata.obs.equals(anndata_obj.obs)
         assert opened_anndata.var.equals(anndata_obj.var)
         assert np.array_equal(_todense(opened_anndata.X), _todense(anndata_obj.X))
 
     # also check context manager
-    with open_anndata(datasets[0], base_path=".") as ad:
+    with open_anndata(datasets[0], base_path=assets_path) as ad:
         assert ad.n_obs == len(ad.obs)
 
 

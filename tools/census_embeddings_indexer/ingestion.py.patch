@@ -1,0 +1,5 @@
+56a57
+>     dimensions_override: int = -1,
+3144a3146,3147
+>         if dimensions_override >= 0:
+>             dimensions = min(dimensions, dimensions_override)

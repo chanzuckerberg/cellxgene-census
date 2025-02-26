@@ -77,7 +77,8 @@ def test_GeneformerTokenizer_correctness(tmpdir: Path) -> None:
         assert len(true_tokens) == len(cell_ids)
         identical = 0
         for i, cell_id in enumerate(cell_ids):
-            assert len(test_tokens[i]) == len(true_tokens[i])
+            if len(test_tokens[i]) != len(true_tokens[i]):
+                assert test_tokens[i] == true_tokens[i]  # to show diff
             rho, _ = spearmanr(test_tokens[i], true_tokens[i])
             if rho < RHO_THRESHOLD:
                 # token sequences are too dissimilar; assert exact identity so that pytest -vv will
@@ -103,7 +104,9 @@ def test_GeneformerTokenizer_docstring_example() -> None:
                 "soma_joinid",
                 "cell_type_ontology_term_id",
             ),
+            max_input_tokens=2048,
+            special_token=False,
         ) as tokenizer:
             dataset = tokenizer.build()
             assert len(dataset) == 15020
-            assert sum(it.length for it in dataset.to_pandas().itertuples()) == 27798388
+            assert sum(it.length for it in dataset.to_pandas().itertuples()) == 27793772
