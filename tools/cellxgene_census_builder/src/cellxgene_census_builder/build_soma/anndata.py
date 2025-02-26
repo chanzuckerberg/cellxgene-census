@@ -3,7 +3,7 @@ from contextlib import AbstractContextManager
 from functools import cached_property
 from os import PathLike
 from types import TracebackType
-from typing import Any, Protocol, Self, TypedDict, cast
+from typing import Any, NotRequired, Protocol, Self, TypedDict, cast
 
 import h5py
 import numpy as np
@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 class AnnDataFilterSpec(TypedDict):
     organism_ontology_term_id: str
     assay_ontology_term_ids: list[str]
+    is_primary_data: NotRequired[bool]
 
 
 # Indexing types
@@ -266,7 +267,7 @@ class AnnDataProxy(AbstractContextManager["AnnDataProxy"]):
 
 
 # The minimum columns required to be able to filter an H5AD.  See `make_anndata_cell_filter` for details.
-CXG_OBS_COLUMNS_MINIMUM_READ = ("assay_ontology_term_id", "organism_ontology_term_id", "tissue_type")
+CXG_OBS_COLUMNS_MINIMUM_READ = ("assay_ontology_term_id", "organism_ontology_term_id", "tissue_type", "is_primary_data")
 CXG_VAR_COLUMNS_MINIMUM_READ = ("feature_biotype", "feature_reference")
 
 
@@ -326,6 +327,8 @@ def make_anndata_cell_filter(filter_spec: AnnDataFilterSpec) -> AnnDataFilterFun
     assert isinstance(organism_ontology_term_id, str)
     assay_ontology_term_ids = filter_spec.get("assay_ontology_term_ids")
     assert isinstance(assay_ontology_term_ids, list)
+    is_primary_data = filter_spec.get("is_primary_data", None)
+    assert isinstance(is_primary_data, bool | None)
 
     def _filter(ad: AnnDataProxy) -> AnnDataProxy:
         """Filter observations and features per Census schema."""
@@ -345,6 +348,10 @@ def make_anndata_cell_filter(filter_spec: AnnDataFilterSpec) -> AnnDataFilterFun
         obs_mask = obs_mask & (ad.obs.organism_ontology_term_id == organism_ontology_term_id)
         if assay_ontology_term_ids:
             obs_mask = obs_mask & ad.obs.assay_ontology_term_id.isin(assay_ontology_term_ids)
+
+        # Filter by is_primary_data as specified in the filter-spec
+        if is_primary_data is not None:
+            obs_mask = obs_mask & (ad.obs.is_primary_data == is_primary_data)
 
         if not (var_mask.any() and obs_mask.any()):
             return ad[0:0]  # i.e., drop all cells

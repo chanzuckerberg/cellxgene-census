@@ -343,6 +343,10 @@ def validate_axis_dataframes(
                     .reset_index(drop=True)
                 )
 
+                # For spatial assays, make sure we only include primary data
+                if eb.is_exclusively_spatial():
+                    assert dataset_obs["is_primary_data"].all()
+
                 # decategorize census obs slice, as it will not have the same categories as H5AD obs,
                 # preventing Pandas from performing the DataFrame equivalence operation.
                 for key in dataset_obs:

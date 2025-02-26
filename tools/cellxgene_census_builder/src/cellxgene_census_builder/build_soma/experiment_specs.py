@@ -50,6 +50,7 @@ def make_experiment_specs() -> list[ExperimentSpecification]:
             anndata_cell_filter_spec={
                 "organism_ontology_term_id": "NCBITaxon:9606",
                 "assay_ontology_term_ids": ALLOWED_SPATIAL_ASSAYS,
+                "is_primary_data": True,
             },
             organism_ontology_term_id="NCBITaxon:9606",
             obs_term_fields=CXG_OBS_TERM_FIELDS + CXG_OBS_TERM_FIELDS_SPATIAL,
@@ -62,6 +63,7 @@ def make_experiment_specs() -> list[ExperimentSpecification]:
             anndata_cell_filter_spec={
                 "organism_ontology_term_id": "NCBITaxon:10090",
                 "assay_ontology_term_ids": ALLOWED_SPATIAL_ASSAYS,
+                "is_primary_data": True,
             },
             organism_ontology_term_id="NCBITaxon:10090",
             obs_term_fields=CXG_OBS_TERM_FIELDS + CXG_OBS_TERM_FIELDS_SPATIAL,

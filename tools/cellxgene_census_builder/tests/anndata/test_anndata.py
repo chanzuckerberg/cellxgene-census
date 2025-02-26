@@ -287,7 +287,13 @@ def test_open_anndata_column_names(tmp_path: pathlib.Path, h5ad_simple: str) -> 
         assert (ad.var.index == [f"homo_sapiens_{i}" for i in ["a", "b", "c", "d"]]).all()
 
     with open_anndata(path, include_filter_columns=True, obs_column_names=("cell_type",), var_column_names=()) as ad:
-        assert set(ad.obs.keys()) == {"assay_ontology_term_id", "organism_ontology_term_id", "tissue_type", "cell_type"}
+        assert set(ad.obs.keys()) == {
+            "assay_ontology_term_id",
+            "organism_ontology_term_id",
+            "tissue_type",
+            "cell_type",
+            "is_primary_data",
+        }
         assert set(ad.var.keys()) == {"feature_biotype", "feature_reference"}
 
 
