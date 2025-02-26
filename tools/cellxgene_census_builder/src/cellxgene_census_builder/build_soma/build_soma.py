@@ -114,7 +114,12 @@ def build(args: CensusBuildArgs, *, validate: bool = True) -> int:
         # Prune datasets that we will not use, and do not want to include in the build
         prune_unused_datasets(args.h5ads_path, datasets, filtered_datasets)
 
-        client.cluster.scale(16)  # TODO: Come up with some heuristic/ decide on chunk sizes for writing images
+        # Scale the cluster up as we are no longer memory constrained in the following phases
+        n_workers = clamp(cpu_count(), 1, args.config.max_worker_processes)
+        logger.info(f"Scaling cluster to {n_workers} workers.")
+        client.cluster.scale(n=n_workers)
+
+        # Step 4a - add spatial information
         build_step4a_add_spatial(args.h5ads_path.as_posix(), filtered_datasets, experiment_builders, args)
 
         # Step 5- write out dataset manifest and summary information
@@ -124,11 +129,6 @@ def build(args: CensusBuildArgs, *, validate: bool = True) -> int:
 
         # Temporary work-around. Can be removed when single-cell-data/TileDB-SOMA#1969 fixed.
         tiledb_soma_1969_work_around(root_collection.uri)
-
-        # Scale the cluster up as we are no longer memory constrained in the following phases
-        n_workers = clamp(cpu_count(), 1, args.config.max_worker_processes)
-        logger.info(f"Scaling cluster to {n_workers} workers.")
-        client.cluster.scale(n=n_workers)
 
         if args.config.consolidate:
             for f in dask.distributed.as_completed(submit_consolidate(root_collection.uri, pool=client, vacuum=True)):
