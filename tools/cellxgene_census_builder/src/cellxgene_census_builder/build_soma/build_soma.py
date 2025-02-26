@@ -365,7 +365,7 @@ def build_step4a_add_spatial(
             loc = pd.DataFrame(tissue_pos, columns=["y", "x"])
             loc["soma_joinid"] = obs["soma_joinid"].array
             loc_pa = pa.Table.from_pandas(loc, preserve_index=False)
-            _ = scene.add_new_collection("obsl")
+            scene.add_new_collection("obsl")
 
             with scene.add_new_point_cloud_dataframe(
                 "loc",
