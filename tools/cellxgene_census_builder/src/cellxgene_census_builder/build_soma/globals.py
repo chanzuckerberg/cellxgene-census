@@ -127,8 +127,6 @@ CXG_OBS_FIELDS_READ = [  # Columns READ from the CXG H5AD - see open_anndata()
     FieldSpec(name="organism", type=pa.large_string(), is_dictionary=True),
     FieldSpec(name="organism_ontology_term_id", type=pa.large_string(), is_dictionary=True),
 ]
-# TODO: remove and use FIELDS variable
-CENSUS_OBS_STATS_COLUMNS = ["raw_sum", "nnz", "raw_mean_nnz", "raw_variance_nnz", "n_measured_vars"]
 
 CXG_VAR_COLUMNS_READ: tuple[str, ...] = (
     "_index",

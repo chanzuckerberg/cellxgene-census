@@ -35,7 +35,7 @@ from .globals import (
     CENSUS_DATASETS_NAME,
     CENSUS_DATASETS_TABLE_SPEC,
     CENSUS_INFO_NAME,
-    CENSUS_OBS_STATS_COLUMNS,
+    CENSUS_OBS_STATS_FIELDS,
     CENSUS_SCHEMA_VERSION,
     CENSUS_SPATIAL_SEQUENCING_NAME,
     CENSUS_SUMMARY_CELL_COUNTS_NAME,
@@ -335,7 +335,7 @@ def validate_axis_dataframes(
                             "dataset_id",
                             "tissue_general",
                             "tissue_general_ontology_term_id",
-                            *CENSUS_OBS_STATS_COLUMNS,
+                            *[x.name for x in CENSUS_OBS_STATS_FIELDS],
                         ]
                     )
                     .sort_values(by="soma_joinid")
@@ -363,7 +363,7 @@ def validate_axis_dataframes(
                     # TODO: Make this comparison work in the case where slide-seq data does not have the visium specific obs columns
                     # Ideally, we fill the ad.obs with a fill value for cases where the column is optional
                     common_cols = ad.obs.columns.intersection(
-                        list({f.name for f in eb.obs_term_fields} - set(CENSUS_OBS_STATS_COLUMNS))
+                        list({f.name for f in eb.obs_term_fields} - {x.name for x in CENSUS_OBS_STATS_FIELDS})
                     )
                     ad_obs = ad.obs[common_cols].reset_index(drop=True)
                     assert (
@@ -751,7 +751,7 @@ def validate_X_layers_raw_contents(
                 # get the joinids for the obs axis
                 obs_df = (
                     exp.obs.read(
-                        column_names=["soma_joinid", "dataset_id", *CENSUS_OBS_STATS_COLUMNS],
+                        column_names=["soma_joinid", "dataset_id", *[x.name for x in CENSUS_OBS_STATS_FIELDS]],
                         value_filter=f"dataset_id == '{dataset.dataset_id}'",
                     )
                     .concat()
