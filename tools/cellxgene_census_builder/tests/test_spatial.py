@@ -204,6 +204,7 @@ def test_obs_spatial_presence(spatial_build):
     expected = obs[["soma_joinid", "dataset_id"]].rename(columns={"dataset_id": "scene_id"}).assign(data=True)
 
     # TODO: resolve casting `scene_id` to categorical. Ideally `scene_id` will be stored dictionary encoded
+    # https://github.com/single-cell-data/TileDB-SOMA/issues/3743
     pd.testing.assert_frame_equal(expected, obs_spatial_presence.astype({"scene_id": "category"}))
 
 

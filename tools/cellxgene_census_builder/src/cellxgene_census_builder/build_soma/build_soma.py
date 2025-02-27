@@ -392,12 +392,12 @@ def build_step4a_add_spatial(
         obs_spatial_presence = pa.Table.from_pandas(
             pd.concat(obs_spatial_presences, ignore_index=True)
             .reset_index(drop=True)
-            # TODO: tiledbsoma doesn't let us use a categorical column as an index, follow up on this, Julia is aware
+            # TODO: tiledbsoma currently doesn't let us use a categorical column as an index
+            # https://github.com/single-cell-data/TileDB-SOMA/issues/3743
             # .astype({"scene_id": "category"})
             # Add in all True boolean column for interpretation as sparse matrix
             .assign(data=True)
         )
-        # assert False, obs_spatial_presence.schema
 
         with cast(soma.Experiment, eb.experiment).add_new_dataframe(
             "obs_spatial_presence",
