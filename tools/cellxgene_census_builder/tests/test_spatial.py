@@ -76,13 +76,11 @@ def _fetch_datasets_and_write_manifest(h5ad_dir: Path, manifest_pth: str) -> Non
 
 @pytest.fixture(scope="session")
 def spatial_manifest(tmp_path_factory, worker_id) -> Path:
-    # if worker_id == "master":
-    #     # not executing in with multiple workers, just produce the data and let
-    #     # pytest's fixture caching do its job
-    #     return _fetch_datasets(anndata_dir, manifest_pth)
-
-    # get the temp directory shared by all workers
-    # root_tmp_dir = tmp_path_factory.getbasetemp().parent
+    # TODO: We should refactor this fixture to better support running tests in parallel.
+    # Currently datasets are downloaded in a thread safe way to prevent overwriting, and build are written to seperate directories
+    # However builds can happen in parallel which ends up oversubscribbing the CPU and taking a long time.
+    # Ideally we would do a build once and re-use it across workers (as each build takes some time). See these docs for more info on how to do this:
+    # https://pytest-xdist.readthedocs.io/en/stable/how-to.html#making-session-scoped-fixtures-execute-only-once
     root_tmp_dir = tmp_path_factory.getbasetemp()  # Not shared, but also not reused
     anndata_dir = pooch.os_cache("cellxgene_census_builder")
     manifest_pth = root_tmp_dir / "manifest.csv"
@@ -116,7 +114,6 @@ def spatial_build(spatial_manifest, tmp_path_factory) -> SpatialBuild:
             "build",
             "--manifest",
             str(spatial_manifest),
-            # "--no-validate",
         ],
         check=True,
     )
