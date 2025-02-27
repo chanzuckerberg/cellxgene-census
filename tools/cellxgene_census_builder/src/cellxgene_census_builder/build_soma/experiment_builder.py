@@ -594,6 +594,7 @@ def dispatch_X_chunk(
     local_var_joinids = adata.var.join(global_var_joinids).soma_joinid.to_numpy()
     assert (local_var_joinids >= 0).all(), f"Illegal join id, {dataset_id}"
 
+    # spatial and non-spatial assays should not be written to the same Experiment
     _is_spatial_assay = np.isin(adata.obs.assay_ontology_term_id.to_numpy(), ALLOWED_SPATIAL_ASSAYS)
     if is_spatial_assay := _is_spatial_assay.any():
         assert _is_spatial_assay.all(), f"Mix of spatial and non-spatial assays in the same dataset: {dataset_id}"
@@ -661,6 +662,7 @@ def dispatch_X_chunk(
         del X
         gc.collect()
 
+        # We don't write a normalized matrix for spatial Experiments
         if is_spatial_assay:
             pass
         elif is_full_gene_assay is not None:
