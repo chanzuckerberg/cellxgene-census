@@ -35,26 +35,43 @@ VISIUM_DATASET_IDS = [
     "db4b5e64-71bd-4ed8-8ec9-21471194485b",  # Homo sapiens Slide-seq
 ]
 
-
-def create_manifest_csv_file(
-    spatial_datasets_dir: Path | str, manifest_file_path: Path | str, dataset_ids: list[str]
-) -> None:
-    file_paths = [str(Path(spatial_datasets_dir) / f"{d_id}.h5ad") for d_id in dataset_ids]
-    manifest_content = "\n".join([", ".join(pair) for pair in zip(dataset_ids, file_paths, strict=False)])
-
-    with open(manifest_file_path, "w") as f:
-        f.write(manifest_content.strip())
+SPATIAL_TEST_DATASETS = [
+    {
+        "dataset_id": "fee901ce-87ea-46cd-835a-c15906a4aa6d",
+        "collection_id": "21bbfaec-6958-46bc-b1cd-1535752f6304",
+        "collection_name": "Single cell and spatial transcriptomics in Sjögren’s Disease-affected Human Salivary Glands",
+        "dataset_title": "spRNA-seq for GZMK+CD8+ T cells Target A Specific Acinar Cell Type in Sjögren’s Disease - Block #7",
+        "dataset_version_id": "fee901ce-87ea-46cd-835a-c15906a4aa6d",
+    },  # Homo sapiens Visium
+    {
+        "dataset_id": "e944a0f7-e398-4e8f-a060-94dae8a08fb3",
+        "collection_id": "68cba939-4e72-4405-80ef-512a05044fba",
+        "collection_name": "Profiling the heterogeneity of colorectal cancer consensus molecular subtypes using spatial transcriptomics",
+        "dataset_title": "S5_Rec A121573 Rep1",
+        "dataset_version_id": "e944a0f7-e398-4e8f-a060-94dae8a08fb3",
+    },  # Homo sapiens Visium
+    {
+        "dataset_id": "db4b5e64-71bd-4ed8-8ec9-21471194485b",
+        "collection_id": "a96133de-e951-4e2d-ace6-59db8b3bfb1d",
+        "collection_name": "HTAN/HTAPP Broad - Spatio-molecular dissection of the breast cancer metastatic microenvironment",
+        "dataset_title": "HTAPP-982-SMP-7629 Slide-seq",
+        "dataset_version_id": "db4b5e64-71bd-4ed8-8ec9-21471194485b",
+    },  # Homo sapiens Slide-seq
+]
 
 
 def _fetch_datasets_and_write_manifest(h5ad_dir: Path, manifest_pth: str) -> None:
-    for dataset_id in VISIUM_DATASET_IDS:
+    for dataset in SPATIAL_TEST_DATASETS:
+        dataset_id = dataset["dataset_id"]
         pooch.retrieve(
             f"https://datasets.cellxgene.cziscience.com/{dataset_id}.h5ad",
             None,
             fname=f"{dataset_id}.h5ad",
             path=h5ad_dir,
         )
-    create_manifest_csv_file(h5ad_dir, manifest_pth, VISIUM_DATASET_IDS)
+    table = pd.DataFrame(SPATIAL_TEST_DATASETS)
+    table["dataset_asset_h5ad_uri"] = table["dataset_id"].apply(lambda x: str(h5ad_dir / f"{x}.h5ad"))
+    table.to_csv(manifest_pth, index=False)
 
 
 @pytest.fixture(scope="session")

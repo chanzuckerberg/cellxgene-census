@@ -1,8 +1,8 @@
-import csv
 import io
 import logging
 
 import fsspec
+import pandas as pd
 
 from .datasets import Dataset
 from .globals import CXG_SCHEMA_VERSION
@@ -15,12 +15,14 @@ CXG_BASE_URI = "https://api.cellxgene.cziscience.com/"
 # CXG_BASE_URI = "https://api.cellxgene.dev.single-cell.czi.technology/"
 
 
-def parse_manifest_file(manifest_fp: io.TextIOBase) -> list[Dataset]:
-    """Return manifest as list of tuples, (dataset_id, URI/path), read from the text stream."""
-    # skip comments and strip leading/trailing white space
-    skip_comments = csv.reader(row for row in manifest_fp if not row.startswith("#"))
-    stripped = [[r.strip() for r in row] for row in skip_comments]
-    return [Dataset(dataset_id=r[0], dataset_asset_h5ad_uri=r[1]) for r in stripped]
+def load_manifest_from_fp(manifest_fp: io.TextIOBase | str) -> list[Dataset]:
+    logger.info("Loading manifest from file")
+    return parse_manifest_file(manifest_fp)
+
+
+def parse_manifest_file(manifest_fp: io.TextIOBase | str) -> list[Dataset]:
+    """Return manifest as list Datasets."""
+    return [Dataset(**rec) for rec in pd.read_csv(manifest_fp).to_dict(orient="records")]  # type: ignore[misc,arg-type]
 
 
 def dedup_datasets(datasets: list[Dataset]) -> list[Dataset]:
@@ -29,11 +31,6 @@ def dedup_datasets(datasets: list[Dataset]) -> list[Dataset]:
         logger.warning("Dataset manifest contained DUPLICATES, which will be ignored.")
         return list(ds.values())
     return datasets
-
-
-def load_manifest_from_fp(manifest_fp: io.TextIOBase) -> list[Dataset]:
-    logger.info("Loading manifest from file")
-    return parse_manifest_file(manifest_fp)
 
 
 def null_to_empty_str(val: str | None) -> str:
@@ -144,11 +141,7 @@ def load_manifest(
     from the CELLxGENE REST API.  Apply the blocklist if provided.
     """
     if manifest_fp is not None:
-        if isinstance(manifest_fp, str):
-            with open(manifest_fp) as f:
-                datasets = load_manifest_from_fp(f)
-        else:
-            datasets = load_manifest_from_fp(manifest_fp)
+        datasets = load_manifest_from_fp(manifest_fp)
     else:
         datasets = load_manifest_from_CxG()
 
