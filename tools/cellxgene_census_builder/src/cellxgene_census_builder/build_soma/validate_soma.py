@@ -150,7 +150,6 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_specifications: l
         )
 
         # verify required dataset fields are set
-        # TODO (spatial): The below 5 lines should be uncommented once datasets are available via `/datasets` endpoint
         df: pd.DataFrame = census_info[CENSUS_DATASETS_NAME].read().concat().to_pandas()
 
         assert (df["collection_id"] != "").all()
