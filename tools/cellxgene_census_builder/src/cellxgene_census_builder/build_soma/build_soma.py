@@ -305,7 +305,7 @@ def build_step4a_add_spatial(
     logger.info("Build step 4a - Populate spatial info - started")
     import h5py
     import pyarrow as pa
-    from anndata.experimental import read_elem
+    from anndata.io import read_elem
 
     h5ad_path = args.h5ads_path
     client = dask.distributed.Client.current()

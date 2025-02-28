@@ -10,7 +10,7 @@ import pandas as pd
 import pooch
 import pytest
 import tiledbsoma
-from anndata.experimental import read_elem
+from anndata.io import read_elem
 from filelock import FileLock
 
 from cellxgene_census_builder.build_soma.manifest import load_manifest

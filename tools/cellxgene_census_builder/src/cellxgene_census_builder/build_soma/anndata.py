@@ -10,7 +10,8 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 import scipy.sparse as sparse
-from anndata.experimental import CSCDataset, CSRDataset, read_elem, sparse_dataset
+from anndata.abc import CSCDataset, CSRDataset
+from anndata.io import read_elem, sparse_dataset
 
 from ..util import urlcat
 from .datasets import Dataset

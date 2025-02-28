@@ -578,7 +578,7 @@ def validate_X_layers_presence(
 
     def _read_var_names(path: str) -> npt.NDArray[np.object_]:
         import h5py
-        from anndata.experimental import read_elem
+        from anndata.io import read_elem
 
         with h5py.File(path) as f:
             index_key = f["var"].attrs["_index"]
