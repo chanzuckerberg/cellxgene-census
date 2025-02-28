@@ -24,17 +24,7 @@ class SpatialBuild:
 
 
 # These should be updated with every schema update
-VISIUM_DATASET_URIS = [
-    "https://datasets.cellxgene.cziscience.com/fee901ce-87ea-46cd-835a-c15906a4aa6d.h5ad",
-    "https://datasets.cellxgene.cziscience.com/e944a0f7-e398-4e8f-a060-94dae8a08fb3.h5ad",
-]
-
-VISIUM_DATASET_IDS = [
-    "fee901ce-87ea-46cd-835a-c15906a4aa6d",  # Homo sapiens Visium
-    "e944a0f7-e398-4e8f-a060-94dae8a08fb3",  # Homo sapiens Visium
-    "db4b5e64-71bd-4ed8-8ec9-21471194485b",  # Homo sapiens Slide-seq
-]
-
+# Fields besides dataset_id are only needed for validation of the built object, and can be dummy values
 SPATIAL_TEST_DATASETS = [
     {
         "dataset_id": "fee901ce-87ea-46cd-835a-c15906a4aa6d",
