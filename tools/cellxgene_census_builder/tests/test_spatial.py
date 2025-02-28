@@ -223,7 +223,6 @@ def test_obs_spatial_presence(spatial_build):
 
 
 def test_scene(spatial_build):
-    # TODO: Figure out what else needs checking here
     census = cellxgene_census.open_soma(uri=str(spatial_build.soma_path))
     experiment = census["census_spatial_sequencing"]["homo_sapiens"]
 
@@ -245,6 +244,9 @@ def test_spatialdata_query_export(spatial_build):
     sdata = query.to_spatialdata(X_name="raw")
     adata = query.to_anndata(X_name="raw")
 
-    # TODO: compare adata and sdata more fully
-
-    assert sdata.tables["RNA"].n_obs == adata.n_obs
+    pd.testing.assert_frame_equal(
+        sdata.tables["RNA"].obs.drop(columns=["instance_key", "region_key"]).reset_index(drop=True),
+        adata.obs.reset_index(drop=True),
+    )
+    pd.testing.assert_frame_equal(sdata.tables["RNA"].var, adata.var)
+    assert (sdata.tables["RNA"].X != adata.X).sum() == 0
