@@ -19,6 +19,7 @@ from dask.delayed import Delayed
 from tiledbsoma import (
     Axis,
     CoordinateSpace,
+    ScaleTransform,
     Scene,
 )
 
@@ -441,10 +442,6 @@ def add_image_collection(
     spatial_library_info: h5py.Group,
     scale_factors: dict[str, float],
 ) -> list[Delayed]:
-    from somacore import (
-        ScaleTransform,
-    )
-
     image_dict = {
         k: read_elem_as_dask(spatial_library_info["images"][k]) for k in spatial_library_info["images"].keys()
     }
