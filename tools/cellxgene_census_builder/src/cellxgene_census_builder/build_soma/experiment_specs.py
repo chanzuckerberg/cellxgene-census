@@ -1,7 +1,13 @@
 import functools
 
 from .experiment_builder import ExperimentBuilder, ExperimentSpecification
-from .globals import RNA_SEQ
+from .globals import (
+    ALLOWED_SPATIAL_ASSAYS,
+    CXG_OBS_FIELDS_READ,
+    CXG_OBS_TERM_FIELDS,
+    CXG_OBS_TERM_FIELDS_SPATIAL,
+    RNA_SEQ,
+)
 
 
 @functools.cache
@@ -15,20 +21,53 @@ def make_experiment_specs() -> list[ExperimentSpecification]:
         ExperimentSpecification.create(
             name="homo_sapiens",
             label="Homo sapiens",
+            root_collection="census_data",
             anndata_cell_filter_spec={
                 "organism_ontology_term_id": "NCBITaxon:9606",
                 "assay_ontology_term_ids": RNA_SEQ,
             },
             organism_ontology_term_id="NCBITaxon:9606",
+            obs_term_fields=CXG_OBS_TERM_FIELDS,
+            obs_term_fields_read=CXG_OBS_TERM_FIELDS + CXG_OBS_FIELDS_READ,
         ),
         ExperimentSpecification.create(
             name="mus_musculus",
             label="Mus musculus",
+            root_collection="census_data",
             anndata_cell_filter_spec={
                 "organism_ontology_term_id": "NCBITaxon:10090",
                 "assay_ontology_term_ids": RNA_SEQ,
             },
             organism_ontology_term_id="NCBITaxon:10090",
+            obs_term_fields=CXG_OBS_TERM_FIELDS,
+            obs_term_fields_read=CXG_OBS_TERM_FIELDS + CXG_OBS_FIELDS_READ,
+        ),
+        # Experiments for spatial assays
+        ExperimentSpecification.create(
+            name="homo_sapiens",
+            label="Homo sapiens",
+            root_collection="census_spatial_sequencing",
+            anndata_cell_filter_spec={
+                "organism_ontology_term_id": "NCBITaxon:9606",
+                "assay_ontology_term_ids": ALLOWED_SPATIAL_ASSAYS,
+                "is_primary_data": True,
+            },
+            organism_ontology_term_id="NCBITaxon:9606",
+            obs_term_fields=CXG_OBS_TERM_FIELDS + CXG_OBS_TERM_FIELDS_SPATIAL,
+            obs_term_fields_read=CXG_OBS_TERM_FIELDS + CXG_OBS_FIELDS_READ + CXG_OBS_TERM_FIELDS_SPATIAL,
+        ),
+        ExperimentSpecification.create(
+            name="mus_musculus",
+            label="Mus musculus",
+            root_collection="census_spatial_sequencing",
+            anndata_cell_filter_spec={
+                "organism_ontology_term_id": "NCBITaxon:10090",
+                "assay_ontology_term_ids": ALLOWED_SPATIAL_ASSAYS,
+                "is_primary_data": True,
+            },
+            organism_ontology_term_id="NCBITaxon:10090",
+            obs_term_fields=CXG_OBS_TERM_FIELDS + CXG_OBS_TERM_FIELDS_SPATIAL,
+            obs_term_fields_read=CXG_OBS_TERM_FIELDS + CXG_OBS_FIELDS_READ + CXG_OBS_TERM_FIELDS_SPATIAL,
         ),
     ]
 

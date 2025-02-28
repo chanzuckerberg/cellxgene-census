@@ -77,7 +77,6 @@ def create_args_parser() -> argparse.ArgumentParser:
     build_parser = subparsers.add_parser("build", help="Build the Census")
     build_parser.add_argument(
         "--manifest",
-        type=argparse.FileType("r"),
         help="Manifest file",
     )
     build_parser.add_argument(
