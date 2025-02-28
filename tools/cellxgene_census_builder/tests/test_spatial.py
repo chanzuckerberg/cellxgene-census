@@ -93,7 +93,9 @@ def spatial_build(spatial_manifest, tmp_path_factory) -> SpatialBuild:
 
     subprocess.run(
         [
-            "python",
+            "coverage",
+            "run",
+            "--parallel-mode",
             "-m",
             "cellxgene_census_builder.build_soma",
             "-v",
