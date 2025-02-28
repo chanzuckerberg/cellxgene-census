@@ -89,9 +89,8 @@ def spatial_build(spatial_manifest, tmp_path_factory) -> SpatialBuild:
     census_dir = root_tmp_dir / "census-builds"
     build_tag = "test-spatial-build"
     blocklist = root_tmp_dir / "block.csv"
-    with blocklist.open("w") as _:
-        pass
-    # Returns URI for build object
+    blocklist.touch()
+
     subprocess.run(
         [
             "python",
