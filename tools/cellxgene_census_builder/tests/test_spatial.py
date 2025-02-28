@@ -179,7 +179,6 @@ def test_no_normalized_matrix(spatial_build):
 
 
 def test_images(spatial_build):
-    # TODO: check the metadata of the images
     census = cellxgene_census.open_soma(uri=str(spatial_build.soma_path))
     manifest = load_manifest(str(spatial_build.manifest_path), str(spatial_build.blocklist))
 
@@ -200,7 +199,7 @@ def test_images(spatial_build):
             image_collection = spatial[dataset_id]["img"][library_id]
             for k in image_collection.keys():
                 from_census = image_collection[k].read().to_numpy()
-                from_h5ad = np.transpose(spatial_dict["images"][k], (2, 0, 1))  ## TODO figure out why we do this
+                from_h5ad = np.transpose(spatial_dict["images"][k], (2, 0, 1))
                 np.testing.assert_array_equal(from_h5ad, from_census)
 
 
