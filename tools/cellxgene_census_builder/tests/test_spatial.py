@@ -47,6 +47,13 @@ SPATIAL_TEST_DATASETS = [
         "dataset_title": "HTAPP-982-SMP-7629 Slide-seq",
         "dataset_version_id": "db4b5e64-71bd-4ed8-8ec9-21471194485b",
     },  # Homo sapiens Slide-seq
+    {
+        "dataset_id": "563baeba-7936-4600-b61c-c003f89c8bdb",
+        "collection_id": "8e880741-bf9a-4c8e-9227-934204631d2a",
+        "collection_name": "High Resolution Slide-seqV2 Spatial Transcriptomics Enables Discovery of Disease-Specific Cell Neighborhoods and Pathways",
+        "dataset_title": "Spatial transcriptomics in mouse: Puck_200127_09",
+        "dataset_version_id": "563baeba-7936-4600-b61c-c003f89c8bdb",
+    },  # Mus musculus Slide-seq w/ repeated coordinates
 ]
 
 
@@ -119,7 +126,10 @@ def spatial_build(spatial_manifest, tmp_path_factory) -> SpatialBuild:
 def test_spatial_build(spatial_build):
     manifest = load_manifest(str(spatial_build.manifest_path), str(spatial_build.blocklist))
     census = cellxgene_census.open_soma(uri=str(spatial_build.soma_path))
-    obs = census["census_spatial_sequencing"]["homo_sapiens"].obs.read().concat().to_pandas()
+    obss = []
+    for species in ["homo_sapiens", "mus_musculus"]:
+        obss.append(census["census_spatial_sequencing"][species].obs.read().concat().to_pandas())
+    obs = pd.concat(obss)
     assert set(obs["dataset_id"].unique()) == {d.dataset_id for d in manifest}
 
 
@@ -173,12 +183,13 @@ def test_images(spatial_build):
     census = cellxgene_census.open_soma(uri=str(spatial_build.soma_path))
     manifest = load_manifest(str(spatial_build.manifest_path), str(spatial_build.blocklist))
 
-    h5ads = {d.dataset_id: Path(d.dataset_asset_h5ad_uri) for d in manifest}
     obs = census["census_spatial_sequencing"]["homo_sapiens"].obs.read().concat().to_pandas()
+    h5ads = {d.dataset_id: Path(d.dataset_asset_h5ad_uri) for d in manifest}
     assay_types = obs[["dataset_id", "assay"]].drop_duplicates().set_index("dataset_id")["assay"]
     spatial = census["census_spatial_sequencing"]["homo_sapiens"]["spatial"]
 
-    for dataset_id, h5ad_path in h5ads.items():
+    for dataset_id in obs["dataset_id"].unique():
+        h5ad_path = h5ads[dataset_id]
         assay = assay_types.loc[dataset_id]
         if assay == "Slide-seqV2":
             # No images should be stored for slide-seq
