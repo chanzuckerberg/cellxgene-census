@@ -1,5 +1,3 @@
-from typing import Optional, Tuple
-
 import numba
 import numpy as np
 import numpy.typing as npt
@@ -43,7 +41,7 @@ class MeanVarianceAccumulator:
         self,
         var_vec: npt.NDArray[np.int64],
         val_vec: npt.NDArray[np.float32],
-        batch_vec: Optional[npt.NDArray[np.int64]] = None,
+        batch_vec: npt.NDArray[np.int64] | None = None,
     ) -> None:
         if self.n_batches == 1:
             assert batch_vec is None
@@ -54,7 +52,7 @@ class MeanVarianceAccumulator:
 
     def finalize(
         self,
-    ) -> Tuple[
+    ) -> tuple[
         npt.NDArray[np.float64],
         npt.NDArray[np.float64],
         npt.NDArray[np.float64],
@@ -98,7 +96,7 @@ class MeanAccumulator:
         self.n_samples = n_samples
         self.nnz_only = nnz_only
         # If we want to exclude zeros, we need to keep track of the denominator
-        self.n = np.zeros(n_variables)
+        self.n = np.zeros(n_variables, dtype=np.float64)
 
     def update(self, var_vec: npt.NDArray[np.int64], val_vec: npt.NDArray[np.float32]) -> None:
         if self.nnz_only:
@@ -108,9 +106,9 @@ class MeanAccumulator:
 
     def finalize(self) -> npt.NDArray[np.float64]:
         if self.nnz_only:
-            return self.u / self.n
+            return np.divide(self.u, self.n, dtype=np.float64)
         else:
-            return self.u / self.n_samples
+            return np.divide(self.u, self.n_samples, dtype=np.float64)
 
 
 class CountsAccumulator:
@@ -125,7 +123,7 @@ class CountsAccumulator:
         self,
         var_vec: npt.NDArray[np.int64],
         val_vec: npt.NDArray[np.float32],
-        batch_vec: Optional[npt.NDArray[np.int64]] = None,
+        batch_vec: npt.NDArray[np.int64] | None = None,
     ) -> None:
         if self.n_batches == 1:
             assert batch_vec is None
@@ -147,7 +145,7 @@ class CountsAccumulator:
                 self.clip_val,
             )
 
-    def finalize(self) -> Tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
+    def finalize(self) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
         return self.counts_sum, self.squared_counts_sum
 
 
@@ -282,7 +280,7 @@ def _mbomv_combine_batches(
     n_samples: npt.NDArray[np.int64],
     u: npt.NDArray[np.float64],
     M2: npt.NDArray[np.float64],
-) -> Tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
+) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
     """Combine all batches using Chan's parallel adaptation of Welford's.
 
     Returns tuple of (u, M2).

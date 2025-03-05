@@ -20,12 +20,13 @@ from cellxgene_census_builder.build_state import CensusBuildArgs
 from ..conftest import GENE_IDS, ORGANISMS, get_anndata
 
 
-def test_open_anndata(datasets: list[Dataset]) -> None:
+def test_open_anndata(datasets: list[Dataset], census_build_args: CensusBuildArgs) -> None:
     """`open_anndata` should open the h5ads for each of the dataset in the argument,
     and yield both the dataset and the corresponding AnnData object.
     This test does not involve additional filtering steps.
     The `datasets` used here have no raw layer.
     """
+    assets_path = census_build_args.h5ads_path.as_posix()
 
     def _todense(X: npt.NDArray[np.float32] | sparse.spmatrix) -> npt.NDArray[np.float32]:
         if isinstance(X, np.ndarray):
@@ -33,17 +34,17 @@ def test_open_anndata(datasets: list[Dataset]) -> None:
         else:
             return cast(npt.NDArray[np.float32], X.todense())
 
-    result = [(d, open_anndata(d, base_path=".")) for d in datasets]
+    result = [(d, open_anndata(d, base_path=assets_path)) for d in datasets]
     assert len(result) == len(datasets) and len(datasets) > 0
     for i, (dataset, anndata_obj) in enumerate(result):
         assert dataset == datasets[i]
-        opened_anndata = anndata.read_h5ad(dataset.dataset_h5ad_path)
+        opened_anndata = anndata.read_h5ad(f"{assets_path}/{dataset.dataset_h5ad_path}")
         assert opened_anndata.obs.equals(anndata_obj.obs)
         assert opened_anndata.var.equals(anndata_obj.var)
         assert np.array_equal(_todense(opened_anndata.X), _todense(anndata_obj.X))
 
     # also check context manager
-    with open_anndata(datasets[0], base_path=".") as ad:
+    with open_anndata(datasets[0], base_path=assets_path) as ad:
         assert ad.n_obs == len(ad.obs)
 
 
@@ -108,7 +109,8 @@ def test_make_anndata_cell_filter_filters_out_organoids_cell_culture(
     filtered_adata_with_organoids_and_cell_culture = func(adata_with_organoids_and_cell_culture)
 
     assert adata_with_organoids_and_cell_culture.var.equals(filtered_adata_with_organoids_and_cell_culture.var)
-    assert filtered_adata_with_organoids_and_cell_culture.obs.shape[0] == 2
+    # tissue(2) and organoid(1). cell_culture should be excluded
+    assert filtered_adata_with_organoids_and_cell_culture.obs.shape[0] == 3
 
 
 def test_make_anndata_cell_filter_organism(tmp_path: pathlib.Path, h5ad_with_organism: str) -> None:
@@ -265,7 +267,7 @@ def test_empty_estimated_density(tmp_path: pathlib.Path) -> None:
     adata = anndata.AnnData(
         obs=pd.DataFrame(), var=pd.DataFrame({"feature_id": [0, 1, 2]}), X=sparse.csr_matrix((0, 3), dtype=np.float32)
     )
-    adata.uns["schema_version"] = "5.1.0"
+    adata.uns["schema_version"] = "5.2.0"
     adata.write_h5ad(path)
 
     with open_anndata(path) as ad:
@@ -285,7 +287,13 @@ def test_open_anndata_column_names(tmp_path: pathlib.Path, h5ad_simple: str) -> 
         assert (ad.var.index == [f"homo_sapiens_{i}" for i in ["a", "b", "c", "d"]]).all()
 
     with open_anndata(path, include_filter_columns=True, obs_column_names=("cell_type",), var_column_names=()) as ad:
-        assert set(ad.obs.keys()) == {"assay_ontology_term_id", "organism_ontology_term_id", "tissue_type", "cell_type"}
+        assert set(ad.obs.keys()) == {
+            "assay_ontology_term_id",
+            "organism_ontology_term_id",
+            "tissue_type",
+            "cell_type",
+            "is_primary_data",
+        }
         assert set(ad.var.keys()) == {"feature_biotype", "feature_reference"}
 
 
@@ -297,7 +305,7 @@ def test_open_anndata_raw_X(tmp_path: pathlib.Path) -> None:
         var=pd.DataFrame({"feature_id": [0, 1, 2]}),
         X=sparse.csr_matrix((2, 3), dtype=np.float32),
         raw={"X": sparse.csr_matrix((2, 4), dtype=np.float32)},
-        uns={"schema_version": "5.1.0"},
+        uns={"schema_version": "5.2.0"},
     )
     adata.write_h5ad(path)
 
@@ -410,7 +418,7 @@ def test_multi_species_filter(
             index=[f"feature_{i}" for i in range(n_vars)],
         ),
         X=sparse.random(n_obs, n_vars, format="csr", dtype=np.float32),
-        uns={"schema_version": "5.1.0"},
+        uns={"schema_version": "5.2.0"},
     )
     path = (tmp_path / "species.h5ad").as_posix()
     adata.write_h5ad(path)

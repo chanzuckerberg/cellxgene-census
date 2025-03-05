@@ -101,28 +101,24 @@ def list_uris_to_consolidate(
     collection: soma.Collection,
 ) -> list[ConsolidationCandidate]:
     """Recursively walk the soma.Collection and return all uris for soma_types that can be consolidated and vacuumed."""
+    from tiledbsoma._soma_group import SOMAGroup
+
     uris = []
     for soma_obj in collection.values():
-        type = soma_obj.soma_type
-        if type not in [
-            "SOMACollection",
-            "SOMAExperiment",
-            "SOMAMeasurement",
-            "SOMADataFrame",
-            "SOMASparseNDArray",
-            "SOMADenseNDArray",
-        ]:
-            raise TypeError(f"Unknown SOMA type {type}.")
-
-        if type in ["SOMACollection", "SOMAExperiment", "SOMAMeasurement"]:
+        if isinstance(soma_obj, SOMAGroup):
             uris += list_uris_to_consolidate(soma_obj)
             n_columns = 0
             n_fragments = 0
         else:
             n_columns = len(soma_obj.schema)
             n_fragments = len(tiledb.array_fragments(soma_obj.uri))
+        # TODO: Consolidation for dense arrays is currently broken, tracked in https://github.com/single-cell-data/TileDB-SOMA/issues/3383
+        if soma_obj.soma_type in ["SOMADenseNDArray", "SOMAPointCloudDataFrame"]:
+            continue
         uris.append(
-            ConsolidationCandidate(uri=soma_obj.uri, soma_type=type, n_columns=n_columns, n_fragments=n_fragments)
+            ConsolidationCandidate(
+                uri=soma_obj.uri, soma_type=soma_obj.soma_type, n_columns=n_columns, n_fragments=n_fragments
+            )
         )
 
     return uris

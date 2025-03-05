@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # mypy: ignore-errors
 
+# DEPRECATED: see README.md
+
 import argparse
 import json
 import logging
@@ -10,6 +12,7 @@ import sys
 from collections import Counter
 
 import pandas as pd
+import torch
 import yaml
 from datasets import Dataset
 from geneformer import DataCollatorForCellClassification
@@ -22,6 +25,7 @@ NPROC = multiprocessing.cpu_count()
 
 
 def main(argv):
+    assert torch.cuda.is_available(), "CUDA is not available"
     args = parse_arguments(argv)
     if os.path.exists(args.model_out):
         logger.error("output directory already exists: " + args.model_out)

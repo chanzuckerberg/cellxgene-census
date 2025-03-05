@@ -15,8 +15,17 @@ Learn how to stream the single-cell data and metadata from Census into your mach
     notebooks/api_demo/census_citation_generation.ipynb
     notebooks/api_demo/census_gget_demo.ipynb
 
-[NEW! 🚀] Using integrated embeddings and models
-------------------------------------------------
+[NEW! 🚀] Accesing spatial transcriptomics data with Census
+-----------------------------------------------------------
+
+.. toctree::
+    :maxdepth: 1
+
+    notebooks/api_demo/census_spatial.ipynb
+
+
+Using integrated embeddings and models
+---------------------------------------
 
 Tutorials that show you how to retrieve pre-calculated Census embeddings and use their associated models for your workflows.
 
@@ -27,6 +36,7 @@ Access Census embeddings.
    
     notebooks/api_demo/census_access_maintained_embeddings.ipynb
     notebooks/api_demo/census_embedding.ipynb
+    notebooks/api_demo/census_embedding_search.ipynb
     
 Use the Census trained models.
 

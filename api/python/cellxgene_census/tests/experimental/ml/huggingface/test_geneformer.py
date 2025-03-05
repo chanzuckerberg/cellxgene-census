@@ -1,3 +1,5 @@
+import sys
+
 import datasets
 import pytest
 import tiledbsoma
@@ -67,7 +69,7 @@ def test_GeneformerTokenizer_correctness(tmpdir: Path) -> None:
         ad.write_h5ad(h5ad_dir.join("tokenizeme.h5ad"))
         # run geneformer.TranscriptomeTokenizer to get "true" tokenizations
         # see: https://huggingface.co/ctheodoris/Geneformer/blob/main/geneformer/tokenizer.py
-        TranscriptomeTokenizer({}).tokenize_data(h5ad_dir, tmpdir, "tk", file_format="h5ad")
+        TranscriptomeTokenizer({}).tokenize_data(h5ad_dir, str(tmpdir), "tk", file_format="h5ad")
         true_tokens = [it["input_ids"] for it in datasets.load_from_disk(tmpdir.join("tk.dataset"))]
 
         # check GeneformerTokenizer sequences against geneformer.TranscriptomeTokenizer's
@@ -75,7 +77,8 @@ def test_GeneformerTokenizer_correctness(tmpdir: Path) -> None:
         assert len(true_tokens) == len(cell_ids)
         identical = 0
         for i, cell_id in enumerate(cell_ids):
-            assert len(test_tokens[i]) == len(true_tokens[i])
+            if len(test_tokens[i]) != len(true_tokens[i]):
+                assert test_tokens[i] == true_tokens[i]  # to show diff
             rho, _ = spearmanr(test_tokens[i], true_tokens[i])
             if rho < RHO_THRESHOLD:
                 # token sequences are too dissimilar; assert exact identity so that pytest -vv will
@@ -88,6 +91,7 @@ def test_GeneformerTokenizer_correctness(tmpdir: Path) -> None:
         assert identical / len(cell_ids) >= EXACT_THRESHOLD
 
 
+@pytest.mark.skipif(sys.version_info < (3, 10), reason="requires python3.10 or higher")
 @pytest.mark.experimental
 @pytest.mark.live_corpus
 def test_GeneformerTokenizer_docstring_example() -> None:
@@ -100,7 +104,9 @@ def test_GeneformerTokenizer_docstring_example() -> None:
                 "soma_joinid",
                 "cell_type_ontology_term_id",
             ),
+            max_input_tokens=2048,
+            special_token=False,
         ) as tokenizer:
             dataset = tokenizer.build()
             assert len(dataset) == 15020
-            assert sum(it.length for it in dataset.to_pandas().itertuples()) == 27798388
+            assert sum(it.length for it in dataset.to_pandas().itertuples()) == 27793772

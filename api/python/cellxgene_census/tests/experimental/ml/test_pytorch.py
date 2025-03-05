@@ -1,6 +1,5 @@
 import pathlib
-import sys
-from typing import Callable, List, Optional, Sequence, Union
+from collections.abc import Callable, Sequence
 from unittest.mock import patch
 
 import numpy as np
@@ -18,8 +17,8 @@ try:
     from torch import Tensor, float32
     from torch.utils.data._utils.worker import WorkerInfo
 
+    from cellxgene_census.experimental.ml.encoders import BatchEncoder, LabelEncoder
     from cellxgene_census.experimental.ml.pytorch import (
-        DefaultEncoder,
         ExperimentDataPipe,
         experiment_dataloader,
         list_split,
@@ -50,17 +49,17 @@ def pytorch_seq_x_value_gen(obs_range: range, var_range: range) -> spmatrix:
 
 
 @pytest.fixture
-def X_layer_names() -> List[str]:
+def X_layer_names() -> list[str]:
     return ["raw"]
 
 
 @pytest.fixture
-def obsp_layer_names() -> Optional[List[str]]:
+def obsp_layer_names() -> list[str] | None:
     return None
 
 
 @pytest.fixture
-def varp_layer_names() -> Optional[List[str]]:
+def varp_layer_names() -> list[str] | None:
     return None
 
 
@@ -71,15 +70,18 @@ def add_dataframe(coll: CollectionBase, key: str, value_range: range) -> None:
             [
                 ("soma_joinid", pa.int64()),
                 ("label", pa.large_string()),
+                ("label2", pa.large_string()),
             ]
         ),
         index_column_names=["soma_joinid"],
+        domain=[(min(value_range), max(value_range))],
     )
     df.write(
         pa.Table.from_pydict(
             {
                 "soma_joinid": list(value_range),
                 "label": [str(i) for i in value_range],
+                "label2": ["c" for i in value_range],
             }
         )
     )
@@ -100,8 +102,8 @@ def add_sparse_array(
 @pytest.fixture(scope="function")
 def soma_experiment(
     tmp_path: pathlib.Path,
-    obs_range: Union[int, range],
-    var_range: Union[int, range],
+    obs_range: int | range,
+    var_range: int | range,
     X_value_gen: Callable[[range, range], sparse.spmatrix],
     obsp_layer_names: Sequence[str],
     varp_layer_names: Sequence[str],
@@ -151,6 +153,39 @@ def test_non_batched(soma_experiment: Experiment, use_eager_fetch: bool) -> None
     row = next(row_iter)
     assert row[0].int().tolist() == [0, 1, 0]
     assert row[1].tolist() == [0]
+
+
+@pytest.mark.experimental
+# noinspection PyTestParametrized
+@pytest.mark.parametrize(
+    "obs_range,var_range,X_value_gen,use_eager_fetch",
+    [(6, 3, pytorch_x_value_gen, use_eager_fetch) for use_eager_fetch in (True, False)],
+)
+@pytest.mark.parametrize("return_sparse_X", [True, False])
+def test_uneven_soma_and_result_batches(
+    soma_experiment: Experiment, use_eager_fetch: bool, return_sparse_X: bool
+) -> None:
+    """This is checking that batches are correctly created when they require fetching multiple chunks.
+
+    This was added due to failures in _ObsAndXIterator.__next__.
+    """
+    exp_data_pipe = ExperimentDataPipe(
+        soma_experiment,
+        measurement_name="RNA",
+        X_name="raw",
+        obs_column_names=["label"],
+        shuffle=False,
+        batch_size=3,
+        soma_chunk_size=2,
+        return_sparse_X=return_sparse_X,
+        use_eager_fetch=use_eager_fetch,
+    )
+    row_iter = iter(exp_data_pipe)
+
+    row = next(row_iter)
+    X_batch = row[0].to_dense() if return_sparse_X else row[0]
+    assert X_batch.int()[0].tolist() == [0, 1, 0]
+    assert row[1].tolist() == [[0], [1], [2]]
 
 
 @pytest.mark.experimental
@@ -351,7 +386,7 @@ def test_batching__partial_soma_batches_are_concatenated(soma_experiment: Experi
 @pytest.mark.experimental
 # noinspection PyTestParametrized
 @pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(3, 3, pytorch_x_value_gen)])
-def test_encoders(soma_experiment: Experiment) -> None:
+def test_default_encoders_implicit(soma_experiment: Experiment) -> None:
     exp_data_pipe = ExperimentDataPipe(
         soma_experiment,
         measurement_name="RNA",
@@ -364,11 +399,58 @@ def test_encoders(soma_experiment: Experiment) -> None:
 
     batch = next(batch_iter)
     assert isinstance(batch[1], Tensor)
+    assert batch[0].to_dense().tolist() == [[0, 1, 0], [1, 0, 1], [0, 1, 0]]
 
     labels_encoded = batch[1]
 
     labels_decoded = exp_data_pipe.obs_encoders["label"].inverse_transform(labels_encoded)
-    assert labels_decoded.tolist() == ["0", "1", "2"]
+    assert labels_decoded.tolist() == ["0", "1", "2"]  # type: ignore
+
+
+@pytest.mark.experimental
+# noinspection PyTestParametrized
+@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(3, 3, pytorch_x_value_gen)])
+def test_default_encoders_explicit(soma_experiment: Experiment) -> None:
+    exp_data_pipe = ExperimentDataPipe(
+        soma_experiment,
+        measurement_name="RNA",
+        X_name="raw",
+        encoders=[LabelEncoder("label")],
+        shuffle=False,
+        batch_size=3,
+    )
+    batch_iter = iter(exp_data_pipe)
+
+    batch = next(batch_iter)
+    assert isinstance(batch[1], Tensor)
+
+    labels_encoded = batch[1]
+
+    labels_decoded = exp_data_pipe.obs_encoders["label"].inverse_transform(labels_encoded)
+    assert labels_decoded.tolist() == ["0", "1", "2"]  # type: ignore
+
+
+@pytest.mark.experimental
+# noinspection PyTestParametrized
+@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(3, 3, pytorch_x_value_gen)])
+def test_batch_encoder(soma_experiment: Experiment) -> None:
+    exp_data_pipe = ExperimentDataPipe(
+        soma_experiment,
+        measurement_name="RNA",
+        X_name="raw",
+        encoders=[BatchEncoder(["label", "label2"])],
+        shuffle=False,
+        batch_size=3,
+    )
+    batch_iter = iter(exp_data_pipe)
+
+    batch = next(batch_iter)
+    assert isinstance(batch[1], Tensor)
+
+    labels_encoded = batch[1]
+
+    labels_decoded = exp_data_pipe.obs_encoders["batch"].inverse_transform(labels_encoded)
+    assert labels_decoded.tolist() == ["0c", "1c", "2c"]  # type: ignore
 
 
 @pytest.mark.experimental
@@ -380,7 +462,7 @@ def test_custom_encoders_fail_if_duplicate(soma_experiment: Experiment) -> None:
             soma_experiment,
             measurement_name="RNA",
             X_name="raw",
-            encoders=[DefaultEncoder("label"), DefaultEncoder("label")],
+            encoders=[LabelEncoder("label"), LabelEncoder("label")],
             shuffle=False,
             batch_size=3,
         )
@@ -390,23 +472,19 @@ def test_custom_encoders_fail_if_duplicate(soma_experiment: Experiment) -> None:
 # noinspection PyTestParametrized
 @pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(3, 3, pytorch_x_value_gen)])
 def test_custom_encoders_fail_if_columns_defined(soma_experiment: Experiment) -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Cannot specify both `obs_column_names` and `encoders`"):
         ExperimentDataPipe(
             soma_experiment,
             measurement_name="RNA",
             X_name="raw",
             obs_column_names=["label"],
-            encoders=[DefaultEncoder("label")],
+            encoders=[LabelEncoder("label")],
             shuffle=False,
             batch_size=3,
         )
 
 
 @pytest.mark.experimental
-@pytest.mark.skipif(
-    (sys.version_info.major, sys.version_info.minor) == (3, 9),
-    reason="fails intermittently with OOM error for 3.9",
-)
 # noinspection PyTestParametrized
 @pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(6, 3, pytorch_x_value_gen)])
 def test_multiprocessing__returns_full_result(soma_experiment: Experiment) -> None:
@@ -438,11 +516,11 @@ def test_distributed__returns_data_partition_for_rank(
     """Tests pytorch._partition_obs_joinids() behavior in a simulated PyTorch distributed processing mode,
     using mocks to avoid having to do real PyTorch distributed setup."""
 
-    with patch("cellxgene_census.experimental.ml.pytorch.dist.is_initialized") as mock_dist_is_initialized, patch(
-        "cellxgene_census.experimental.ml.pytorch.dist.get_rank"
-    ) as mock_dist_get_rank, patch(
-        "cellxgene_census.experimental.ml.pytorch.dist.get_world_size"
-    ) as mock_dist_get_world_size:
+    with (
+        patch("cellxgene_census.experimental.ml.pytorch.dist.is_initialized") as mock_dist_is_initialized,
+        patch("cellxgene_census.experimental.ml.pytorch.dist.get_rank") as mock_dist_get_rank,
+        patch("cellxgene_census.experimental.ml.pytorch.dist.get_world_size") as mock_dist_get_world_size,
+    ):
         mock_dist_is_initialized.return_value = True
         mock_dist_get_rank.return_value = 1
         mock_dist_get_world_size.return_value = 3
@@ -451,7 +529,7 @@ def test_distributed__returns_data_partition_for_rank(
             soma_experiment,
             measurement_name="RNA",
             X_name="raw",
-            encoders=[DefaultEncoder("soma_joinid"), DefaultEncoder("label")],
+            encoders=[LabelEncoder("soma_joinid"), LabelEncoder("label")],
             soma_chunk_size=2,
             shuffle=False,
         )
@@ -474,13 +552,12 @@ def test_distributed_and_multiprocessing__returns_data_partition_for_rank(
     DataLoader multiprocessing mode, using mocks to avoid having to do distributed pytorch
     setup or real DataLoader multiprocessing."""
 
-    with patch("torch.utils.data.get_worker_info") as mock_get_worker_info, patch(
-        "cellxgene_census.experimental.ml.pytorch.dist.is_initialized"
-    ) as mock_dist_is_initialized, patch(
-        "cellxgene_census.experimental.ml.pytorch.dist.get_rank"
-    ) as mock_dist_get_rank, patch(
-        "cellxgene_census.experimental.ml.pytorch.dist.get_world_size"
-    ) as mock_dist_get_world_size:
+    with (
+        patch("torch.utils.data.get_worker_info") as mock_get_worker_info,
+        patch("cellxgene_census.experimental.ml.pytorch.dist.is_initialized") as mock_dist_is_initialized,
+        patch("cellxgene_census.experimental.ml.pytorch.dist.get_rank") as mock_dist_get_rank,
+        patch("cellxgene_census.experimental.ml.pytorch.dist.get_world_size") as mock_dist_get_world_size,
+    ):
         mock_get_worker_info.return_value = WorkerInfo(id=1, num_workers=2, seed=1234)
         mock_dist_is_initialized.return_value = True
         mock_dist_get_rank.return_value = 1
@@ -490,7 +567,7 @@ def test_distributed_and_multiprocessing__returns_data_partition_for_rank(
             soma_experiment,
             measurement_name="RNA",
             X_name="raw",
-            encoders=[DefaultEncoder("soma_joinid"), DefaultEncoder("label")],
+            encoders=[LabelEncoder("soma_joinid"), LabelEncoder("label")],
             soma_chunk_size=2,
             shuffle=False,
         )
@@ -516,7 +593,7 @@ def test_experiment_dataloader__non_batched(soma_experiment: Experiment, use_eag
         soma_experiment,
         measurement_name="RNA",
         X_name="raw",
-        encoders=[DefaultEncoder("soma_joinid"), DefaultEncoder("label")],
+        encoders=[LabelEncoder("soma_joinid"), LabelEncoder("label")],
         shuffle=False,
         use_eager_fetch=use_eager_fetch,
     )
@@ -539,7 +616,7 @@ def test_experiment_dataloader__batched(soma_experiment: Experiment, use_eager_f
         soma_experiment,
         measurement_name="RNA",
         X_name="raw",
-        encoders=[DefaultEncoder("soma_joinid"), DefaultEncoder("label")],
+        encoders=[LabelEncoder("soma_joinid"), LabelEncoder("label")],
         batch_size=3,
         shuffle=False,
         use_eager_fetch=use_eager_fetch,
@@ -550,6 +627,26 @@ def test_experiment_dataloader__batched(soma_experiment: Experiment, use_eager_f
     batch = torch_data[0]
     assert batch[0].to_dense().tolist() == [[0, 1, 0], [1, 0, 1], [0, 1, 0]]
     assert batch[1].tolist() == [[0, 0], [1, 1], [2, 2]]
+
+
+@pytest.mark.experimental
+# noinspection PyTestParametrized,DuplicatedCode
+@pytest.mark.parametrize(
+    "obs_range,var_range,X_value_gen,use_eager_fetch",
+    [(10, 3, pytorch_x_value_gen, use_eager_fetch) for use_eager_fetch in (True, False)],
+)
+def test_experiment_dataloader__batched_length(soma_experiment: Experiment, use_eager_fetch: bool) -> None:
+    dp = ExperimentDataPipe(
+        soma_experiment,
+        measurement_name="RNA",
+        X_name="raw",
+        obs_column_names=["label"],
+        batch_size=3,
+        shuffle=False,
+        use_eager_fetch=use_eager_fetch,
+    )
+    dl = experiment_dataloader(dp)
+    assert len(dl) == len(list(dl))
 
 
 @pytest.mark.experimental
@@ -597,7 +694,7 @@ def test__shuffle(soma_experiment: Experiment) -> None:
         soma_experiment,
         measurement_name="RNA",
         X_name="raw",
-        encoders=[DefaultEncoder("soma_joinid"), DefaultEncoder("label")],
+        encoders=[LabelEncoder("soma_joinid"), LabelEncoder("label")],
         shuffle=True,
     )
 

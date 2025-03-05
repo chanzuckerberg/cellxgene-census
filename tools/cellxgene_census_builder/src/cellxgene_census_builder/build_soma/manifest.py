@@ -1,9 +1,8 @@
-import csv
 import io
 import logging
-import os.path
 
 import fsspec
+import pandas as pd
 
 from .datasets import Dataset
 from .globals import CXG_SCHEMA_VERSION
@@ -16,12 +15,14 @@ CXG_BASE_URI = "https://api.cellxgene.cziscience.com/"
 # CXG_BASE_URI = "https://api.cellxgene.dev.single-cell.czi.technology/"
 
 
-def parse_manifest_file(manifest_fp: io.TextIOBase) -> list[Dataset]:
-    """Return manifest as list of tuples, (dataset_id, URI/path), read from the text stream."""
-    # skip comments and strip leading/trailing white space
-    skip_comments = csv.reader(row for row in manifest_fp if not row.startswith("#"))
-    stripped = [[r.strip() for r in row] for row in skip_comments]
-    return [Dataset(dataset_id=r[0], dataset_asset_h5ad_uri=r[1]) for r in stripped]
+def load_manifest_from_fp(manifest_fp: io.TextIOBase | str) -> list[Dataset]:
+    logger.info("Loading manifest from file")
+    return parse_manifest_file(manifest_fp)
+
+
+def parse_manifest_file(manifest_fp: io.TextIOBase | str) -> list[Dataset]:
+    """Return manifest as list Datasets."""
+    return [Dataset(**rec) for rec in pd.read_csv(manifest_fp).to_dict(orient="records")]  # type: ignore[misc,arg-type]
 
 
 def dedup_datasets(datasets: list[Dataset]) -> list[Dataset]:
@@ -29,19 +30,6 @@ def dedup_datasets(datasets: list[Dataset]) -> list[Dataset]:
     if len(ds) != len(datasets):
         logger.warning("Dataset manifest contained DUPLICATES, which will be ignored.")
         return list(ds.values())
-    return datasets
-
-
-def load_manifest_from_fp(manifest_fp: io.TextIOBase) -> list[Dataset]:
-    logger.info("Loading manifest from file")
-    all_datasets = parse_manifest_file(manifest_fp)
-    datasets = [
-        d
-        for d in all_datasets
-        if d.dataset_asset_h5ad_uri.endswith(".h5ad") and os.path.exists(d.dataset_asset_h5ad_uri)
-    ]
-    if len(datasets) != len(all_datasets):
-        logger.warning("Manifest contained records which are not H5AD files or which are not accessible - ignoring")
     return datasets
 
 
@@ -111,15 +99,25 @@ def load_blocklist(dataset_id_blocklist_uri: str | None) -> set[str]:
         logger.error(msg)
         raise ValueError(msg)
 
-    with fsspec.open(dataset_id_blocklist_uri, "rt") as fp:
-        for line in fp:
-            line = line.strip()
-            if len(line) == 0 or line.startswith("#"):
-                # strip blank lines and comments (hash is never in a UUID)
-                continue
-            blocked_dataset_ids.add(line)
+    blocklist = (
+        # Figure out protocol to open file
+        fsspec.filesystem(fsspec.utils.infer_storage_options(dataset_id_blocklist_uri)["protocol"])
+        # Read whole file as bytes
+        .cat_file(dataset_id_blocklist_uri)
+        # Decode to string and split into lines
+        .decode("utf-8")
+        .strip()
+        .split("\n")
+    )
 
-        logger.info(f"Dataset blocklist found, containing {len(blocked_dataset_ids)} ids.")
+    for line in blocklist:
+        line = line.strip()
+        if len(line) == 0 or line.startswith("#"):
+            # strip blank lines and comments (hash is never in a UUID)
+            continue
+        blocked_dataset_ids.add(line)
+
+    logger.info(f"Dataset blocklist found, containing {len(blocked_dataset_ids)} ids.")
 
     return blocked_dataset_ids
 
@@ -143,11 +141,7 @@ def load_manifest(
     from the CELLxGENE REST API.  Apply the blocklist if provided.
     """
     if manifest_fp is not None:
-        if isinstance(manifest_fp, str):
-            with open(manifest_fp) as f:
-                datasets = load_manifest_from_fp(f)
-        else:
-            datasets = load_manifest_from_fp(manifest_fp)
+        datasets = load_manifest_from_fp(manifest_fp)
     else:
         datasets = load_manifest_from_CxG()
 

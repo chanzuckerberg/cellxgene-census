@@ -32,7 +32,10 @@ def create_census_summary(
 
     # write to a SOMA dataframe
     with info_collection.add_new_dataframe(
-        CENSUS_SUMMARY_NAME, schema=pa.Schema.from_pandas(df, preserve_index=False), index_column_names=["soma_joinid"]
+        CENSUS_SUMMARY_NAME,
+        schema=pa.Schema.from_pandas(df, preserve_index=False),
+        index_column_names=["soma_joinid"],
+        domain=[(df["soma_joinid"].min(), df["soma_joinid"].max())],
     ) as summary:
         summary.write(pa.Table.from_pandas(df, preserve_index=False))
 
@@ -57,5 +60,6 @@ def create_census_info_organisms(
         CENSUS_INFO_ORGANISMS_NAME,
         schema=pa.Schema.from_pandas(df, preserve_index=False),
         index_column_names=["soma_joinid"],
+        domain=[(df["soma_joinid"].min(), df["soma_joinid"].max())],
     ) as summary:
         summary.write(pa.Table.from_pandas(df, preserve_index=False))

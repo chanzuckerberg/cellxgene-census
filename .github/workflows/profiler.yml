@@ -1,5 +1,8 @@
 name: Profiler
 
+env:
+  CELLXGENE_CENSUS_USERAGENT: "CZI-test"
+
 on:
   pull_request:
     paths:
@@ -9,7 +12,7 @@ jobs:
     name: Run Profiler
     strategy:
       matrix:
-        os: [single-cell-8c64g-runner]
+        os: [sc-dev-64g-runner]
         python-version: ["3.11"]
     runs-on: ${{matrix.os}}
     permissions: # these permissions must be set for AWS auth to work!

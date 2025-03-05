@@ -31,7 +31,7 @@ def test_load_manifest_from_file(tmp_path: pathlib.Path, manifest_csv: str, empt
 def test_load_manifest_does_dedup(manifest_csv_with_duplicates: str, empty_blocklist: str) -> None:
     """`load_manifest` should not include duplicate datasets from the manifest"""
     manifest = load_manifest(manifest_csv_with_duplicates, empty_blocklist)
-    assert len(manifest) == 2
+    assert len(manifest) == 2, manifest
 
     with open(manifest_csv_with_duplicates) as fp:
         manifest = load_manifest(fp, empty_blocklist)
@@ -40,8 +40,7 @@ def test_load_manifest_does_dedup(manifest_csv_with_duplicates: str, empty_block
 
 def test_manifest_dataset_block(tmp_path: pathlib.Path, manifest_csv: str, empty_blocklist: str) -> None:
     # grab first item from the manifest, and block it.
-    with open(manifest_csv) as f:
-        first_dataset_id = f.readline().split(",")[0].strip()
+    first_dataset_id = load_manifest(manifest_csv, empty_blocklist)[0].dataset_id
 
     blocklist_fname = f"{tmp_path}/blocklist.txt"
     blocklist_content = f"# a comment\n\n{first_dataset_id}\n\n"
@@ -65,7 +64,7 @@ def test_load_manifest_from_cxg(empty_blocklist: str) -> None:
                 "collection_doi_label": "Publication 1",
                 "citation": "citation",
                 "title": "dataset #1",
-                "schema_version": "5.1.0",
+                "schema_version": "5.2.0",
                 "assets": [
                     {
                         "filesize": 123,
@@ -90,7 +89,7 @@ def test_load_manifest_from_cxg(empty_blocklist: str) -> None:
                 "collection_doi_label": "Publication 2",
                 "citation": "citation",
                 "title": "dataset #2",
-                "schema_version": "5.1.0",
+                "schema_version": "5.2.0",
                 "assets": [{"filesize": 456, "filetype": "H5AD", "url": "https://fake.url/dataset_id_2.h5ad"}],
                 "dataset_version_id": "dataset_id_2",
                 "cell_count": 11,
@@ -122,7 +121,7 @@ def test_load_manifest_from_cxg_errors_on_datasets_with_old_schema(
                 "collection_doi_label": "Publication 1",
                 "citation": "citation",
                 "title": "dataset #1",
-                "schema_version": "5.1.0",
+                "schema_version": "5.2.0",
                 "assets": [{"filesize": 123, "filetype": "H5AD", "url": "https://fake.url/dataset_id_1.h5ad"}],
                 "dataset_version_id": "dataset_id_1",
                 "cell_count": 10,
@@ -166,7 +165,7 @@ def test_load_manifest_from_cxg_excludes_datasets_with_no_assets(
                 "collection_doi": None,
                 "citation": "citation",
                 "title": "dataset #1",
-                "schema_version": "5.1.0",
+                "schema_version": "5.2.0",
                 "assets": [{"filesize": 123, "filetype": "H5AD", "url": "https://fake.url/dataset_id_1.h5ad"}],
                 "dataset_version_id": "dataset_id_1",
                 "cell_count": 10,
@@ -179,7 +178,7 @@ def test_load_manifest_from_cxg_excludes_datasets_with_no_assets(
                 "collection_doi": None,
                 "citation": "citation",
                 "title": "dataset #2",
-                "schema_version": "5.1.0",
+                "schema_version": "5.2.0",
                 "assets": [],
                 "dataset_version_id": "dataset_id_2",
                 "cell_count": 10,
@@ -210,13 +209,23 @@ def test_blocklist_alive_and_well() -> None:
 
     # test for existance by reading it. NOTE: if the file moves, this test will fail until
     # the new file location is merged to main.
-    with fsspec.open(dataset_id_blocklist_uri, "rt") as fp:
-        for line in fp:
-            # each line must be a comment, blank or a UUID
-            line = line.strip()
-            if not line or line.startswith("#"):
-                continue
+    blocklist = (
+        # Figure out protocol to open file
+        fsspec.filesystem(fsspec.utils.infer_storage_options(dataset_id_blocklist_uri)["protocol"])
+        # Read whole file as bytes
+        .cat_file(dataset_id_blocklist_uri)
+        # Decode to string and split into lines
+        .decode("utf-8")
+        .strip()
+        .split("\n")
+    )
 
-            # UUID() raises ValueError upon malformed UUID
-            # Equality check enforces formatting (i.e., dashes)
-            assert line == str(uuid.UUID(hex=line))
+    for line in blocklist:
+        # each line must be a comment, blank or a UUID
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+
+        # UUID() raises ValueError upon malformed UUID
+        # Equality check enforces formatting (i.e., dashes)
+        assert line == str(uuid.UUID(hex=line))
