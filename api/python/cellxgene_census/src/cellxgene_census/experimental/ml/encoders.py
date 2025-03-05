@@ -29,8 +29,8 @@ class Encoder(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def transform(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Transform the obs :class:`pandas.DataFrame` into a :class:`pandas.DataFrame` of encoded values."""
+    def transform(self, df: pd.DataFrame) -> npt.ArrayLike:
+        """Return a 1-D np.array containing encoded values from ``self.columns`` (concatenated, if there are multiple)."""
         pass
 
     @abc.abstractmethod
@@ -50,6 +50,12 @@ class Encoder(abc.ABC):
         """Columns in ``obs`` that the encoder will be applied to."""
         pass
 
+    @property
+    @abc.abstractmethod
+    def classes_(self) -> npt.ArrayLike:
+        """Classes of the encoder."""
+        pass
+
 
 class LabelEncoder(Encoder):
     """Default encoder based on :class:`sklearn.preprocessing.LabelEncoder`."""
@@ -62,8 +68,8 @@ class LabelEncoder(Encoder):
         """Fit the encoder with ``obs``."""
         self._encoder.fit(obs[self.col].unique())
 
-    def transform(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Transform the obs :class:`pandas.DataFrame` into a :class:`pandas.DataFrame` of encoded values."""
+    def transform(self, df: pd.DataFrame) -> npt.ArrayLike:
+        """Return a 1-D np.array containing encoded values from ``self.col``."""
         return self._encoder.transform(df[self.col])  # type: ignore
 
     def inverse_transform(self, encoded_values: npt.ArrayLike) -> npt.ArrayLike:
@@ -81,9 +87,9 @@ class LabelEncoder(Encoder):
         return [self.col]
 
     @property
-    def classes_(self):  # type: ignore
+    def classes_(self) -> npt.ArrayLike:
         """Classes of the encoder."""
-        return self._encoder.classes_
+        return self._encoder.classes_  # type: ignore
 
 
 class BatchEncoder(Encoder):
@@ -96,11 +102,11 @@ class BatchEncoder(Encoder):
         self._name = name
         self._encoder = LabelEncoder()
 
-    def _join_cols(self, df: pd.DataFrame):  # type: ignore
+    def _join_cols(self, df: pd.DataFrame) -> pd.Series:
         return functools.reduce(lambda a, b: a + b, [df[c].astype(str) for c in self.cols])
 
-    def transform(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Transform the obs :class:`pandas.DataFrame` into a :class:`pandas.DataFrame` of encoded values."""
+    def transform(self, df: pd.DataFrame) -> npt.ArrayLike:
+        """Return a 1-D np.array containing concatenated, encoded values from ``self.cols``."""
         arr = self._join_cols(df)
         return self._encoder.transform(arr)  # type: ignore
 
@@ -124,6 +130,6 @@ class BatchEncoder(Encoder):
         return self._name
 
     @property
-    def classes_(self):  # type: ignore
+    def classes_(self) -> npt.ArrayLike:
         """Classes of the encoder."""
-        return self._encoder.classes_
+        return self._encoder.classes_  # type: ignore
