@@ -3,7 +3,7 @@ requires = ["setuptools>=45", "setuptools_scm[toml]>=6.2"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "cellxgene_census_builder"
+name = "cellxgene-census-builder"
 dynamic = ["version"]
 description = "Build Cell Census"
 authors = [
@@ -24,34 +24,37 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
 ]
 dependencies= [
-    "typing_extensions==4.10.0",
-    "pyarrow==15.0.2",
-    "pandas[performance]==2.2.1",
-    "anndata==0.10.6",
+    "typing_extensions==4.12.2",
+    "pyarrow==19.0.1",
+    "pandas[performance]>=2.2.3",
+    "anndata==0.11.3",
     "numpy==1.26.4",
     # IMPORTANT: consider TileDB format compat before advancing this version. It is important that
     # the tiledbsoma _format_ version lag that used in cellxgene-census package, ensuring that
     # recent cellxgene-census _readers_ are able to read the results of a Census build (writer).
     # The compatibility matrix is defined here:
     #    https://github.com/TileDB-Inc/TileDB/blob/dev/format_spec/FORMAT_SPEC.md
-    "tiledbsoma==1.9.3",
-    "cellxgene-census==1.12.0",
-    "cellxgene-ontology-guide==1.0.0",
-    "scipy==1.12.0",
-    "fsspec[http]==2024.3.1",
-    "s3fs==2024.3.1",
-    "requests==2.32.0",
-    "aiohttp==3.9.3",
-    "Cython", # required by owlready2
-    "wheel",  # required by owlready2
-    "owlready2==0.44",
-    "gitpython==3.1.42",
-    "attrs==23.2.0",
-    "psutil==5.9.8",
-    "pyyaml==6.0.1",
-    "numba==0.59.1",
-    "dask==2024.3.1",
-    "distributed==2024.3.1",
+    "tiledbsoma==1.15.3",
+    "cellxgene-census==1.16.2",
+    "cellxgene_ontology_guide==1.4.2",
+    "scipy>=1.15.2",
+    "fsspec[http]==2025.2.0",
+    "s3fs==2025.2.0",
+    "requests==2.32.3",
+    "aiohttp==3.11.13",
+    "gitpython==3.1.44",
+    "attrs>=25.1.0",
+    "psutil==7.0.0",
+    "pyyaml>=6.0.2",
+    "numba==0.61.0",
+    "dask==2024.11.2",
+    "distributed==2024.11.2",
+    "tiledb==0.33.4",
+    # Spatial testing
+    "filelock==3.17.0",
+    "spatialdata>=0.3.0",
+    "pooch==1.8.2",
+    "pytest-xdist==3.6.1",
 ]
 
 [project.urls]

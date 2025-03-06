@@ -5,7 +5,6 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta name="description" content="cellxgene.census">
 <title>Querying and fetching the single-cell data and cell/gene metadata • cellxgene.census</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
@@ -15,87 +14,74 @@
 <link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png">
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
-<!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Querying and fetching the single-cell data and cell/gene metadata">
-<meta property="og:description" content="cellxgene.census">
-<!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
-<script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-<![endif]--><script defer data-domain="chanzuckerberg.github.io/cellxgene-census" src="https://plausible.io/js/script.js"></script>
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Querying and fetching the single-cell data and cell/gene metadata">
+<script defer data-domain="chanzuckerberg.github.io/cellxgene-census" src="https://plausible.io/js/script.js"></script>
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
-    
 
-    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light"><div class="container">
-    
+
+    <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
+
     <a class="navbar-brand me-2" href="../index.html">cellxgene.census</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.10.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.15.0</small>
 
-    
+
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
-<li class="nav-item">
-  <a class="external-link nav-link" href="https://chanzuckerberg.github.io/cellxgene-census/">Main Census Site</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="../reference/index.html">Reference</a>
-</li>
+<li class="nav-item"><a class="external-link nav-link" href="https://chanzuckerberg.github.io/cellxgene-census/">Main Census Site</a></li>
+<li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item dropdown">
-  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
-  <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <h6 class="dropdown-header" data-toc-skip>Use Census embeddings</h6>
-    <a class="dropdown-item" href="../articles/census_access_maintained_embeddings.html">Access CELLxGENE collaboration embeddings (scVI, Geneformer)</a>
-    <div class="dropdown-divider"></div>
-    <h6 class="dropdown-header" data-toc-skip>Explore and analyze the data</h6>
-    <a class="dropdown-item" href="../articles/comp_bio_census_info.html">Learning about the CZ CELLxGENE Census</a>
-    <a class="dropdown-item" href="../articles/comp_bio_summarize_axis_query.html">Summarizing cell and gene metadata</a>
-    <a class="dropdown-item" href="../articles/comp_bio_data_integration.html">Integrating multi-dataset slices of data with Seurat</a>
-    <a class="dropdown-item" href="../articles/comp_bio_normalizing_full_gene_sequencing.html">Normalizing full-length gene sequencing data</a>
-    <div class="dropdown-divider"></div>
-    <h6 class="dropdown-header" data-toc-skip>cellxgene.census capabilities</h6>
-    <a class="dropdown-item" href="../articles/census_query_extract.html">Querying and fetching the single-cell data and cell/gene metadata</a>
-    <a class="dropdown-item" href="../articles/census_citation_generation.html">Generating citations for Census slices</a>
-    <a class="dropdown-item" href="../articles/census_datasets.html">Census Datasets example</a>
-    <a class="dropdown-item" href="../articles/census_dataset_presence.html">Genes measured in each cell (dataset presence matrix)</a>
-    <a class="dropdown-item" href="../articles/census_compute_over_X.html">Computing on X using online (incremental) algorithms</a>
-    <a class="dropdown-item" href="../articles/census_access_maintained_embeddings.html">Access CELLxGENE collaboration embeddings (scVI, Geneformer)</a>
-  </div>
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
+<li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Use Census embeddings</h6></li>
+    <li><a class="dropdown-item" href="../articles/census_access_maintained_embeddings.html">Access CELLxGENE collaboration embeddings (scVI, Geneformer)</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Explore and analyze the data</h6></li>
+    <li><a class="dropdown-item" href="../articles/comp_bio_census_info.html">Learning about the CZ CELLxGENE Census</a></li>
+    <li><a class="dropdown-item" href="../articles/comp_bio_summarize_axis_query.html">Summarizing cell and gene metadata</a></li>
+    <li><a class="dropdown-item" href="../articles/comp_bio_data_integration.html">Integrating multi-dataset slices of data with Seurat</a></li>
+    <li><a class="dropdown-item" href="../articles/comp_bio_normalizing_full_gene_sequencing.html">Normalizing full-length gene sequencing data</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>cellxgene.census capabilities</h6></li>
+    <li><a class="dropdown-item" href="../articles/census_query_extract.html">Querying and fetching the single-cell data and cell/gene metadata</a></li>
+    <li><a class="dropdown-item" href="../articles/census_citation_generation.html">Generating citations for Census slices</a></li>
+    <li><a class="dropdown-item" href="../articles/census_datasets.html">Census Datasets example</a></li>
+    <li><a class="dropdown-item" href="../articles/census_dataset_presence.html">Genes measured in each cell (dataset presence matrix)</a></li>
+    <li><a class="dropdown-item" href="../articles/census_compute_over_X.html">Computing on X using online (incremental) algorithms</a></li>
+    <li><a class="dropdown-item" href="../articles/census_access_maintained_embeddings.html">Access CELLxGENE collaboration embeddings (scVI, Geneformer)</a></li>
+  </ul>
 </li>
       </ul>
-<form class="form-inline my-2 my-lg-0" role="search">
-        <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off">
-</form>
-
-      <ul class="navbar-nav">
-<li class="nav-item">
-  <a class="external-link nav-link" href="https://github.com/chanzuckerberg/cellxgene-census/" aria-label="github">
-    <span class="fab fa fab fa-github fa-lg"></span>
-     
-  </a>
-</li>
+<ul class="navbar-nav">
+<li class="nav-item"><form class="form-inline" role="search">
+ <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
+</form></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/chanzuckerberg/cellxgene-census/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul>
 </div>
 
-    
+
   </div>
 </nav><div class="container template-article">
 
 
 
-
-<div class="row">
+<script src="census_query_extract_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="" class="logo" alt=""><h1>Querying and fetching the single-cell data and cell/gene metadata</h1>
+
+      <h1>Querying and fetching the single-cell data and cell/gene metadata</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/chanzuckerberg/cellxgene-census/tree/main/api/r/cellxgene.census/vignettes_/census_query_extract.Rmd" class="external-link"><code>vignettes/census_query_extract.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/chanzuckerberg/cellxgene-census/tree/main/api/r/cellxgene.census/vignettes/census_query_extract.Rmd" class="external-link"><code>vignettes/census_query_extract.Rmd</code></a></small>
       <div class="d-none name"><code>census_query_extract.Rmd</code></div>
     </div>
 
@@ -105,11 +91,7 @@
 THIS VIGNETTE IS BASED ON:
 https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebooks/api_demo/census_query_extract.ipynb
 -->
-<p>This tutorial showcases the easiest ways to query the expression data
-and cell/gene metadata from the Census, and load them into R data
-frames, <a href="https://satijalab.org/seurat/" class="external-link">Seurat</a> assays, and
-<a href="https://bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html" class="external-link">SingleCellExperiment</a>
-objects.</p>
+<p>This tutorial showcases the easiest ways to query the expression data and cell/gene metadata from the Census, and load them into R data frames, <a href="https://satijalab.org/seurat/" class="external-link">Seurat</a> assays, and <a href="https://bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html" class="external-link">SingleCellExperiment</a> objects.</p>
 <p><strong>Contents</strong></p>
 <ol style="list-style-type: decimal">
 <li>Opening the census.</li>
@@ -121,48 +103,33 @@ objects.</p>
 <div class="section level2">
 <h2 id="opening-the-census">Opening the census<a class="anchor" aria-label="anchor" href="#opening-the-census"></a>
 </h2>
-<p>The <code>cellxgene.census</code> R package contains a convenient API
-to open any version of the Census (by default, the newest stable
-version).</p>
+<p>The <code>cellxgene.census</code> R package contains a convenient API to open any version of the Census (by default, the newest stable version).</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://github.com/chanzuckerberg/cellxgene-census" class="external-link">"cellxgene.census"</a></span><span class="op">)</span></span>
 <span><span class="va">census</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/open_soma.html">open_soma</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>You can learn more about the <code>cellxgene.census</code> methods by
-accessing their corresponding documentation, for example
-<code><a href="../reference/open_soma.html">?cellxgene.census::open_soma</a></code>.</p>
+<p>You can learn more about the <code>cellxgene.census</code> methods by accessing their corresponding documentation, for example <code><a href="../reference/open_soma.html">?cellxgene.census::open_soma</a></code>.</p>
 </div>
 <div class="section level2">
 <h2 id="querying-cell-metadata-obs">Querying cell metadata (obs)<a class="anchor" aria-label="anchor" href="#querying-cell-metadata-obs"></a>
 </h2>
-<p>The human gene metadata of the Census, for RNA assays, is located at
-<code>census$get("census_data")$get("homo_sapiens")$obs</code>. This is
-a <code>SOMADataFrame</code> and as such it can be materialized as an R
-data frame (tibble) using
-<code>as.data.frame(obs$read()$concat())</code>.</p>
-<p>The mouse cell metadata is at
-<code>census$get("census_data")$get("mus_musculus").obs</code>.</p>
-<p>For slicing the cell metadata there are two relevant arguments that
-can be passed through <code>read():</code></p>
+<p>The human gene metadata of the Census, for RNA assays, is located at <code>census$get("census_data")$get("homo_sapiens")$obs</code>. This is a <code>SOMADataFrame</code> and as such it can be materialized as an R data frame (tibble) using <code>as.data.frame(obs$read()$concat())</code>.</p>
+<p>The mouse cell metadata is at <code>census$get("census_data")$get("mus_musculus").obs</code>.</p>
+<p>For slicing the cell metadata there are two relevant arguments that can be passed through <code>read():</code></p>
 <ul>
 <li>
-<code>column_names</code> — character vector indicating what
-metadata columns to fetch.</li>
+<code>column_names</code> — character vector indicating what metadata columns to fetch.</li>
 <li>
-<code>value_filter</code> — R expression with selection conditions
-to fetch rows.
+<code>value_filter</code> — R expression with selection conditions to fetch rows.
 <ul>
 <li>Expressions are one or more comparisons</li>
-<li>Comparisons are one of
-<code>&lt;column&gt; &lt;op&gt; &lt;value&gt;</code> or
-<code>&lt;column&gt; &lt;op&gt; &lt;column&gt;</code>
+<li>Comparisons are one of <code>&lt;column&gt; &lt;op&gt; &lt;value&gt;</code> or <code>&lt;column&gt; &lt;op&gt; &lt;column&gt;</code>
 </li>
 <li>Expressions can combine comparisons using &amp;&amp; or ||</li>
 <li>op is one of &lt; | &gt; | &lt;= | &gt;= | == | != or %in%</li>
 </ul>
 </li>
 </ul>
-<p>To learn what metadata columns are available for fetching and
-filtering we can directly look at the keys of the cell metadata.</p>
+<p>To learn what metadata columns are available for fetching and filtering we can directly look at the keys of the cell metadata.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"homo_sapiens"</span><span class="op">)</span><span class="op">$</span><span class="va">obs</span><span class="op">$</span><span class="fu">colnames</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  [1] "soma_joinid"                             </span></span>
@@ -177,83 +144,75 @@ filtering we can directly look at the keys of the cell metadata.</p>
 <span><span class="co">#&gt; [10] "disease_ontology_term_id"                </span></span>
 <span><span class="co">#&gt; [11] "donor_id"                                </span></span>
 <span><span class="co">#&gt; [12] "is_primary_data"                         </span></span>
-<span><span class="co">#&gt; [13] "self_reported_ethnicity"                 </span></span>
-<span><span class="co">#&gt; [14] "self_reported_ethnicity_ontology_term_id"</span></span>
-<span><span class="co">#&gt; [15] "sex"                                     </span></span>
-<span><span class="co">#&gt; [16] "sex_ontology_term_id"                    </span></span>
-<span><span class="co">#&gt; [17] "suspension_type"                         </span></span>
-<span><span class="co">#&gt; [18] "tissue"                                  </span></span>
-<span><span class="co">#&gt; [19] "tissue_ontology_term_id"                 </span></span>
-<span><span class="co">#&gt; [20] "tissue_general"                          </span></span>
-<span><span class="co">#&gt; [21] "tissue_general_ontology_term_id"         </span></span>
-<span><span class="co">#&gt; [22] "raw_sum"                                 </span></span>
-<span><span class="co">#&gt; [23] "nnz"                                     </span></span>
-<span><span class="co">#&gt; [24] "raw_mean_nnz"                            </span></span>
-<span><span class="co">#&gt; [25] "raw_variance_nnz"                        </span></span>
-<span><span class="co">#&gt; [26] "n_measured_vars"</span></span></code></pre></div>
-<p><code>soma_joinid</code> is a special <code>SOMADataFrame</code>
-column that is used for join operations. The definition for all other
-columns can be found at the <a href="https://chanzuckerberg.github.io/cellxgene-census/cellxgene_census_docsite_schema.html" class="external-link">Census
-schema</a>.</p>
-<p>All of these can be used to fetch specific columns or specific rows
-matching a condition. For the latter we need to know the values we are
-looking for <em>a priori</em>.</p>
-<p>For example let’s see what are the possible values available for
-<code>sex</code>. To this we can load all cell metadata but fetching
-only for the column <code>sex</code>.</p>
+<span><span class="co">#&gt; [13] "observation_joinid"                      </span></span>
+<span><span class="co">#&gt; [14] "self_reported_ethnicity"                 </span></span>
+<span><span class="co">#&gt; [15] "self_reported_ethnicity_ontology_term_id"</span></span>
+<span><span class="co">#&gt; [16] "sex"                                     </span></span>
+<span><span class="co">#&gt; [17] "sex_ontology_term_id"                    </span></span>
+<span><span class="co">#&gt; [18] "suspension_type"                         </span></span>
+<span><span class="co">#&gt; [19] "tissue"                                  </span></span>
+<span><span class="co">#&gt; [20] "tissue_ontology_term_id"                 </span></span>
+<span><span class="co">#&gt; [21] "tissue_type"                             </span></span>
+<span><span class="co">#&gt; [22] "tissue_general"                          </span></span>
+<span><span class="co">#&gt; [23] "tissue_general_ontology_term_id"         </span></span>
+<span><span class="co">#&gt; [24] "raw_sum"                                 </span></span>
+<span><span class="co">#&gt; [25] "nnz"                                     </span></span>
+<span><span class="co">#&gt; [26] "raw_mean_nnz"                            </span></span>
+<span><span class="co">#&gt; [27] "raw_variance_nnz"                        </span></span>
+<span><span class="co">#&gt; [28] "n_measured_vars"</span></span></code></pre></div>
+<p><code>soma_joinid</code> is a special <code>SOMADataFrame</code> column that is used for join operations. The definition for all other columns can be found at the <a href="https://chanzuckerberg.github.io/cellxgene-census/cellxgene_census_docsite_schema.html" class="external-link">Census schema</a>.</p>
+<p>All of these can be used to fetch specific columns or specific rows matching a condition. For the latter we need to know the values we are looking for <em>a priori</em>.</p>
+<p>For example let’s see what are the possible values available for <code>sex</code>. To this we can load all cell metadata but fetching only for the column <code>sex</code>.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"homo_sapiens"</span><span class="op">)</span><span class="op">$</span><span class="va">obs</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span>column_names <span class="op">=</span> <span class="st">"sex"</span><span class="op">)</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;             sex</span></span>
-<span><span class="co">#&gt; 1          male</span></span>
-<span><span class="co">#&gt; 224      female</span></span>
-<span><span class="co">#&gt; 3747640 unknown</span></span></code></pre></div>
-<p>As you can see there are only three different values for sex, that is
-<code>"male"</code>, <code>"female"</code> and
-<code>"unknown"</code>.</p>
-<p>With this information we can fetch all cell metatadata for a specific
-sex value, for example <code>"unknown"</code>.</p>
+<span><span class="co">#&gt;           sex</span></span>
+<span><span class="co">#&gt; 1      female</span></span>
+<span><span class="co">#&gt; 86       male</span></span>
+<span><span class="co">#&gt; 63810 unknown</span></span></code></pre></div>
+<p>As you can see there are only three different values for sex, that is <code>"male"</code>, <code>"female"</code> and <code>"unknown"</code>.</p>
+<p>With this information we can fetch all cell metatadata for a specific sex value, for example <code>"unknown"</code>.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"homo_sapiens"</span><span class="op">)</span><span class="op">$</span><span class="va">obs</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span>value_filter <span class="op">=</span> <span class="st">"sex == 'unknown'"</span><span class="op">)</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   soma_joinid                           dataset_id     assay assay_ontology_term_id</span></span>
-<span><span class="co">#&gt; 1     3747639 9fcb0b73-c734-40a5-be9c-ace7eea401c9 10x 3' v2            EFO:0009899</span></span>
-<span><span class="co">#&gt; 2     3747640 9fcb0b73-c734-40a5-be9c-ace7eea401c9 10x 3' v2            EFO:0009899</span></span>
-<span><span class="co">#&gt; 3     3747641 9fcb0b73-c734-40a5-be9c-ace7eea401c9 10x 3' v2            EFO:0009899</span></span>
-<span><span class="co">#&gt; 4     3747642 9fcb0b73-c734-40a5-be9c-ace7eea401c9 10x 3' v2            EFO:0009899</span></span>
-<span><span class="co">#&gt; 5     3747643 9fcb0b73-c734-40a5-be9c-ace7eea401c9 10x 3' v2            EFO:0009899</span></span>
-<span><span class="co">#&gt; 6     3747644 9fcb0b73-c734-40a5-be9c-ace7eea401c9 10x 3' v2            EFO:0009899</span></span>
-<span><span class="co">#&gt; 7     3747645 9fcb0b73-c734-40a5-be9c-ace7eea401c9 10x 3' v2            EFO:0009899</span></span>
-<span><span class="co">#&gt; 8     3747646 9fcb0b73-c734-40a5-be9c-ace7eea401c9 10x 3' v2            EFO:0009899</span></span>
-<span><span class="co">#&gt; 9     3747647 9fcb0b73-c734-40a5-be9c-ace7eea401c9 10x 3' v2            EFO:0009899</span></span>
-<span><span class="co">#&gt;    cell_type cell_type_ontology_term_id development_stage</span></span>
-<span><span class="co">#&gt; 1 fibroblast                 CL:0000057 human adult stage</span></span>
-<span><span class="co">#&gt; 2 fibroblast                 CL:0000057 human adult stage</span></span>
-<span><span class="co">#&gt; 3 fibroblast                 CL:0000057 human adult stage</span></span>
-<span><span class="co">#&gt; 4 fibroblast                 CL:0000057 human adult stage</span></span>
-<span><span class="co">#&gt; 5 fibroblast                 CL:0000057 human adult stage</span></span>
-<span><span class="co">#&gt; 6 fibroblast                 CL:0000057 human adult stage</span></span>
-<span><span class="co">#&gt; 7 fibroblast                 CL:0000057 human adult stage</span></span>
-<span><span class="co">#&gt; 8 fibroblast                 CL:0000057 human adult stage</span></span>
-<span><span class="co">#&gt; 9 fibroblast                 CL:0000057 human adult stage</span></span>
-<span><span class="co">#&gt;   development_stage_ontology_term_id disease disease_ontology_term_id</span></span>
-<span><span class="co">#&gt; 1                     HsapDv:0000087  normal             PATO:0000461</span></span>
-<span><span class="co">#&gt; 2                     HsapDv:0000087  normal             PATO:0000461</span></span>
-<span><span class="co">#&gt; 3                     HsapDv:0000087  normal             PATO:0000461</span></span>
-<span><span class="co">#&gt; 4                     HsapDv:0000087  normal             PATO:0000461</span></span>
-<span><span class="co">#&gt; 5                     HsapDv:0000087  normal             PATO:0000461</span></span>
-<span><span class="co">#&gt; 6                     HsapDv:0000087  normal             PATO:0000461</span></span>
-<span><span class="co">#&gt; 7                     HsapDv:0000087  normal             PATO:0000461</span></span>
-<span><span class="co">#&gt; 8                     HsapDv:0000087  normal             PATO:0000461</span></span>
-<span><span class="co">#&gt; 9                     HsapDv:0000087  normal             PATO:0000461</span></span>
-<span><span class="co">#&gt;                       donor_id is_primary_data self_reported_ethnicity</span></span>
-<span><span class="co">#&gt; 1 Pagella_GSE161267_GSM4904134            TRUE                 unknown</span></span>
-<span><span class="co">#&gt; 2 Pagella_GSE161267_GSM4904134            TRUE                 unknown</span></span>
-<span><span class="co">#&gt; 3 Pagella_GSE161267_GSM4904134            TRUE                 unknown</span></span>
-<span><span class="co">#&gt; 4 Pagella_GSE161267_GSM4904134            TRUE                 unknown</span></span>
-<span><span class="co">#&gt; 5 Pagella_GSE161267_GSM4904134            TRUE                 unknown</span></span>
-<span><span class="co">#&gt; 6 Pagella_GSE161267_GSM4904134            TRUE                 unknown</span></span>
-<span><span class="co">#&gt; 7 Pagella_GSE161267_GSM4904134            TRUE                 unknown</span></span>
-<span><span class="co">#&gt; 8 Pagella_GSE161267_GSM4904134            TRUE                 unknown</span></span>
-<span><span class="co">#&gt; 9 Pagella_GSE161267_GSM4904134            TRUE                 unknown</span></span>
+<span><span class="co">#&gt; 1       63809 94423ec1-21f8-40e8-b5c9-c3ea82350ca4 10x 3' v2            EFO:0009899</span></span>
+<span><span class="co">#&gt; 2       63825 94423ec1-21f8-40e8-b5c9-c3ea82350ca4 10x 3' v2            EFO:0009899</span></span>
+<span><span class="co">#&gt; 3       63829 94423ec1-21f8-40e8-b5c9-c3ea82350ca4 10x 3' v2            EFO:0009899</span></span>
+<span><span class="co">#&gt; 4       63842 94423ec1-21f8-40e8-b5c9-c3ea82350ca4 10x 3' v2            EFO:0009899</span></span>
+<span><span class="co">#&gt; 5       63845 94423ec1-21f8-40e8-b5c9-c3ea82350ca4 10x 3' v2            EFO:0009899</span></span>
+<span><span class="co">#&gt; 6       63848 94423ec1-21f8-40e8-b5c9-c3ea82350ca4 10x 3' v2            EFO:0009899</span></span>
+<span><span class="co">#&gt; 7       63850 94423ec1-21f8-40e8-b5c9-c3ea82350ca4 10x 3' v2            EFO:0009899</span></span>
+<span><span class="co">#&gt; 8       63859 94423ec1-21f8-40e8-b5c9-c3ea82350ca4 10x 3' v2            EFO:0009899</span></span>
+<span><span class="co">#&gt; 9       63877 94423ec1-21f8-40e8-b5c9-c3ea82350ca4 10x 3' v2            EFO:0009899</span></span>
+<span><span class="co">#&gt;        cell_type cell_type_ontology_term_id development_stage</span></span>
+<span><span class="co">#&gt; 1 dendritic cell                 CL:0000451           unknown</span></span>
+<span><span class="co">#&gt; 2       monocyte                 CL:0000576           unknown</span></span>
+<span><span class="co">#&gt; 3       monocyte                 CL:0000576           unknown</span></span>
+<span><span class="co">#&gt; 4      mast cell                 CL:0000097           unknown</span></span>
+<span><span class="co">#&gt; 5       monocyte                 CL:0000576           unknown</span></span>
+<span><span class="co">#&gt; 6       monocyte                 CL:0000576           unknown</span></span>
+<span><span class="co">#&gt; 7       monocyte                 CL:0000576           unknown</span></span>
+<span><span class="co">#&gt; 8       monocyte                 CL:0000576           unknown</span></span>
+<span><span class="co">#&gt; 9       monocyte                 CL:0000576           unknown</span></span>
+<span><span class="co">#&gt;   development_stage_ontology_term_id disease disease_ontology_term_id donor_id</span></span>
+<span><span class="co">#&gt; 1                            unknown  normal             PATO:0000461    P6709</span></span>
+<span><span class="co">#&gt; 2                            unknown  normal             PATO:0000461    P6207</span></span>
+<span><span class="co">#&gt; 3                            unknown  normal             PATO:0000461    P6709</span></span>
+<span><span class="co">#&gt; 4                            unknown  normal             PATO:0000461    P5846</span></span>
+<span><span class="co">#&gt; 5                            unknown  normal             PATO:0000461    P6709</span></span>
+<span><span class="co">#&gt; 6                            unknown  normal             PATO:0000461    P6709</span></span>
+<span><span class="co">#&gt; 7                            unknown  normal             PATO:0000461    P6709</span></span>
+<span><span class="co">#&gt; 8                            unknown  normal             PATO:0000461    P6709</span></span>
+<span><span class="co">#&gt; 9                            unknown  normal             PATO:0000461    P5846</span></span>
+<span><span class="co">#&gt;   is_primary_data observation_joinid self_reported_ethnicity</span></span>
+<span><span class="co">#&gt; 1           FALSE         C?ICmL&lt;&amp;&gt;Z                 unknown</span></span>
+<span><span class="co">#&gt; 2           FALSE         85i%LjfFIv                 unknown</span></span>
+<span><span class="co">#&gt; 3           FALSE         Ayapye-s;W                 unknown</span></span>
+<span><span class="co">#&gt; 4           FALSE         y?m!gJTm_}                 unknown</span></span>
+<span><span class="co">#&gt; 5           FALSE         ;%L|gB$19h                 unknown</span></span>
+<span><span class="co">#&gt; 6           FALSE         W6Gv)*|fO&amp;                 unknown</span></span>
+<span><span class="co">#&gt; 7           FALSE         C_4WKgszOh                 unknown</span></span>
+<span><span class="co">#&gt; 8           FALSE         z`}uhAE2vd                 unknown</span></span>
+<span><span class="co">#&gt; 9           FALSE         vt{WkZp)ha                 unknown</span></span>
 <span><span class="co">#&gt;   self_reported_ethnicity_ontology_term_id     sex sex_ontology_term_id suspension_type</span></span>
 <span><span class="co">#&gt; 1                                  unknown unknown              unknown            cell</span></span>
 <span><span class="co">#&gt; 2                                  unknown unknown              unknown            cell</span></span>
@@ -264,32 +223,38 @@ sex value, for example <code>"unknown"</code>.</p>
 <span><span class="co">#&gt; 7                                  unknown unknown              unknown            cell</span></span>
 <span><span class="co">#&gt; 8                                  unknown unknown              unknown            cell</span></span>
 <span><span class="co">#&gt; 9                                  unknown unknown              unknown            cell</span></span>
-<span><span class="co">#&gt;    tissue tissue_ontology_term_id tissue_general tissue_general_ontology_term_id</span></span>
-<span><span class="co">#&gt; 1 gingiva          UBERON:0001828         mucosa                  UBERON:0000344</span></span>
-<span><span class="co">#&gt; 2 gingiva          UBERON:0001828         mucosa                  UBERON:0000344</span></span>
-<span><span class="co">#&gt; 3 gingiva          UBERON:0001828         mucosa                  UBERON:0000344</span></span>
-<span><span class="co">#&gt; 4 gingiva          UBERON:0001828         mucosa                  UBERON:0000344</span></span>
-<span><span class="co">#&gt; 5 gingiva          UBERON:0001828         mucosa                  UBERON:0000344</span></span>
-<span><span class="co">#&gt; 6 gingiva          UBERON:0001828         mucosa                  UBERON:0000344</span></span>
-<span><span class="co">#&gt; 7 gingiva          UBERON:0001828         mucosa                  UBERON:0000344</span></span>
-<span><span class="co">#&gt; 8 gingiva          UBERON:0001828         mucosa                  UBERON:0000344</span></span>
-<span><span class="co">#&gt; 9 gingiva          UBERON:0001828         mucosa                  UBERON:0000344</span></span>
-<span><span class="co">#&gt;   raw_sum  nnz raw_mean_nnz raw_variance_nnz n_measured_vars</span></span>
-<span><span class="co">#&gt; 1     547  329     1.662614        14.559604           31602</span></span>
-<span><span class="co">#&gt; 2     982  563     1.744227         5.315247           31602</span></span>
-<span><span class="co">#&gt; 3   12467 3809     3.273038       109.305683           31602</span></span>
-<span><span class="co">#&gt; 4    1053  566     1.860424         7.430042           31602</span></span>
-<span><span class="co">#&gt; 5     548  363     1.509642         2.410818           31602</span></span>
-<span><span class="co">#&gt; 6     678  429     1.580420        11.379616           31602</span></span>
-<span><span class="co">#&gt; 7     848  524     1.618321         9.437216           31602</span></span>
-<span><span class="co">#&gt; 8     935  608     1.537829         4.868418           31602</span></span>
-<span><span class="co">#&gt; 9     735  485     1.515464         6.213087           31602</span></span>
-<span><span class="co">#&gt;  [ reached 'max' / getOption("max.print") -- omitted 3301779 rows ]</span></span></code></pre></div>
-<p>You can use both <code>column_names</code> and
-<code>value_filter</code> to perform specific queries. For example let’s
-fetch the <code>disease</code> column for the <code>cell_type</code>
-<code>"B cell"</code> in the <code>tissue_general</code>
-<code>"lung"</code>.</p>
+<span><span class="co">#&gt;            tissue tissue_ontology_term_id tissue_type tissue_general</span></span>
+<span><span class="co">#&gt; 1 body of stomach          UBERON:0001161      tissue        stomach</span></span>
+<span><span class="co">#&gt; 2 body of stomach          UBERON:0001161      tissue        stomach</span></span>
+<span><span class="co">#&gt; 3 body of stomach          UBERON:0001161      tissue        stomach</span></span>
+<span><span class="co">#&gt; 4 body of stomach          UBERON:0001161      tissue        stomach</span></span>
+<span><span class="co">#&gt; 5 body of stomach          UBERON:0001161      tissue        stomach</span></span>
+<span><span class="co">#&gt; 6 body of stomach          UBERON:0001161      tissue        stomach</span></span>
+<span><span class="co">#&gt; 7 body of stomach          UBERON:0001161      tissue        stomach</span></span>
+<span><span class="co">#&gt; 8 body of stomach          UBERON:0001161      tissue        stomach</span></span>
+<span><span class="co">#&gt; 9 body of stomach          UBERON:0001161      tissue        stomach</span></span>
+<span><span class="co">#&gt;   tissue_general_ontology_term_id raw_sum  nnz raw_mean_nnz raw_variance_nnz</span></span>
+<span><span class="co">#&gt; 1                  UBERON:0000945     695  368     1.888587         12.14287</span></span>
+<span><span class="co">#&gt; 2                  UBERON:0000945    6095 1427     4.271198        124.79807</span></span>
+<span><span class="co">#&gt; 3                  UBERON:0000945    1045  492     2.123984         23.31861</span></span>
+<span><span class="co">#&gt; 4                  UBERON:0000945    1546  640     2.415625         27.82386</span></span>
+<span><span class="co">#&gt; 5                  UBERON:0000945    1308  530     2.467925         59.81466</span></span>
+<span><span class="co">#&gt; 6                  UBERON:0000945     891  434     2.052995         16.80319</span></span>
+<span><span class="co">#&gt; 7                  UBERON:0000945     847  399     2.122807         23.51503</span></span>
+<span><span class="co">#&gt; 8                  UBERON:0000945     445  216     2.060185         55.25683</span></span>
+<span><span class="co">#&gt; 9                  UBERON:0000945    1672  668     2.502994         15.53672</span></span>
+<span><span class="co">#&gt;   n_measured_vars</span></span>
+<span><span class="co">#&gt; 1           19550</span></span>
+<span><span class="co">#&gt; 2           19550</span></span>
+<span><span class="co">#&gt; 3           19550</span></span>
+<span><span class="co">#&gt; 4           19550</span></span>
+<span><span class="co">#&gt; 5           19550</span></span>
+<span><span class="co">#&gt; 6           19550</span></span>
+<span><span class="co">#&gt; 7           19550</span></span>
+<span><span class="co">#&gt; 8           19550</span></span>
+<span><span class="co">#&gt; 9           19550</span></span>
+<span><span class="co">#&gt;  [ reached 'max' / getOption("max.print") -- omitted 3756271 rows ]</span></span></code></pre></div>
+<p>You can use both <code>column_names</code> and <code>value_filter</code> to perform specific queries. For example let’s fetch the <code>disease</code> column for the <code>cell_type</code> <code>"B cell"</code> in the <code>tissue_general</code> <code>"lung"</code>.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cell_metadata_b_cell</span> <span class="op">&lt;-</span> <span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"homo_sapiens"</span><span class="op">)</span><span class="op">$</span><span class="va">obs</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span></span>
 <span>  value_filter <span class="op">=</span> <span class="st">"cell_type == 'B cell' &amp; tissue_general == 'lung'"</span>,</span>
@@ -300,46 +265,237 @@ fetch the <code>disease</code> column for the <code>cell_type</code>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">cell_metadata_b_cell</span><span class="op">)</span></span>
 <span><span class="co">#&gt; disease</span></span>
-<span><span class="co">#&gt; chronic obstructive pulmonary disease                              COVID-19 </span></span>
-<span><span class="co">#&gt;                                  6369                                  2729 </span></span>
-<span><span class="co">#&gt;          hypersensitivity pneumonitis             interstitial lung disease </span></span>
-<span><span class="co">#&gt;                                    52                                   376 </span></span>
-<span><span class="co">#&gt;                   lung adenocarcinoma             lung large cell carcinoma </span></span>
-<span><span class="co">#&gt;                                 62351                                  1534 </span></span>
-<span><span class="co">#&gt;              lymphangioleiomyomatosis         non-small cell lung carcinoma </span></span>
-<span><span class="co">#&gt;                                   133                                 17484 </span></span>
-<span><span class="co">#&gt;   non-specific interstitial pneumonia                                normal </span></span>
-<span><span class="co">#&gt;                                   231                                 25461 </span></span>
-<span><span class="co">#&gt;                 pleomorphic carcinoma                             pneumonia </span></span>
-<span><span class="co">#&gt;                                  1210                                    50 </span></span>
-<span><span class="co">#&gt;                   pulmonary emphysema                    pulmonary fibrosis </span></span>
-<span><span class="co">#&gt;                                  1512                                  6798 </span></span>
-<span><span class="co">#&gt;                 pulmonary sarcoidosis             small cell lung carcinoma </span></span>
-<span><span class="co">#&gt;                                     6                                   583 </span></span>
-<span><span class="co">#&gt;          squamous cell lung carcinoma </span></span>
-<span><span class="co">#&gt;                                 11920</span></span></code></pre></div>
+<span><span class="co">#&gt;                                                        Alzheimer disease </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                      B-cell acute lymphoblastic leukemia </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                              B-cell non-Hodgkin lymphoma </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                        Barrett esophagus </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                                 COVID-19 </span></span>
+<span><span class="co">#&gt;                                                                     2729 </span></span>
+<span><span class="co">#&gt;                                                            Crohn disease </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                            Crohn ileitis </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                            Down syndrome </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                       Lewy body dementia </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                        Parkinson disease </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                              Plasmodium malariae malaria </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                              Wilms tumor </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                     acute kidney failure </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                   acute myeloid leukemia </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                              acute myocardial infarction </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                             acute promyelocytic leukemia </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                           adenocarcinoma </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                       age related macular degeneration 7 </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                            amyotrophic lateral sclerosis </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt; amyotrophic lateral sclerosis 26 with or without frontotemporal dementia </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                              anencephaly </span></span>
+<span><span class="co">#&gt;                                                                       79 </span></span>
+<span><span class="co">#&gt;                          arrhythmogenic right ventricular cardiomyopathy </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                     aspiration pneumonia </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                     basal cell carcinoma </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                     basal laminar drusen </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                             benign prostatic hyperplasia </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                                 blastoma </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                            breast cancer </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                         breast carcinoma </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                           cardiomyopathy </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                                 cataract </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                         chromophobe renal cell carcinoma </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                   chronic kidney disease </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                    chronic obstructive pulmonary disease </span></span>
+<span><span class="co">#&gt;                                                                     6369 </span></span>
+<span><span class="co">#&gt;                                                         chronic rhinitis </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                               clear cell renal carcinoma </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                     colon sessile serrated adenoma/polyp </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                        colorectal cancer </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                      colorectal neoplasm </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                         common variable immunodeficiency </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                 congenital heart disease </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                          cystic fibrosis </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                                 dementia </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                digestive system disorder </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                   dilated cardiomyopathy </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                                 epilepsy </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                      follicular lymphoma </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                  frontotemporal dementia </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                           gastric cancer </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                            gastric intestinal metaplasia </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                                gastritis </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                               gingivitis </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                             glioblastoma </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                           heart disorder </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                            heart failure </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                             hydrosalpinx </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                       hyperplastic polyp </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                             hypersensitivity pneumonitis </span></span>
+<span><span class="co">#&gt;                                                                       52 </span></span>
+<span><span class="co">#&gt;                                                                influenza </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                                   injury </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                interstitial lung disease </span></span>
+<span><span class="co">#&gt;                                                                      376 </span></span>
+<span><span class="co">#&gt;                                                                   keloid </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                   kidney benign neoplasm </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                        kidney oncocytoma </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                              listeriosis </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                    localized scleroderma </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                            long COVID-19 </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                               luminal A breast carcinoma </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                               luminal B breast carcinoma </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                      lung adenocarcinoma </span></span>
+<span><span class="co">#&gt;                                                                    62351 </span></span>
+<span><span class="co">#&gt;                                                lung large cell carcinoma </span></span>
+<span><span class="co">#&gt;                                                                     1534 </span></span>
+<span><span class="co">#&gt;                                                 lymphangioleiomyomatosis </span></span>
+<span><span class="co">#&gt;                                                                      133 </span></span>
+<span><span class="co">#&gt;                                                     macular degeneration </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                            malignant pancreatic neoplasm </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                       multiple sclerosis </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                    myocardial infarction </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                 neuroendocrine carcinoma </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                            non-compaction cardiomyopathy </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                            non-small cell lung carcinoma </span></span>
+<span><span class="co">#&gt;                                                                    17484 </span></span>
+<span><span class="co">#&gt;                                      non-specific interstitial pneumonia </span></span>
+<span><span class="co">#&gt;                                                                      231 </span></span>
+<span><span class="co">#&gt;                                        nonpapillary renal cell carcinoma </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                                   normal </span></span>
+<span><span class="co">#&gt;                                                                    25461 </span></span>
+<span><span class="co">#&gt;                                                        opiate dependence </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                            periodontitis </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                    pilocytic astrocytoma </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                      plasma cell myeloma </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                    pleomorphic carcinoma </span></span>
+<span><span class="co">#&gt;                                                                     1210 </span></span>
+<span><span class="co">#&gt;                                                                pneumonia </span></span>
+<span><span class="co">#&gt;                                                                       50 </span></span>
+<span><span class="co">#&gt;                                                   post-COVID-19 disorder </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                premalignant hematological system disease </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                              primary biliary cholangitis </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                           primary sclerosing cholangitis </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                      pulmonary emphysema </span></span>
+<span><span class="co">#&gt;                                                                     1512 </span></span>
+<span><span class="co">#&gt;                                                       pulmonary fibrosis </span></span>
+<span><span class="co">#&gt;                                                                     6798 </span></span>
+<span><span class="co">#&gt;                                                    pulmonary sarcoidosis </span></span>
+<span><span class="co">#&gt;                                                                        6 </span></span>
+<span><span class="co">#&gt;                                                      respiratory failure </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                              respiratory system disorder </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                small cell lung carcinoma </span></span>
+<span><span class="co">#&gt;                                                                      583 </span></span>
+<span><span class="co">#&gt;                                             squamous cell lung carcinoma </span></span>
+<span><span class="co">#&gt;                                                                    11920 </span></span>
+<span><span class="co">#&gt;                                             systemic lupus erythematosus </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                   temporal lobe epilepsy </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                            tongue cancer </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                            toxoplasmosis </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                         triple-negative breast carcinoma </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                               trisomy 18 </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                          tubular adenoma </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                    tubulovillous adenoma </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                 type 1 diabetes mellitus </span></span>
+<span><span class="co">#&gt;                                                                        0 </span></span>
+<span><span class="co">#&gt;                                                 type 2 diabetes mellitus </span></span>
+<span><span class="co">#&gt;                                                                        0</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="querying-gene-metadata-var">Querying gene metadata (var)<a class="anchor" aria-label="anchor" href="#querying-gene-metadata-var"></a>
 </h2>
-<p>The human gene metadata of the Census is located at
-<code>census$get("census_data")$get("homo_sapiens")$ms$get("RNA")$var</code>.
-Similarly to the cell metadata, it is a <code>SOMADataFrame</code> and
-thus we can also use its method <code>read()</code>.</p>
-<p>The mouse gene metadata is at
-<code>census$get("census_data")$get("mus_musculus")$ms$get("RNA")$var</code>.</p>
-<p>Let’s take a look at the metadata available for column selection and
-row filtering.</p>
+<p>The human gene metadata of the Census is located at <code>census$get("census_data")$get("homo_sapiens")$ms$get("RNA")$var</code>. Similarly to the cell metadata, it is a <code>SOMADataFrame</code> and thus we can also use its method <code>read()</code>.</p>
+<p>The mouse gene metadata is at <code>census$get("census_data")$get("mus_musculus")$ms$get("RNA")$var</code>.</p>
+<p>Let’s take a look at the metadata available for column selection and row filtering.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"homo_sapiens"</span><span class="op">)</span><span class="op">$</span><span class="va">ms</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"RNA"</span><span class="op">)</span><span class="op">$</span><span class="va">var</span><span class="op">$</span><span class="fu">colnames</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "soma_joinid"    "feature_id"     "feature_name"   "feature_length" "nnz"           </span></span>
 <span><span class="co">#&gt; [6] "n_measured_obs"</span></span></code></pre></div>
-<p>With the exception of soma_joinid these columns are defined in the <a href="https://cellxgene-census.readthedocs.io/en/latest/cellxgene_census_docsite_schema.html" class="external-link">Census
-schema</a>. Similarly to the cell metadata, we can use the same
-operations to learn and fetch gene metadata.</p>
-<p>For example, to get the <code>feature_name</code> and
-<code>feature_length</code> of the genes <code>"ENSG00000161798"</code>
-and <code>"ENSG00000188229"</code> we can do the following.</p>
+<p>With the exception of soma_joinid these columns are defined in the <a href="https://cellxgene-census.readthedocs.io/en/latest/cellxgene_census_docsite_schema.html" class="external-link">Census schema</a>. Similarly to the cell metadata, we can use the same operations to learn and fetch gene metadata.</p>
+<p>For example, to get the <code>feature_name</code> and <code>feature_length</code> of the genes <code>"ENSG00000161798"</code> and <code>"ENSG00000188229"</code> we can do the following.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">var_df</span> <span class="op">&lt;-</span> <span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"homo_sapiens"</span><span class="op">)</span><span class="op">$</span><span class="va">ms</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"RNA"</span><span class="op">)</span><span class="op">$</span><span class="va">var</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span></span>
 <span>  value_filter <span class="op">=</span> <span class="st">"feature_id %in% c('ENSG00000161798', 'ENSG00000188229')"</span>,</span>
@@ -354,37 +510,23 @@ and <code>"ENSG00000188229"</code> we can do the following.</p>
 <div class="section level2">
 <h2 id="querying-expression-data-as-seurat">Querying expression data as <code>Seurat</code><a class="anchor" aria-label="anchor" href="#querying-expression-data-as-seurat"></a>
 </h2>
-<p>A convenient way to query and fetch expression data is to use the
-<code>get_seurat</code> method of the <code>cellxgene.census</code> API.
-This is a method that combines the column selection and value filtering
-we described above to obtain slices of the expression data based on
-metadata queries.</p>
-<p>The method will return a <a href="https://satijalab.org/seurat/" class="external-link"><code>Seurat</code> object</a>, it
-takes as an input a census object, the string for an organism, and for
-both cell and gene metadata we can specify filters and column selection
-as described above but with the following arguments:</p>
+<p>A convenient way to query and fetch expression data is to use the <code>get_seurat</code> method of the <code>cellxgene.census</code> API. This is a method that combines the column selection and value filtering we described above to obtain slices of the expression data based on metadata queries.</p>
+<p>The method will return a <a href="https://satijalab.org/seurat/" class="external-link"><code>Seurat</code> object</a>, it takes as an input a census object, the string for an organism, and for both cell and gene metadata we can specify filters and column selection as described above but with the following arguments:</p>
 <ul>
 <li>
-<code>obs_column_names</code> — character vector indicating the
-columns to select for cell metadata.</li>
+<code>obs_column_names</code> — character vector indicating the columns to select for cell metadata.</li>
 <li>
-<code>obs_value_filter</code> — expression with selection conditions
-to fetch cells meeting a criteria.</li>
+<code>obs_value_filter</code> — expression with selection conditions to fetch cells meeting a criteria.</li>
 <li>
-<code>var_column_names</code> — character vector indicating the
-columns to select for gene metadata.</li>
+<code>var_column_names</code> — character vector indicating the columns to select for gene metadata.</li>
 <li>
-<code>var_value_filter</code> — expression with selection conditions
-to fetch genes meeting a criteria.</li>
+<code>var_value_filter</code> — expression with selection conditions to fetch genes meeting a criteria.</li>
 </ul>
 <p>For example if we want to fetch the expression data for:</p>
 <ul>
-<li>Genes <code>"ENSG00000161798"</code> and
-<code>"ENSG00000188229"</code>.</li>
-<li>All <code>"B cells"</code> of <code>"lung"</code> with
-<code>"COVID-19"</code>.</li>
-<li>With all gene metadata and adding <code>sex</code> cell
-metadata.</li>
+<li>Genes <code>"ENSG00000161798"</code> and <code>"ENSG00000188229"</code>.</li>
+<li>All <code>"B cells"</code> of <code>"lung"</code> with <code>"COVID-19"</code>.</li>
+<li>With all gene metadata and adding <code>sex</code> cell metadata.</li>
 </ul>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://satijalab.org/seurat" class="external-link">"Seurat"</a></span><span class="op">)</span></span>
@@ -402,38 +544,25 @@ metadata.</li>
 <span><span class="co">#&gt;  2 layers present: counts, data</span></span></code></pre></div>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">seurat_obj</span><span class="op">[[</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
-<span><span class="co">#&gt;                 orig.ident nCount_RNA nFeature_RNA cell_type tissue_general  disease</span></span>
-<span><span class="co">#&gt; cell13391229 SeuratProject          0            0    B cell           lung COVID-19</span></span>
-<span><span class="co">#&gt; cell13393737 SeuratProject          1            1    B cell           lung COVID-19</span></span>
-<span><span class="co">#&gt; cell13394391 SeuratProject          0            0    B cell           lung COVID-19</span></span>
-<span><span class="co">#&gt; cell13394897 SeuratProject          0            0    B cell           lung COVID-19</span></span>
-<span><span class="co">#&gt; cell13395941 SeuratProject          0            0    B cell           lung COVID-19</span></span>
-<span><span class="co">#&gt; cell13397408 SeuratProject          0            0    B cell           lung COVID-19</span></span>
-<span><span class="co">#&gt;                  sex</span></span>
-<span><span class="co">#&gt; cell13391229    male</span></span>
-<span><span class="co">#&gt; cell13393737 unknown</span></span>
-<span><span class="co">#&gt; cell13394391    male</span></span>
-<span><span class="co">#&gt; cell13394897 unknown</span></span>
-<span><span class="co">#&gt; cell13395941    male</span></span>
-<span><span class="co">#&gt; cell13397408 unknown</span></span></code></pre></div>
+<span><span class="co">#&gt;                orig.ident cell_type tissue_general  disease  sex</span></span>
+<span><span class="co">#&gt; cell8964464 SeuratProject    B cell           lung COVID-19 male</span></span>
+<span><span class="co">#&gt; cell8964864 SeuratProject    B cell           lung COVID-19 male</span></span>
+<span><span class="co">#&gt; cell8965181 SeuratProject    B cell           lung COVID-19 male</span></span>
+<span><span class="co">#&gt; cell8965207 SeuratProject    B cell           lung COVID-19 male</span></span>
+<span><span class="co">#&gt; cell8965360 SeuratProject    B cell           lung COVID-19 male</span></span>
+<span><span class="co">#&gt; cell8965378 SeuratProject    B cell           lung COVID-19 male</span></span></code></pre></div>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">seurat_obj</span><span class="op">$</span><span class="va">RNA</span><span class="op">[[</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                 feature_name feature_length      nnz n_measured_obs</span></span>
-<span><span class="co">#&gt; ENSG00000161798         AQP5           1884  1029069       58250439</span></span>
-<span><span class="co">#&gt; ENSG00000188229       TUBB4B           2037 21416107       62655002</span></span></code></pre></div>
-<p>For a full description refer to
-<code><a href="../reference/get_seurat.html">?cellxgene.census::get_seurat</a></code>.</p>
+<span><span class="co">#&gt; ENSG00000161798         AQP5           1884  1226640       68915280</span></span>
+<span><span class="co">#&gt; ENSG00000188229       TUBB4B           2037 26463689       73806975</span></span></code></pre></div>
+<p>For a full description refer to <code><a href="../reference/get_seurat.html">?cellxgene.census::get_seurat</a></code>.</p>
 </div>
 <div class="section level2">
 <h2 id="querying-expression-data-as-singlecellexperiment">Querying expression data as <code>SingleCellExperiment</code><a class="anchor" aria-label="anchor" href="#querying-expression-data-as-singlecellexperiment"></a>
 </h2>
-<p>Similarly to the previous section, there is a
-<code>get_single_cell_experiment</code> method in the
-<code>cellxgene.census</code> API. It behaves exactly the same as
-<code>get_seurat</code> but it returns a <a href="https://bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html" class="external-link"><code>SingleCellExperiment</code>
-object</a>.</p>
-<p>For example, to repeat the same query we can simply do the
-following.</p>
+<p>Similarly to the previous section, there is a <code>get_single_cell_experiment</code> method in the <code>cellxgene.census</code> API. It behaves exactly the same as <code>get_seurat</code> but it returns a <a href="https://bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html" class="external-link"><code>SingleCellExperiment</code> object</a>.</p>
+<p>For example, to repeat the same query we can simply do the following.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st">"SingleCellExperiment"</span><span class="op">)</span></span>
 <span></span>
@@ -450,7 +579,7 @@ following.</p>
 <span><span class="co">#&gt; assays(1): counts</span></span>
 <span><span class="co">#&gt; rownames(2): ENSG00000161798 ENSG00000188229</span></span>
 <span><span class="co">#&gt; rowData names(4): feature_name feature_length nnz n_measured_obs</span></span>
-<span><span class="co">#&gt; colnames(2729): obs13391229 obs13393737 ... obs54635684 obs54635708</span></span>
+<span><span class="co">#&gt; colnames(2729): obs8964464 obs8964864 ... obs69303276 obs69304862</span></span>
 <span><span class="co">#&gt; colData names(4): cell_type tissue_general disease sex</span></span>
 <span><span class="co">#&gt; reducedDimNames(0):</span></span>
 <span><span class="co">#&gt; mainExpName: RNA</span></span>
@@ -458,58 +587,51 @@ following.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">sce_obj</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; DataFrame with 6 rows and 4 columns</span></span>
-<span><span class="co">#&gt;               cell_type tissue_general     disease         sex</span></span>
-<span><span class="co">#&gt;             &lt;character&gt;    &lt;character&gt; &lt;character&gt; &lt;character&gt;</span></span>
-<span><span class="co">#&gt; obs13391229      B cell           lung    COVID-19        male</span></span>
-<span><span class="co">#&gt; obs13393737      B cell           lung    COVID-19     unknown</span></span>
-<span><span class="co">#&gt; obs13394391      B cell           lung    COVID-19        male</span></span>
-<span><span class="co">#&gt; obs13394897      B cell           lung    COVID-19     unknown</span></span>
-<span><span class="co">#&gt; obs13395941      B cell           lung    COVID-19        male</span></span>
-<span><span class="co">#&gt; obs13397408      B cell           lung    COVID-19     unknown</span></span></code></pre></div>
+<span><span class="co">#&gt;            cell_type tissue_general  disease      sex</span></span>
+<span><span class="co">#&gt;             &lt;factor&gt;       &lt;factor&gt; &lt;factor&gt; &lt;factor&gt;</span></span>
+<span><span class="co">#&gt; obs8964464    B cell           lung COVID-19     male</span></span>
+<span><span class="co">#&gt; obs8964864    B cell           lung COVID-19     male</span></span>
+<span><span class="co">#&gt; obs8965181    B cell           lung COVID-19     male</span></span>
+<span><span class="co">#&gt; obs8965207    B cell           lung COVID-19     male</span></span>
+<span><span class="co">#&gt; obs8965360    B cell           lung COVID-19     male</span></span>
+<span><span class="co">#&gt; obs8965378    B cell           lung COVID-19     male</span></span></code></pre></div>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">rowData</a></span><span class="op">(</span><span class="va">sce_obj</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; DataFrame with 2 rows and 4 columns</span></span>
 <span><span class="co">#&gt;                 feature_name feature_length       nnz n_measured_obs</span></span>
 <span><span class="co">#&gt;                  &lt;character&gt;      &lt;integer&gt; &lt;integer&gt;      &lt;integer&gt;</span></span>
-<span><span class="co">#&gt; ENSG00000161798         AQP5           1884   1029069       58250439</span></span>
-<span><span class="co">#&gt; ENSG00000188229       TUBB4B           2037  21416107       62655002</span></span></code></pre></div>
-<p>For a full description refer to
-<code><a href="../reference/get_single_cell_experiment.html">?cellxgene.census::get_single_cell_experiment</a></code>.</p>
+<span><span class="co">#&gt; ENSG00000161798         AQP5           1884   1226640       68915280</span></span>
+<span><span class="co">#&gt; ENSG00000188229       TUBB4B           2037  26463689       73806975</span></span></code></pre></div>
+<p>For a full description refer to <code><a href="../reference/get_single_cell_experiment.html">?cellxgene.census::get_single_cell_experiment</a></code>.</p>
 <div class="section level3">
 <h3 id="close-the-census">Close the census<a class="anchor" aria-label="anchor" href="#close-the-census"></a>
 </h3>
-<p>After use, the census object should be closed to release memory and
-other resources.</p>
+<p>After use, the census object should be closed to release memory and other resources.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">census</span><span class="op">$</span><span class="fu">close</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>This also closes all SOMA objects accessed via the top-level
-<code>census</code>. Closing can be automated using
-<code>on.exit(census$close(), add = TRUE)</code> immediately after
-<code>census &lt;- open_soma()</code>.</p>
+<p>This also closes all SOMA objects accessed via the top-level <code>census</code>. Closing can be automated using <code>on.exit(census$close(), add = TRUE)</code> immediately after <code>census &lt;- open_soma()</code>.</p>
 </div>
 </div>
-  </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
 </div>
 
 
 
     <footer><div class="pkgdown-footer-left">
-  <p></p>
-<p>Developed by Chan Zuckerberg Initiative Foundation.</p>
+  <p>Developed by Chan Zuckerberg Initiative Foundation.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
 </div>
 
     </footer>
 </div>
 
-  
 
-  
+
+
 
   </body>
 </html>

@@ -10,7 +10,6 @@ import pandas as pd
 import psutil
 import pyarrow as pa
 import pytest
-import tiledb
 import tiledbsoma as soma
 
 from cellxgene_census_builder.build_soma import build
@@ -95,7 +94,7 @@ def test_base_builder_creation(
         # Query the census and do assertions
         with soma.Collection.open(
             uri=census_build_args.soma_path.as_posix(),
-            context=soma.options.SOMATileDBContext(tiledb_ctx=tiledb.Ctx({"vfs.s3.region": "us-west-2"})),
+            context=soma.options.SOMATileDBContext(tiledb_config={"vfs.s3.region": "us-west-2"}),
         ) as census:
             # There are 16 cells in total (4 in each dataset). They all belong to homo_sapiens
             human_obs = census[CENSUS_DATA_NAME]["homo_sapiens"]["obs"].read().concat().to_pandas()
@@ -189,6 +188,7 @@ def test_unicode_support(tmp_path: pathlib.Path) -> None:
         uri=os.path.join(tmp_path, "unicode_support"),
         schema=pa.Schema.from_pandas(pd_df, preserve_index=False),
         index_column_names=["soma_joinid"],
+        domain=[(pd_df["soma_joinid"].min(), pd_df["soma_joinid"].max())],
     ) as s_df:
         s_df.write(pa.Table.from_pandas(pd_df, preserve_index=False))
 

@@ -4,7 +4,7 @@
 
 The Census API requires a Linux or MacOS system with:
 
-- Python 3.8 to Python 3.11. Or R, supported versions TBD.
+- Python 3.10 to Python 3.12. Or R, supported versions TBD.
 - Recommended: >16 GB of memory.
 - Recommended: >5 Mbps internet connection.
 - Recommended: for increased performance use the API through a AWS-EC2 instance from the region `us-west-2`. The Census data builds are hosted in a AWS-S3 bucket in that region.

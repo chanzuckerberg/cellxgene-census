@@ -1,0 +1,25 @@
+template:
+  metadata:
+    annotations:
+      karpenter.sh/do-not-disrupt: "true"
+  spec:
+    containers:
+      - command:
+          - /home/runner/run.sh
+        image: public.ecr.aws/r2b9w7i3/cell_census_github_runners:latest
+        name: runner
+        resources:
+          limits:
+            cpu: 8
+            memory: 64Gi
+          requests:
+            cpu: 8
+            memory: 64Gi
+    tolerations:
+    - key: chanzuckerberg/cellxgene-census
+      operator: "Exists"
+      effect: "NoSchedule"
+    nodeSelector:
+      kubernetes.io/arch: amd64
+githubConfigSecret: gh-app-secret
+githubConfigUrl: https://github.com/chanzuckerberg/cellxgene-census

@@ -96,3 +96,6 @@ EFO:0700004,BD Rhapsody Targeted mRNA
 EFO:0700010,TruDrop
 EFO:0700011,GEXSCOPE technology
 EFO:0700016,Smart-seq v4
+EFO:0010961, Visium Spatial Gene Expression
+EFO:0009920, Slide-seq
+EFO:0030062, Slide-seqV2

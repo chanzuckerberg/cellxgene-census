@@ -1,6 +1,8 @@
-<span style="background-color: #f3bfcb; color; font-size: 18px"> 🚨 Census now supports categoricals, using less memory but potentially breaking existing pipelines. [Find out more](https://chanzuckerberg.github.io/cellxgene-census/articles/2024/20240404-categoricals.html)!
+<span style="background-color: #f3bfcb; color; font-size: 18px"> 🚀 Now in testing: Spatial! From Jan 16th, latest builds will include data from Slide-seq and Visium assays. ⚠️ Opening these builds requires `tiledbsoma>=1.15.3` ⚠️. [Learn more](articles/2025/20250117-spatial.md)!
 
-<span style="background-color: #f3bfcb; color; font-size: 18px"> 🚀 New to the Census: we’ve created a **centralized hub of models and embeddings** using Census data. [Check it out](https://cellxgene.cziscience.com/census-models)!
+<span style="background-color: #f3bfcb; color; font-size: 18px"> 🚀 New to the Census: Train PyTorch models directly with Census data with our efficient and easy-to-use PyTorch loaders. [Learn more](https://chanzuckerberg.github.io/cellxgene-census/articles/2024/20240709-pytorch.html)!
+
+<span style="background-color: #f3bfcb; color; font-size: 18px"> 💻 Explore benchmarks of Census models and embeddings. [See the report](https://chanzuckerberg.github.io/cellxgene-census/articles/2024/20240710_embedding_metrics_dec_2023_lts.html)!
 
  </span>
 

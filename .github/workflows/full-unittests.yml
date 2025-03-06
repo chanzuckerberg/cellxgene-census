@@ -37,9 +37,12 @@ on:
         default: ""
         type: string
 
+env:
+  CELLXGENE_CENSUS_USERAGENT: "CZI-test"
+
 jobs:
   py_unit_tests:
-    runs-on: single-cell-1tb-runner
+    runs-on: sc-dev-64g-runner
     timeout-minutes: 1440 # 24 hour timeout
     strategy:
       fail-fast: false # prevent this job from killing other jobs
@@ -85,7 +88,7 @@ jobs:
           PYTHONPATH=. pytest -v --durations=0 -rP --experimental --expensive ./api/python/cellxgene_census/tests/
 
   r_unit_tests:
-    runs-on: single-cell-1tb-runner
+    runs-on: sc-dev-64g-runner
     timeout-minutes: 1440 # 24 hour timeout
     strategy:
       fail-fast: false # prevent this job from killing other jobs

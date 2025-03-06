@@ -1,5 +1,4 @@
 import functools
-from typing import Any
 
 import pyarrow as pa
 import tiledbsoma as soma
@@ -13,7 +12,7 @@ USE_ARROW_DICTIONARY = True
 
 CENSUS_SCHEMA_VERSION = "2.1.0"
 
-CXG_SCHEMA_VERSION = "5.1.0"  # the CELLxGENE schema version supported
+CXG_SCHEMA_VERSION = "5.2.0"  # the CELLxGENE schema version supported
 
 # Columns expected in the census_datasets dataframe
 CENSUS_DATASETS_TABLE_SPEC = TableSpec.create(
@@ -53,6 +52,9 @@ CENSUS_INFO_NAME = "census_info"
 # top-level SOMA collection
 CENSUS_DATA_NAME = "census_data"
 
+# top-level SOMA collection
+CENSUS_SPATIAL_SEQUENCING_NAME = "census_spatial_sequencing"
+
 # "census_info"/"summary_cell_counts" SOMA Dataframe
 CENSUS_SUMMARY_CELL_COUNTS_NAME = "summary_cell_counts"  # object name
 
@@ -79,36 +81,7 @@ FEATURE_DATASET_PRESENCE_MATRIX_NAME = "feature_dataset_presence_matrix"
 # than `string` or `binary`. There is no at-rest difference (TileDB-SOMA encodes both as large),
 # but the in-memory Arrow Array indices for string/binary can overflow as cell counts increase.
 #
-CXG_OBS_TERM_COLUMNS = [  # Columns pulled from the CXG H5AD without modification.
-    "assay",
-    "assay_ontology_term_id",
-    "cell_type",
-    "cell_type_ontology_term_id",
-    "development_stage",
-    "development_stage_ontology_term_id",
-    "disease",
-    "disease_ontology_term_id",
-    "donor_id",
-    "is_primary_data",
-    "observation_joinid",
-    "self_reported_ethnicity",
-    "self_reported_ethnicity_ontology_term_id",
-    "sex",
-    "sex_ontology_term_id",
-    "suspension_type",
-    "tissue",
-    "tissue_ontology_term_id",
-    "tissue_type",
-]
-CXG_OBS_COLUMNS_READ: tuple[str, ...] = (  # Columns READ from the CXG H5AD - see open_anndata()
-    *CXG_OBS_TERM_COLUMNS,
-    "organism",
-    "organism_ontology_term_id",
-)
-CENSUS_OBS_STATS_COLUMNS = ["raw_sum", "nnz", "raw_mean_nnz", "raw_variance_nnz", "n_measured_vars"]
-CENSUS_OBS_FIELDS: list[FieldSpec | tuple[str, pa.DataType]] = [
-    ("soma_joinid", pa.int64()),
-    FieldSpec(name="dataset_id", type=pa.large_string(), is_dictionary=True),
+CXG_OBS_TERM_FIELDS = [  # Columns pulled from the CXG H5AD without modification.
     FieldSpec(name="assay", type=pa.large_string(), is_dictionary=True),
     FieldSpec(name="assay_ontology_term_id", type=pa.large_string(), is_dictionary=True),
     FieldSpec(name="cell_type", type=pa.large_string(), is_dictionary=True),
@@ -118,8 +91,8 @@ CENSUS_OBS_FIELDS: list[FieldSpec | tuple[str, pa.DataType]] = [
     FieldSpec(name="disease", type=pa.large_string(), is_dictionary=True),
     FieldSpec(name="disease_ontology_term_id", type=pa.large_string(), is_dictionary=True),
     FieldSpec(name="donor_id", type=pa.large_string(), is_dictionary=True),
-    ("is_primary_data", pa.bool_()),
-    ("observation_joinid", pa.large_string()),
+    FieldSpec(name="is_primary_data", type=pa.bool_(), is_dictionary=False),
+    FieldSpec(name="observation_joinid", type=pa.large_string(), is_dictionary=False),
     FieldSpec(name="self_reported_ethnicity", type=pa.large_string(), is_dictionary=True),
     FieldSpec(name="self_reported_ethnicity_ontology_term_id", type=pa.large_string(), is_dictionary=True),
     FieldSpec(name="sex", type=pa.large_string(), is_dictionary=True),
@@ -128,57 +101,32 @@ CENSUS_OBS_FIELDS: list[FieldSpec | tuple[str, pa.DataType]] = [
     FieldSpec(name="tissue", type=pa.large_string(), is_dictionary=True),
     FieldSpec(name="tissue_ontology_term_id", type=pa.large_string(), is_dictionary=True),
     FieldSpec(name="tissue_type", type=pa.large_string(), is_dictionary=True),
+]
+CXG_OBS_TERM_FIELDS_SPATIAL = [  # Spatial speicific columns
+    FieldSpec(name="in_tissue", type=pa.int64(), is_dictionary=False),
+    FieldSpec(name="array_row", type=pa.int64(), is_dictionary=False),
+    FieldSpec(name="array_col", type=pa.int64(), is_dictionary=False),
+]
+CENSUS_OBS_FIELDS_MAPPED = [  # Annotation columns created by census builder
     FieldSpec(name="tissue_general", type=pa.large_string(), is_dictionary=True),
     FieldSpec(name="tissue_general_ontology_term_id", type=pa.large_string(), is_dictionary=True),
-    ("raw_sum", pa.float64()),
-    ("nnz", pa.int64()),
-    ("raw_mean_nnz", pa.float64()),
-    ("raw_variance_nnz", pa.float64()),
-    ("n_measured_vars", pa.int64()),
 ]
-CENSUS_OBS_TABLE_SPEC = TableSpec.create(CENSUS_OBS_FIELDS, use_arrow_dictionary=USE_ARROW_DICTIONARY)
-
-"""
-Materialization (filter pipelines, capacity, etc) of obs/var schema in TileDB is tuned by empirical testing.
-"""
-# Numeric columns
-_NumericObsAttrs = ["raw_sum", "nnz", "raw_mean_nnz", "raw_variance_nnz", "n_measured_vars"]
-# Categorical/dict-like columns
-_DictLikeObsAttrs = [
-    f.name
-    for f in CENSUS_OBS_FIELDS
-    if isinstance(f, FieldSpec) and f.is_dictionary
-    if f.is_dictionary and f.name not in (_NumericObsAttrs + ["soma_joinid"])
+CENSUS_OBS_STATS_FIELDS = [  # Columns for stats calculated during build
+    FieldSpec(name="raw_sum", type=pa.float64(), is_dictionary=False),
+    FieldSpec(name="nnz", type=pa.int64(), is_dictionary=False),
+    FieldSpec(name="raw_mean_nnz", type=pa.float64(), is_dictionary=False),
+    FieldSpec(name="raw_variance_nnz", type=pa.float64(), is_dictionary=False),
+    FieldSpec(name="n_measured_vars", type=pa.int64(), is_dictionary=False),
 ]
-# Best of the rest
-_AllOtherObsAttrs = [
-    f.name
-    for f in CENSUS_OBS_TABLE_SPEC.fields
-    if f.name not in (_DictLikeObsAttrs + _NumericObsAttrs + ["soma_joinid"])
+CENSUS_OBS_CORE_FIELDS = [
+    FieldSpec(name="soma_joinid", type=pa.int64(), is_dictionary=False),
+    FieldSpec(name="dataset_id", type=pa.large_string(), is_dictionary=True),
 ]
-# Dict filter varies depending on whether we are using dictionary types in the schema
-_DictLikeFilter: list[Any] = (
-    [{"_type": "ZstdFilter", "level": 9}]
-    if USE_ARROW_DICTIONARY
-    else ["DictionaryFilter", {"_type": "ZstdFilter", "level": 19}]
-)
-CENSUS_OBS_PLATFORM_CONFIG = {
-    "tiledb": {
-        "create": {
-            "capacity": 2**16,
-            "dims": {"soma_joinid": {"filters": ["DoubleDeltaFilter", {"_type": "ZstdFilter", "level": 19}]}},
-            "attrs": {
-                **{
-                    k: {"filters": ["ByteShuffleFilter", {"_type": "ZstdFilter", "level": 9}]} for k in _NumericObsAttrs
-                },
-                **{k: {"filters": _DictLikeFilter} for k in _DictLikeObsAttrs},
-                **{k: {"filters": [{"_type": "ZstdFilter", "level": 19}]} for k in _AllOtherObsAttrs},
-            },
-            "offsets_filters": ["DoubleDeltaFilter", {"_type": "ZstdFilter", "level": 19}],
-            "allows_duplicates": True,
-        }
-    }
-}
+# These are not actually written, so pyarrow type is not important
+CXG_OBS_FIELDS_READ = [  # Columns READ from the CXG H5AD - see open_anndata()
+    FieldSpec(name="organism", type=pa.large_string(), is_dictionary=True),
+    FieldSpec(name="organism_ontology_term_id", type=pa.large_string(), is_dictionary=True),
+]
 
 CXG_VAR_COLUMNS_READ: tuple[str, ...] = (
     "_index",
@@ -186,19 +134,21 @@ CXG_VAR_COLUMNS_READ: tuple[str, ...] = (
     "feature_length",
     "feature_reference",
     "feature_biotype",
+    "feature_type",
 )
 CENSUS_VAR_TABLE_SPEC = TableSpec.create(
     [
         ("soma_joinid", pa.int64()),
         ("feature_id", pa.large_string()),
         ("feature_name", pa.large_string()),
+        ("feature_type", pa.large_string()),
         ("feature_length", pa.int64()),
         ("nnz", pa.int64()),
         ("n_measured_obs", pa.int64()),
     ],
     use_arrow_dictionary=USE_ARROW_DICTIONARY,
 )
-_StringLabelVar = ["feature_id", "feature_name"]
+_StringLabelVar = ["feature_id", "feature_name", "feature_type"]
 _NumericVar = ["nnz", "n_measured_obs", "feature_length"]
 CENSUS_VAR_PLATFORM_CONFIG = {
     "tiledb": {
@@ -335,6 +285,13 @@ RNA_SEQ = [
     "EFO:0022396",  # TruSeq
     "EFO:0022488",  # Smart-seq3
     "EFO:0022490",  # ScaleBio single cell RNA sequencing
+    "EFO:0022600",  # Parse Evercode Whole Transcriptome v1
+    "EFO:0022601",  # Parse Evercode Whole Transcriptome v2
+    "EFO:0022602",  # Parse Evercode Whole Transcriptome v3
+    "EFO:0022606",  # 10x gene expression flex
+    "EFO:0022839",  # STORM-seq
+    "EFO:0022845",  # modified STRT-seq
+    "EFO:0022846",  # 5' STRT-seq
     "EFO:0030002",  # microwell-seq
     "EFO:0030003",  # 10x 3' transcription profiling
     "EFO:0030004",  # 10x 5' transcription profiling
@@ -351,6 +308,13 @@ RNA_SEQ = [
     "EFO:0700010",  # TruDrop
     "EFO:0700011",  # GEXSCOPE technology
     "EFO:0700016",  # Smart-seq v4
+]
+
+# list of EFO terms that correspond to SPATIAL modality/measurement. These terms
+# define the inclusive filter applied to obs.assay_ontology_term_id. All other
+ALLOWED_SPATIAL_ASSAYS = [
+    "EFO:0010961",  # Visium Spatial Gene Expression
+    "EFO:0030062",  # Slide-seqV2
 ]
 
 # Full-gene assays have special handling in the "normalized" X layers
@@ -371,6 +335,7 @@ FULL_GENE_ASSAY = [
     "EFO:0010184",  # Smart-like
     "EFO:0022396",  # TruSeq
     "EFO:0022488",  # Smart-seq3
+    "EFO:0022839",  # STORM-seq
     "EFO:0030031",  # SCOPE-chip
     "EFO:0030061",  # mcSCRB-seq
     "EFO:0700016",  # Smart-seq v4

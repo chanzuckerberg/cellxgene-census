@@ -76,7 +76,7 @@ def test_meanvar(matrix: sparse.coo_matrix, n_batches: int, stride: int, ddof: i
         r, c = matrix.tolil().nonzero()
         for x, y in zip(r, c):
             mask[x, y] = 0
-        masked: np.ma.MaskedArray[np.bool_, np.dtype[np.float64]] = ma.masked_array(dense, mask=mask)  # type: ignore[no-untyped-call]
+        masked: np.ma.MaskedArray[tuple[int, ...], np.dtype[np.float64]] = ma.masked_array(dense, mask=mask)  # type: ignore[no-untyped-call]
         mean = masked.mean(axis=0)  # type: ignore[no-untyped-call]
         assert allclose(all_u, mean)
 
@@ -138,7 +138,7 @@ def test_counts(matrix: sparse.coo_matrix, n_batches: int, stride: int) -> None:
     assert n_samples.sum() == matrix.shape[0]
     assert len(n_samples) == n_batches
 
-    clip_val = 50 * np.random.rand(n_batches, matrix.shape[1])
+    clip_val = (50 * np.random.rand(n_batches, matrix.shape[1])).astype(np.float64)
 
     ca = CountsAccumulator(n_batches, matrix.shape[1], clip_val)
     for i in range(0, matrix.nnz, stride):

@@ -1,4 +1,6 @@
 import pathlib
+from functools import partial
+from textwrap import dedent
 from typing import Literal
 
 import anndata
@@ -43,8 +45,17 @@ def get_anndata(
     n_cells = 4
     n_genes = len(gene_ids)
     rng = np.random.default_rng()
-    min_X_val = 1 if no_zero_counts else 0
-    X = rng.integers(min_X_val, min_X_val + 5, size=(n_cells, n_genes)).astype(np.float32)
+    if no_zero_counts:
+        X = rng.integers(1, 6, size=(n_cells, n_genes)).astype(np.float32)
+    else:
+        X = sparse.random(
+            n_cells,
+            n_genes,
+            density=0.5,
+            random_state=rng,
+            data_rvs=partial(rng.integers, 1, 6),
+            dtype=np.float32,
+        ).toarray()
 
     # Builder code currently assumes (and enforces) that ALL cells (rows) contain at least
     # one non-zero value in their count matrix. Enforce this assumption, as the rng will
@@ -99,6 +110,7 @@ def get_anndata(
             "feature_biotype": "gene",
             "feature_is_filtered": False,
             "feature_name": "ERCC-00002 (spike-in control)",
+            "feature_type": "synthetic",
             "feature_reference": organism.organism_ontology_term_id,
             "feature_length": 1000,
         },
@@ -116,7 +128,7 @@ def get_anndata(
     uns["batch_condition"] = np.array(["a", "b"], dtype="object")
 
     # Need to carefully set the corpora schema versions in order for tests to pass.
-    uns["schema_version"] = "5.1.0"  # type: ignore
+    uns["schema_version"] = "5.2.0"  # type: ignore
 
     return anndata.AnnData(X=X, obs=obs, var=var, obsm=obsm, uns=uns)
 
@@ -147,10 +159,10 @@ def datasets(census_build_args: CensusBuildArgs) -> list[Dataset]:
     for organism in ORGANISMS:
         for i in range(NUM_DATASET):
             h5ad = get_anndata(
-                organism, GENE_IDS[i], no_zero_counts=True, assay_ontology_term_id=ASSAY_IDS[i], X_format=X_FORMAT[i]
+                organism, GENE_IDS[i], no_zero_counts=False, assay_ontology_term_id=ASSAY_IDS[i], X_format=X_FORMAT[i]
             )
-            h5ad_path = f"{assets_path}/{organism.name}_{i}.h5ad"
-            h5ad.write_h5ad(h5ad_path)
+            h5ad_name = f"{organism.name}_{i}.h5ad"
+            h5ad.write_h5ad(f"{assets_path}/{h5ad_name}")
             datasets.append(
                 Dataset(
                     dataset_id=f"{organism.name}_{i}",
@@ -159,7 +171,7 @@ def datasets(census_build_args: CensusBuildArgs) -> list[Dataset]:
                     collection_id=f"id_{organism.name}",
                     collection_name=f"collection_{organism.name}",
                     dataset_asset_h5ad_uri="mock",
-                    dataset_h5ad_path=h5ad_path,
+                    dataset_h5ad_path=h5ad_name,
                     dataset_version_id=f"{organism.name}_{i}_v0",
                 ),
             )
@@ -169,10 +181,11 @@ def datasets(census_build_args: CensusBuildArgs) -> list[Dataset]:
 
 @pytest.fixture
 def manifest_csv(tmp_path: pathlib.Path) -> str:
-    manifest_content = f"""
-    dataset_id_1, {tmp_path}/data/h5ads/dataset_id_1.h5ad
-    dataset_id_2, {tmp_path}/data/h5ads/dataset_id_2.h5ad
-    """
+    manifest_content = dedent(f"""\
+    dataset_id,dataset_asset_h5ad_uri
+    dataset_id_1,{tmp_path}/data/h5ads/dataset_id_1.h5ad
+    dataset_id_2,{tmp_path}/data/h5ads/dataset_id_2.h5ad
+    """)
     path = f"{tmp_path}/manifest.csv"
     h5ad_path = f"{tmp_path}/data/h5ads/"
     pathlib.Path(h5ad_path).mkdir(parents=True, exist_ok=True)
@@ -186,11 +199,12 @@ def manifest_csv(tmp_path: pathlib.Path) -> str:
 
 @pytest.fixture
 def manifest_csv_with_duplicates(tmp_path: pathlib.Path) -> str:
-    manifest_content = f"""
-    dataset_id_1, {tmp_path}/data/h5ads/dataset_id_1.h5ad
-    dataset_id_2, {tmp_path}/data/h5ads/dataset_id_2.h5ad
-    dataset_id_2, {tmp_path}/data/h5ads/dataset_id_2.h5ad
-    """
+    manifest_content = dedent(f"""\
+    dataset_id,dataset_asset_h5ad_uri
+    dataset_id_1,{tmp_path}/data/h5ads/dataset_id_1.h5ad
+    dataset_id_2,{tmp_path}/data/h5ads/dataset_id_2.h5ad
+    dataset_id_2,{tmp_path}/data/h5ads/dataset_id_2.h5ad
+    """)
     path = f"{tmp_path}/manifest.csv"
     h5ad_path = f"{tmp_path}/data/h5ads/"
     pathlib.Path(h5ad_path).mkdir(parents=True, exist_ok=True)

@@ -1,4 +1,4 @@
-from typing import Any, Tuple, Union
+from typing import Any
 
 import numpy as np
 import numpy.ma as ma
@@ -11,7 +11,7 @@ import cellxgene_census
 from cellxgene_census.experimental import pp
 
 
-def var(X: Union[sparse.csc_matrix, sparse.csr_matrix], axis: int = 0, ddof: int = 1) -> Any:
+def var(X: sparse.csc_matrix | sparse.csr_matrix, axis: int = 0, ddof: int = 1) -> Any:
     """
     Variance of a sparse matrix calculated as mean(X**2) - mean(X)**2
     with Bessel's correction applied for unbiased estimate
@@ -52,7 +52,7 @@ def test_mean_variance(
     calc_mean: bool,
     calc_variance: bool,
     small_mem_context: soma.SOMATileDBContext,
-    obs_coords: Tuple[None, slice],
+    obs_coords: tuple[None, slice],
 ) -> None:
     with cellxgene_census.open_soma(census_version="latest", context=small_mem_context) as census:
         with census["census_data"][experiment_name].axis_query(
@@ -119,7 +119,7 @@ def test_mean_variance_nnz_only(
     calc_mean: bool,
     calc_variance: bool,
     small_mem_context: soma.SOMATileDBContext,
-    obs_coords: Tuple[None, slice],
+    obs_coords: tuple[None, slice],
 ) -> None:
     # Note: since this test requires materializing the matrix in memory to compute the mean/variance,
     # we're going to use a coord slice based approach. This will ensure the matrix can fit in memory.

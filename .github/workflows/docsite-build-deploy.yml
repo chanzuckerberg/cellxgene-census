@@ -6,10 +6,14 @@ on:
   workflow_dispatch: # Used to make post-release docfixes
 permissions:
   contents: write
+
+env:
+  CELLXGENE_CENSUS_USERAGENT: "CZI-test"
+
 jobs:
   build-and-deploy:
     concurrency: ci-${{ github.ref }}
-    runs-on: single-cell-8c64g-runner
+    runs-on: sc-dev-64g-runner
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@v4
@@ -28,40 +32,26 @@ jobs:
           mkdir -p docsite
           touch docsite/.nojekyll
 
-      - name: Install Pandoc
-        run: |
-          sudo apt-get install -y pandoc
-
-      - name: Install misc deps
+      - name: Install system deps
         run: |
           sudo apt-get update
           sudo apt-get install -y libcairo2-dev rsync
+
+      - name: Install Pandoc
+        run: |
+          sudo apt-get install -y pandoc
 
       - name: Build Sphinx website
         run: |
           cd docs/
           make clean && make html
-          cp -r _build/html/* ../docsite/.
 
-      - uses: r-lib/actions/setup-r@v2
-        with:
-          extra-repositories: https://tiledb-inc.r-universe.dev
-
-      - uses: r-lib/actions/setup-r-dependencies@v2
-        with:
-          working-directory: ./api/r/cellxgene.census
-          extra-repositories: https://tiledb-inc.r-universe.dev
-          extra-packages: any::rcmdcheck, any::styler, any::roxygen2, any::pkgdown, any::BiocManager,
-          needs: check
-          cache: true
-
-      - name: Build pkgdown website
+      - name: Copy everything to docsite directory
         run: |
-          cd api/r/cellxgene.census
-          mv _vignettes vignettes
-          Rscript -e 'BiocManager::install("scater")'
-          Rscript -e 'pkgdown::build_site()'
-          cd ../../../
+          # Python docs
+          cp -r docs/_build/html/* docsite/.
+
+          # R docs
           mkdir -p docsite/r
           cp -r api/r/cellxgene.census/docs/* docsite/r/.
 

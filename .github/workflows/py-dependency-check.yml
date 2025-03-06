@@ -14,6 +14,9 @@ on:
     - cron: "30 1 * * *"
   workflow_dispatch: # used for debugging or manual validation
 
+env:
+  CELLXGENE_CENSUS_USERAGENT: "CZI-test"
+
 jobs:
   python-dependency-check:
     name: python-dependency-check
@@ -21,17 +24,17 @@ jobs:
     strategy:
       fail-fast: false  # don't fail-fast, as errors are often specific to a single cell in the matrix
       matrix:
-        os: [single-cell-8c64g-runner, macos-latest]
-        python-version: ["3.8", "3.9", "3.10", "3.11"]
+        os: [sc-dev-64g-runner, macos-latest]
+        python-version: ["3.10", "3.11", "3.12"]
         exclude:
           - os: macos-latest
-            python-version: "3.8"
+            python-version: "3.12"
 
     runs-on: ${{matrix.os}}
 
     steps:
       - name: install tooling
-        if: matrix.os == 'single-cell-8c64g-runner'
+        if: matrix.os == 'sc-dev-64g-runner'
         run: |
           sudo apt-get update && sudo apt-get install -y jq
 
