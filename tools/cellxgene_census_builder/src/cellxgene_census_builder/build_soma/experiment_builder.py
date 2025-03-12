@@ -25,21 +25,23 @@ from ..util import clamp, log_process_resource_status, urlcat
 from .anndata import AnnDataFilterSpec, AnnDataProxy, open_anndata
 from .datasets import Dataset
 from .globals import (
-    CENSUS_OBS_PLATFORM_CONFIG,
-    CENSUS_OBS_TABLE_SPEC,
+    ALLOWED_SPATIAL_ASSAYS,
+    CENSUS_OBS_CORE_FIELDS,
+    CENSUS_OBS_FIELDS_MAPPED,
+    CENSUS_OBS_STATS_FIELDS,
     CENSUS_VAR_PLATFORM_CONFIG,
     CENSUS_VAR_TABLE_SPEC,
     CENSUS_X_LAYERS,
     CENSUS_X_LAYERS_PLATFORM_CONFIG,
-    CXG_OBS_COLUMNS_READ,
     CXG_VAR_COLUMNS_READ,
     DONOR_ID_IGNORE,
     FEATURE_DATASET_PRESENCE_MATRIX_NAME,
     FULL_GENE_ASSAY,
     MEASUREMENT_RNA_NAME,
+    USE_ARROW_DICTIONARY,
     SOMA_TileDB_Context,
 )
-from .schema_util import TableSpec
+from .schema_util import FieldSpec, TableSpec
 from .stats import get_obs_stats, get_var_stats
 from .summary_cell_counts import (
     accumulate_summary_counts,
@@ -89,19 +91,90 @@ class ExperimentSpecification:
 
     name: str
     label: str
+    root_collection: str
     anndata_cell_filter_spec: AnnDataFilterSpec
     organism_ontology_term_id: str
+    obs_term_fields: list[FieldSpec]
+    obs_term_fields_read: list[FieldSpec]
 
     @classmethod
     def create(
         cls,
         name: str,
         label: str,
+        root_collection: str,
         anndata_cell_filter_spec: AnnDataFilterSpec,
         organism_ontology_term_id: str,
+        obs_term_fields: list[FieldSpec],
+        obs_term_fields_read: list[FieldSpec],
     ) -> Self:
         """Factory method. Do not instantiate the class directly."""
-        return cls(name, label, anndata_cell_filter_spec, organism_ontology_term_id)
+        return cls(
+            name,
+            label,
+            root_collection,
+            anndata_cell_filter_spec,
+            organism_ontology_term_id,
+            obs_term_fields,
+            obs_term_fields_read,
+        )
+
+    def is_exclusively_spatial(self) -> bool:
+        """Returns True if the experiment specification EXCLUSIVELY involves spatial assays."""
+        return self.anndata_cell_filter_spec["assay_ontology_term_ids"] == ALLOWED_SPATIAL_ASSAYS
+
+    @property
+    def obs_table_spec(self) -> TableSpec:
+        return TableSpec.create(
+            CENSUS_OBS_CORE_FIELDS + self.obs_term_fields + CENSUS_OBS_FIELDS_MAPPED + CENSUS_OBS_STATS_FIELDS,
+            use_arrow_dictionary=USE_ARROW_DICTIONARY,
+        )
+
+    @property
+    def obs_platform_config(self) -> dict[str, Any]:
+        """Materialization (filter pipelines, capacity, etc) of obs/var schema in TileDB is tuned by empirical testing."""
+        # Numeric cols
+        numeric_obs_attrs = ["raw_sum", "nnz", "raw_mean_nnz", "raw_variance_nnz", "n_measured_vars"]
+        if self.is_exclusively_spatial():
+            numeric_obs_attrs += ["array_row", "array_col", "in_tissue"]
+        # Categorical/dict-like columns
+        dict_like_obs_attrs = [
+            f.name
+            for f in self.obs_table_spec.fields
+            if isinstance(f, FieldSpec) and f.is_dictionary
+            if f.is_dictionary and f.name not in (numeric_obs_attrs + ["soma_joinid"])
+        ]
+        # Dict filter varies depending on whether we are using dictionary types in the schema
+        all_other_obs_attrs = [
+            f.name
+            for f in self.obs_table_spec.fields
+            if f.name not in (dict_like_obs_attrs + numeric_obs_attrs + ["soma_joinid"])
+        ]
+        # Dict filter varies depending on whether we are using dictionary types in the schema
+        dict_like_filter: list[Any] = (
+            [{"_type": "ZstdFilter", "level": 9}]
+            if USE_ARROW_DICTIONARY
+            else ["DictionaryFilter", {"_type": "ZstdFilter", "level": 19}]
+        )
+
+        return {
+            "tiledb": {
+                "create": {
+                    "capacity": 2**16,
+                    "dims": {"soma_joinid": {"filters": ["DoubleDeltaFilter", {"_type": "ZstdFilter", "level": 19}]}},
+                    "attrs": {
+                        **{
+                            k: {"filters": ["ByteShuffleFilter", {"_type": "ZstdFilter", "level": 9}]}
+                            for k in numeric_obs_attrs
+                        },
+                        **{k: {"filters": dict_like_filter} for k in dict_like_obs_attrs},
+                        **{k: {"filters": [{"_type": "ZstdFilter", "level": 19}]} for k in all_other_obs_attrs},
+                    },
+                    "offsets_filters": ["DoubleDeltaFilter", {"_type": "ZstdFilter", "level": 19}],
+                    "allows_duplicates": True,
+                }
+            }
+        }
 
 
 class ExperimentBuilder:
@@ -137,7 +210,7 @@ class ExperimentBuilder:
         return self.specification.anndata_cell_filter_spec
 
     def create(self, census_data: soma.Collection) -> None:
-        """Create experiment within the specified Collection with a single Measurement."""
+        """Create experiment within the specified Collection."""
         logger.info(f"{self.name}: create experiment at {urlcat(census_data.uri, self.name)}")
 
         self.experiment = census_data.add_new_collection(self.name, soma.Experiment)
@@ -149,21 +222,30 @@ class ExperimentBuilder:
         # make measurement and add to ms collection
         ms.add_new_collection(MEASUREMENT_RNA_NAME, soma.Measurement)
 
+        # create `spatial`
+        if self.specification.is_exclusively_spatial():
+            self.experiment.add_new_collection("spatial")
+
     def write_obs_dataframe(self) -> None:
         logger.info(f"{self.name}: writing obs dataframe")
         assert self.experiment is not None
         _assert_open_for_write(self.experiment)
 
-        obs_df = cast(pd.DataFrame, CENSUS_OBS_TABLE_SPEC.recategoricalize(self.obs_df))
-        obs_schema = CENSUS_OBS_TABLE_SPEC.to_arrow_schema(obs_df)
+        obs_df = self.specification.obs_table_spec.recategoricalize(self.obs_df)
+        obs_schema = self.specification.obs_table_spec.to_arrow_schema(obs_df)
+
+        if obs_df is None or obs_df.empty:
+            domain = None
+        else:
+            domain = [(obs_df["soma_joinid"].min(), obs_df["soma_joinid"].max())]
 
         # create `obs`
         self.experiment.add_new_dataframe(
             "obs",
             schema=obs_schema,
             index_column_names=["soma_joinid"],
-            platform_config=CENSUS_OBS_PLATFORM_CONFIG,
-            domain=[(obs_df["soma_joinid"].min(), obs_df["soma_joinid"].max())],
+            platform_config=self.specification.obs_platform_config,
+            domain=domain,
         )
 
         if obs_df is None or obs_df.empty:
@@ -181,8 +263,13 @@ class ExperimentBuilder:
 
         rna_measurement = self.experiment.ms[MEASUREMENT_RNA_NAME]
 
-        var_df = cast(pd.DataFrame, CENSUS_VAR_TABLE_SPEC.recategoricalize(self.var_df))
+        var_df = CENSUS_VAR_TABLE_SPEC.recategoricalize(self.var_df)
         var_schema = CENSUS_VAR_TABLE_SPEC.to_arrow_schema(var_df)
+
+        if var_df is None or var_df.empty:
+            domain = None
+        else:
+            domain = [(var_df["soma_joinid"].min(), var_df["soma_joinid"].max())]
 
         # create `var` in the measurement
         rna_measurement.add_new_dataframe(
@@ -190,7 +277,7 @@ class ExperimentBuilder:
             schema=var_schema,
             index_column_names=["soma_joinid"],
             platform_config=CENSUS_VAR_PLATFORM_CONFIG,
-            domain=[(var_df["soma_joinid"].min(), var_df["soma_joinid"].max())],
+            domain=domain,
         )
 
         if var_df is None or var_df.empty:
@@ -213,7 +300,8 @@ class ExperimentBuilder:
         # SOMA does not currently support empty arrays, so special case this corner-case.
         if self.n_obs > 0:
             assert self.n_var > 0
-            for layer_name in CENSUS_X_LAYERS:
+            layers = CENSUS_X_LAYERS if not self.specification.is_exclusively_spatial() else {"raw": pa.float32()}
+            for layer_name in layers:
                 rna_measurement["X"].add_new_sparse_ndarray(
                     layer_name,
                     type=CENSUS_X_LAYERS[layer_name],
@@ -274,7 +362,7 @@ def accumulate_axes_dataframes(
             dataset,
             base_path=base_path,
             filter_spec=spec.anndata_cell_filter_spec,
-            obs_column_names=CXG_OBS_COLUMNS_READ,
+            obs_column_names=tuple(field.name for field in spec.obs_term_fields_read),
             var_column_names=CXG_VAR_COLUMNS_READ,
         ) as adata:
             logger.debug(f"{dataset.dataset_id}/{spec.name} - found {adata.n_obs} cells")
@@ -284,7 +372,8 @@ def accumulate_axes_dataframes(
                 logger.debug(f"{spec.name} - H5AD has no data after filtering, skipping {dataset.dataset_id}")
                 return pd.DataFrame(), pd.DataFrame()
 
-            obs_df = adata.obs.copy()
+            # Converting dtypes to pandas nullables dtypes to account for when datasets don't provide all columns
+            obs_df = adata.obs.copy().convert_dtypes()
             obs_df["dataset_id"] = dataset.dataset_id
 
             var_df = (
@@ -360,7 +449,7 @@ def post_acc_axes_processing(accumulated: list[tuple[ExperimentBuilder, tuple[pd
 
         # add columns to be completed later, e.g., summary stats such as mean of X
         add_placeholder_columns(
-            obs, CENSUS_OBS_TABLE_SPEC, default={np.int64: np.iinfo(np.int64).min, np.float64: np.nan}
+            obs, eb.specification.obs_table_spec, default={np.int64: np.iinfo(np.int64).min, np.float64: np.nan}
         )
         add_placeholder_columns(var, CENSUS_VAR_TABLE_SPEC, default={np.int64: 0})
 
@@ -505,6 +594,11 @@ def dispatch_X_chunk(
     local_var_joinids = adata.var.join(global_var_joinids).soma_joinid.to_numpy()
     assert (local_var_joinids >= 0).all(), f"Illegal join id, {dataset_id}"
 
+    # spatial and non-spatial assays should not be written to the same Experiment
+    _is_spatial_assay = np.isin(adata.obs.assay_ontology_term_id.to_numpy(), ALLOWED_SPATIAL_ASSAYS)
+    if is_spatial_assay := _is_spatial_assay.any():
+        assert _is_spatial_assay.all(), f"Mix of spatial and non-spatial assays in the same dataset: {dataset_id}"
+
     _is_full_gene_assay = np.isin(adata.obs.assay_ontology_term_id.to_numpy(), FULL_GENE_ASSAY)
     if _is_full_gene_assay.any():
         is_full_gene_assay: npt.NDArray[np.bool_] | None = _is_full_gene_assay
@@ -568,15 +662,16 @@ def dispatch_X_chunk(
         del X
         gc.collect()
 
-        if is_full_gene_assay is not None:
+        # We don't write a normalized matrix for spatial Experiments
+        if is_spatial_assay:
+            pass
+        elif is_full_gene_assay is not None:
             assert feature_length is not None
             is_full_gene_assay_mask = is_full_gene_assay[idx : idx + minor_stride]
             xNormD = np.where(is_full_gene_assay_mask[xI], xD / feature_length[xJ], xD).astype(np.float32)
             xNormD = _divide_by_row_sum(n_obs, xI, xNormD)  # in-place operation
         else:
             xNormD = _divide_by_row_sum(n_obs, xI, xD.copy())  # in-place operation
-        _roundHalfToEven(xNormD, keepbits=15)  # in-place operation
-        xNormD[xNormD == 0] = sigma
 
         # reindex coordinates
         xI += idx + dataset_obs_joinid_start
@@ -587,10 +682,16 @@ def dispatch_X_chunk(
             X_raw.write(pa.Table.from_pydict({"soma_dim_0": xI, "soma_dim_1": xJ, "soma_data": xD}))
         del xD
         gc.collect()
-        with soma.open(urlcat(*path_to_X, "normalized"), mode="w", context=SOMA_TileDB_Context()) as X_normalized:
-            X_normalized.write(pa.Table.from_pydict({"soma_dim_0": xI, "soma_dim_1": xJ, "soma_data": xNormD}))
 
-        del xI, xJ, xNormD
+        if not is_spatial_assay:
+            _roundHalfToEven(xNormD, keepbits=15)  # in-place operation
+            xNormD[xNormD == 0] = sigma
+
+            with soma.open(urlcat(*path_to_X, "normalized"), mode="w", context=SOMA_TileDB_Context()) as X_normalized:
+                X_normalized.write(pa.Table.from_pydict({"soma_dim_0": xI, "soma_dim_1": xJ, "soma_data": xNormD}))
+            del xNormD
+
+        del xI, xJ
         gc.collect()
 
     return result
@@ -651,7 +752,7 @@ def _reduce_X_matrices(
             if d.dataset_id in eb.dataset_obs_joinid_start
             for chunk in range(0, eb.dataset_n_obs[d.dataset_id], REDUCE_X_MAJOR_ROW_STRIDE)
         ]
-        per_eb_results[eb.name] = (
+        per_eb_results[eb.experiment_uri] = (
             dask.bag.from_sequence(read_file_chunks)
             .starmap(read_and_dispatch_partial_h5ad, global_var_joinids=global_var_joinids)
             .foldby("dataset_id", reduce_X_stats_binop)
@@ -675,12 +776,12 @@ def populate_X_layers(
     per_eb_results = _reduce_X_matrices(assets_path, datasets, experiment_builders)
 
     for eb in experiment_builders:
-        if eb.name not in per_eb_results:
+        if eb.experiment_uri not in per_eb_results:
             continue
 
         # add per-dataset stats to each per-dataset XReduction
         eb_result: list[XReduction] = []
-        for dataset_id, xreduction in per_eb_results[eb.name]:
+        for dataset_id, xreduction in per_eb_results[eb.experiment_uri]:
             assert dataset_id == xreduction["dataset_id"]
             d = datasets_by_id[dataset_id]
             eb_result.extend(
