@@ -2,12 +2,26 @@ import logging
 import os
 import pathlib
 from datetime import UTC, datetime
-from typing import cast
+from typing import Any, cast
 
+import dask.array as da
 import dask.distributed
+import h5py
+import numpy as np
+import numpy.typing as npt
 import pandas as pd
 import psutil
+import pyarrow as pa
+import tiledbsoma
 import tiledbsoma as soma
+from anndata.experimental import read_elem_as_dask
+from dask.delayed import Delayed
+from tiledbsoma import (
+    Axis,
+    CoordinateSpace,
+    ScaleTransform,
+    Scene,
+)
 
 from ..build_state import CensusBuildArgs
 from ..util import clamp, cpu_count
@@ -25,6 +39,8 @@ from .experiment_specs import make_experiment_builders
 from .globals import (
     CENSUS_DATA_NAME,
     CENSUS_INFO_NAME,
+    CENSUS_POINT_CLOUD_PLATFORM_CONFIG,
+    CENSUS_SPATIAL_SEQUENCING_NAME,
     SOMA_TileDB_Context,
 )
 from .manifest import load_manifest
@@ -100,6 +116,14 @@ def build(args: CensusBuildArgs, *, validate: bool = True) -> int:
         # Prune datasets that we will not use, and do not want to include in the build
         prune_unused_datasets(args.h5ads_path, datasets, filtered_datasets)
 
+        # Scale the cluster up as we are no longer memory constrained in the following phases
+        n_workers = clamp(cpu_count(), 1, args.config.max_worker_processes)
+        logger.info(f"Scaling cluster to {n_workers} workers.")
+        client.cluster.scale(n=n_workers)
+
+        # Step 4a - add spatial information
+        build_step4a_add_spatial(args.h5ads_path.as_posix(), filtered_datasets, experiment_builders, args)
+
         # Step 5- write out dataset manifest and summary information
         build_step5_save_axis_and_summary_info(
             root_collection, experiment_builders, filtered_datasets, args.config.build_tag
@@ -107,11 +131,6 @@ def build(args: CensusBuildArgs, *, validate: bool = True) -> int:
 
         # Temporary work-around. Can be removed when single-cell-data/TileDB-SOMA#1969 fixed.
         tiledb_soma_1969_work_around(root_collection.uri)
-
-        # Scale the cluster up as we are no longer memory constrained in the following phases
-        n_workers = clamp(cpu_count(), 1, args.config.max_worker_processes)
-        logger.info(f"Scaling cluster to {n_workers} workers.")
-        client.cluster.scale(n=n_workers)
 
         if args.config.consolidate:
             for f in dask.distributed.as_completed(submit_consolidate(root_collection.uri, pool=client, vacuum=True)):
@@ -153,7 +172,7 @@ def populate_root_collection(root_collection: soma.Collection) -> soma.Collectio
     root_collection.metadata["git_commit_sha"] = sha
 
     # Create sub-collections for experiments, etc.
-    for n in [CENSUS_INFO_NAME, CENSUS_DATA_NAME]:
+    for n in [CENSUS_INFO_NAME, CENSUS_DATA_NAME, CENSUS_SPATIAL_SEQUENCING_NAME]:
         root_collection.add_new_collection(n)
 
     return root_collection
@@ -198,7 +217,7 @@ def build_step2_create_root_collection(soma_path: str, experiment_builders: list
         populate_root_collection(root_collection)
 
         for e in experiment_builders:
-            e.create(census_data=root_collection[CENSUS_DATA_NAME])
+            e.create(census_data=root_collection[e.specification.root_collection])
 
         logger.info("Build step 2 - Create root collection - finished")
         return root_collection
@@ -275,6 +294,193 @@ def build_step4_populate_X_layers(
         eb.populate_presence_matrix(filtered_datasets)
 
     logger.info("Build step 4 - Populate X layers - finished")
+
+
+def build_step4a_add_spatial(
+    assets_path: str,
+    filtered_datasets: list[Dataset],
+    experiment_builders: list[ExperimentBuilder],
+    args: CensusBuildArgs,
+) -> None:
+    """Populate spatial info."""
+    logger.info("Build step 4a - Populate spatial info - started")
+    import h5py
+    import pyarrow as pa
+    from anndata.io import read_elem
+
+    h5ad_path = args.h5ads_path
+    client = dask.distributed.Client.current()
+
+    # Add images
+    for eb in reopen_experiment_builders(experiment_builders):
+        if not eb.specification.is_exclusively_spatial():
+            continue
+
+        datasets = [d for d in filtered_datasets if d.dataset_id in eb.dataset_obs_joinid_start]
+        spatial_collection = cast(soma.Experiment, eb.experiment)["spatial"]
+        obs_spatial_presences: list[pd.DataFrame] = []
+        write_tasks = []
+
+        for d in datasets:
+            logger.debug(f"Writing spatial info from {d.dataset_id}")
+            scene = spatial_collection.add_new_collection(d.dataset_id, kind=Scene)
+
+            coord_space = CoordinateSpace((Axis(name="y", unit="pixels"), Axis(name="x", unit="pixels")))
+            scene.coordinate_space = coord_space
+
+            # Default value. Will be redefined if the dataset is visium (e.g. has a radius defined)
+            point_radius = 2.0
+
+            with h5py.File(h5ad_path / d.dataset_h5ad_path) as f:
+                # Verify that we're only looking at a single slide dataset
+                is_single = read_elem(f["uns/spatial/is_single"])
+                assert is_single
+
+                tissue_pos = read_elem(f["obsm/spatial"])
+                spatial_group = f["uns/spatial"]
+
+                if len(spatial_group) > 1:
+                    # If there is more than one element this dataset has images we should include
+                    assert (
+                        len(spatial_group) == 2
+                    ), f"Found {list(spatial_group)} in {d.dataset_h5ad_path}"  # No image for slide-seqv2
+                    _keys = list(spatial_group)
+                    # This flag seems wholly uneccesary since you can tell by the number of keys
+                    _keys.remove("is_single")
+                    library_id = _keys[0]
+                    del _keys
+                    # There are images
+                    spatial_library_info: h5py.Group = spatial_group[library_id]
+                    scale_factors = read_elem(spatial_library_info["scalefactors"])
+                    point_radius = scale_factors["spot_diameter_fullres"] / 2
+                    write_tasks.extend(
+                        add_image_collection(
+                            scene, library_id, coord_space, spatial_group[library_id], scale_factors=scale_factors
+                        )
+                    )
+
+            obs = cast(pd.DataFrame, eb.obs_df).query(f"dataset_id == '{d.dataset_id}'")
+
+            # Locations
+            logger.debug("Writing locations")
+
+            loc = pd.DataFrame(tissue_pos, columns=["y", "x"])
+            loc["soma_joinid"] = obs["soma_joinid"].array
+            loc_pa = pa.Table.from_pandas(loc, preserve_index=False)
+            scene.add_new_collection("obsl")
+
+            with scene.add_new_point_cloud_dataframe(
+                "loc",
+                "obsl",
+                schema=loc_pa.schema,
+                coordinate_space=coord_space,
+                transform=tiledbsoma.IdentityTransform(("y", "x"), ("y", "x")),
+                domain=[(loc["y"].min(), loc["y"].max()), (loc["x"].min(), loc["x"].max())],
+                platform_config=CENSUS_POINT_CLOUD_PLATFORM_CONFIG,
+            ) as loc_sink:
+                loc_sink.write(loc_pa)
+
+                loc_sink.metadata["soma_geometry"] = point_radius
+                loc_sink.metadata["soma_geometry_type"] = "radius"
+
+            obs_spatial_presences.append(obs[["soma_joinid", "dataset_id"]].rename(columns={"dataset_id": "scene_id"}))
+
+        client.compute(write_tasks, sync=True)
+
+        if len(obs_spatial_presences) == 0:
+            logger.warn(f"No scenes found for spatial experiment at {eb.experiment_uri}")
+            continue
+
+        logger.debug(f"Creating obs_spatial_presence table for {len(obs_spatial_presences)} scenes")
+        obs_spatial_presence = pa.Table.from_pandas(
+            pd.concat(obs_spatial_presences, ignore_index=True)
+            .reset_index(drop=True)
+            # TODO: tiledbsoma currently doesn't let us use a categorical column as an index
+            # https://github.com/single-cell-data/TileDB-SOMA/issues/3743
+            # .astype({"scene_id": "category"})
+            # Add in all True boolean column for interpretation as sparse matrix
+            .assign(data=True)
+        )
+
+        with cast(soma.Experiment, eb.experiment).add_new_dataframe(
+            "obs_spatial_presence",
+            schema=obs_spatial_presence.schema,
+            index_column_names=["soma_joinid", "scene_id"],
+            domain=[
+                (np.min(obs_spatial_presence["soma_joinid"]), np.max(obs_spatial_presence["soma_joinid"])),
+                ("", ""),
+            ],
+        ) as df_store:
+            df_store.write(obs_spatial_presence)
+
+
+class TileDBSOMADenseArrayWriteWrapper:
+    def __init__(
+        self,
+        uri: str,
+    ):
+        """Wrapper around tiledbsoma dense array that providing and interface compatible with dask.array."""
+        self.uri = uri
+
+    def __setitem__(self, k: tuple[slice, ...], v: npt.NDArray[Any]) -> None:
+        with tiledbsoma.open(self.uri, mode="w") as soma_array:
+            soma_array.write(k, pa.Tensor.from_numpy(v))
+
+
+def write_dask_array_to_existing_tiledbsoma(soma_array: tiledbsoma.DenseNDArray, value: da.Array) -> Delayed:
+    wrapped_soma_array = TileDBSOMADenseArrayWriteWrapper(soma_array.uri)
+
+    return value.store(
+        wrapped_soma_array,
+        lock=False,
+        compute=False,
+    )
+
+
+def add_image_collection(
+    scene: soma.Collection,
+    key: str,
+    coordinate_space: CoordinateSpace,
+    spatial_library_info: h5py.Group,
+    scale_factors: dict[str, float],
+) -> list[Delayed]:
+    image_dict = {
+        k: read_elem_as_dask(spatial_library_info["images"][k]) for k in spatial_library_info["images"].keys()
+    }
+
+    scale_transform = ScaleTransform(
+        ("y", "x"),
+        ("y", "x"),
+        (
+            scale_factors["tissue_hires_scalef"],
+            scale_factors["tissue_hires_scalef"],
+        ),
+    )
+
+    # Images
+    write_tasks = []
+    logger.debug(f"Writing images {list(image_dict)}")
+    scene.add_new_collection("img")
+
+    hires_image = np.transpose(image_dict["hires"], (2, 0, 1))
+
+    if hires_image.shape[0] == 4:
+        # We have an RGBA image, but only want RGB
+        hires_image = hires_image[:3]
+
+    multiscale_image = scene.add_new_multiscale_image(
+        key=key,
+        subcollection="img",
+        level_key="hires",
+        transform=scale_transform,
+        coordinate_space=coordinate_space,
+        level_shape=hires_image.shape,
+        type=pa.from_numpy_dtype(hires_image.dtype),
+    )
+
+    write_tasks.append(write_dask_array_to_existing_tiledbsoma(multiscale_image["hires"], hires_image))
+
+    return write_tasks
 
 
 def build_step5_save_axis_and_summary_info(

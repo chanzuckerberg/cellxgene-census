@@ -35,16 +35,14 @@ from .globals import (
     CENSUS_DATASETS_NAME,
     CENSUS_DATASETS_TABLE_SPEC,
     CENSUS_INFO_NAME,
-    CENSUS_OBS_STATS_COLUMNS,
-    CENSUS_OBS_TABLE_SPEC,
+    CENSUS_OBS_STATS_FIELDS,
     CENSUS_SCHEMA_VERSION,
+    CENSUS_SPATIAL_SEQUENCING_NAME,
     CENSUS_SUMMARY_CELL_COUNTS_NAME,
     CENSUS_SUMMARY_CELL_COUNTS_TABLE_SPEC,
     CENSUS_SUMMARY_NAME,
     CENSUS_VAR_TABLE_SPEC,
     CENSUS_X_LAYERS,
-    CXG_OBS_COLUMNS_READ,
-    CXG_OBS_TERM_COLUMNS,
     CXG_SCHEMA_VERSION,
     CXG_VAR_COLUMNS_READ,
     FEATURE_DATASET_PRESENCE_MATRIX_NAME,
@@ -82,9 +80,23 @@ def assert_all(__iterable: Iterable[object]) -> bool:
     return r
 
 
+def get_census_data_collection_name(eb: ExperimentSpecification) -> str:
+    return CENSUS_SPATIAL_SEQUENCING_NAME if eb.is_exclusively_spatial() else CENSUS_DATA_NAME
+
+
+def get_experiment_unique_key(es: ExperimentSpecification) -> str:
+    """Return a unique key for the experiment."""
+    return f"{es.name}-{get_census_data_collection_name(es)}"
+
+
+def get_experiment_uri(base_uri: str, eb: ExperimentSpecification) -> str:
+    census_data_collection_name = get_census_data_collection_name(eb)
+    return urlcat(base_uri, census_data_collection_name, eb.name)
+
+
 def open_experiment(base_uri: str, eb: ExperimentSpecification) -> soma.Experiment:
     """Helper function that knows the Census schema path conventions."""
-    return soma.Experiment.open(urlcat(base_uri, CENSUS_DATA_NAME, eb.name), mode="r")
+    return soma.Experiment.open(get_experiment_uri(base_uri, eb), mode="r")
 
 
 def get_experiment_shape(base_uri: str, specs: list[ExperimentSpecification]) -> dict[str, tuple[int, int]]:
@@ -92,7 +104,7 @@ def get_experiment_shape(base_uri: str, specs: list[ExperimentSpecification]) ->
     for es in specs:
         with open_experiment(base_uri, es) as exp:
             shape = (exp.obs.count, exp.ms[MEASUREMENT_RNA_NAME].var.count)
-            shapes[es.name] = shape
+            shapes[get_experiment_unique_key(es)] = shape
     return shapes
 
 
@@ -139,6 +151,7 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_specifications: l
 
         # verify required dataset fields are set
         df: pd.DataFrame = census_info[CENSUS_DATASETS_NAME].read().concat().to_pandas()
+
         assert (df["collection_id"] != "").all()
         assert (df["collection_name"] != "").all()
         assert (df["dataset_title"] != "").all()
@@ -181,16 +194,18 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_specifications: l
 def validate_axis_dataframes_schema(soma_path: str, experiment_specifications: list[ExperimentSpecification]) -> bool:
     """Validate axis dataframe schema matches spec."""
     with soma.Collection.open(soma_path, context=SOMA_TileDB_Context()) as census:
-        census_data = census[CENSUS_DATA_NAME]
-
         # check schema
         for eb in experiment_specifications:
+            census_data = census[eb.root_collection]
             obs = census_data[eb.name].obs
             var = census_data[eb.name].ms[MEASUREMENT_RNA_NAME].var
-            assert sorted(obs.keys()) == sorted(CENSUS_OBS_TABLE_SPEC.field_names())
+
+            assert (
+                sorted(obs.keys()) == sorted(eb.obs_table_spec.field_names())
+            ), f"Found unexpected fields: {set(obs.keys()).difference(eb.obs_table_spec.field_names())}, and missing fields: {set(eb.obs_table_spec.field_names()).difference(obs.keys())}"
             assert sorted(var.keys()) == sorted(CENSUS_VAR_TABLE_SPEC.field_names())
             for field in obs.schema:
-                assert CENSUS_OBS_TABLE_SPEC.field(field.name).is_type_equivalent(
+                assert eb.obs_table_spec.field(field.name).is_type_equivalent(
                     field.type
                 ), f"Unexpected type in {field.name}: {field.type}"
             for field in var.schema:
@@ -228,9 +243,10 @@ def validate_axis_dataframes_global_ids(
                 .concat()
                 .to_pandas()
             )
-            assert eb_info[eb.name].n_obs == len(census_obs_df) == exp.obs.count
-            assert (len(census_obs_df) == 0) or (census_obs_df.soma_joinid.max() + 1 == eb_info[eb.name].n_obs)
-            assert eb_info[eb.name].dataset_ids == set(census_obs_df.dataset_id.unique())
+            eb_info_key = get_experiment_uri(soma_path, eb)
+            assert eb_info[eb_info_key].n_obs == len(census_obs_df) == exp.obs.count
+            assert (len(census_obs_df) == 0) or (census_obs_df.soma_joinid.max() + 1 == eb_info[eb_info_key].n_obs)
+            assert eb_info[eb_info_key].dataset_ids == set(census_obs_df.dataset_id.unique())
 
             # Validate that all obs soma_joinids are unique and in the range [0, n).
             obs_unique_joinids = np.unique(census_obs_df.soma_joinid.to_numpy())
@@ -252,13 +268,13 @@ def validate_axis_dataframes_global_ids(
             del census_obs_df, obs_unique_joinids
 
             # var
-            n_vars = len(eb_info[eb.name].vars)
+            n_vars = len(eb_info[eb_info_key].vars)
 
             census_var_df = (
                 exp.ms[MEASUREMENT_RNA_NAME].var.read(column_names=["feature_id", "soma_joinid"]).concat().to_pandas()
             )
             assert n_vars == len(census_var_df) == exp.ms[MEASUREMENT_RNA_NAME].var.count
-            assert eb_info[eb.name].vars == set(census_var_df.feature_id.array)
+            assert eb_info[eb_info_key].vars == set(census_var_df.feature_id.array)
             assert (len(census_var_df) == 0) or (census_var_df.soma_joinid.max() + 1 == n_vars)
 
             # Validate that all var soma_joinids are unique and in the range [0, n).
@@ -287,20 +303,28 @@ def validate_axis_dataframes(
         eb_info: dict[str, EbInfo] = {}
         for eb in experiment_specifications:
             with soma.Collection.open(soma_path, context=SOMA_TileDB_Context()) as census:
-                census_data = census[CENSUS_DATA_NAME]
+                census_data_collection = census[get_census_data_collection_name(eb)]
                 dataset_id = dataset.dataset_id
                 ad = open_anndata(
                     dataset,
                     base_path=assets_path,
-                    obs_column_names=CXG_OBS_COLUMNS_READ,
+                    obs_column_names=tuple([f.name for f in eb.obs_term_fields_read]),
                     var_column_names=CXG_VAR_COLUMNS_READ,
                     filter_spec=eb.anndata_cell_filter_spec,
                 )
-                eb_info[eb.name] = EbInfo()
-                se = census_data[eb.name]
+                se = census_data_collection[eb.name]
+
+                # NOTE: Since we are validating data for each experiment, we
+                # use the experiment uri as the key for the data that must be validated.
+                # Using just the experiment spec name would cause collisions as in the case
+                # of spatial and non-spatial experiments with the same name (experiment spec name)
+                # but stored under different census root collections
+                eb_info_key = get_experiment_uri(soma_path, eb)
+                eb_info[eb_info_key] = EbInfo()
+
                 dataset_obs = (
                     se.obs.read(
-                        column_names=list(CENSUS_OBS_TABLE_SPEC.field_names()),
+                        column_names=list(eb.obs_table_spec.field_names()),
                         value_filter=f"dataset_id == '{dataset_id}'",
                     )
                     .concat()
@@ -310,7 +334,7 @@ def validate_axis_dataframes(
                             "dataset_id",
                             "tissue_general",
                             "tissue_general_ontology_term_id",
-                            *CENSUS_OBS_STATS_COLUMNS,
+                            *[x.name for x in CENSUS_OBS_STATS_FIELDS],
                         ]
                     )
                     .sort_values(by="soma_joinid")
@@ -318,22 +342,31 @@ def validate_axis_dataframes(
                     .reset_index(drop=True)
                 )
 
+                # For spatial assays, make sure we only include primary data
+                if eb.is_exclusively_spatial():
+                    assert dataset_obs["is_primary_data"].all()
+
                 # decategorize census obs slice, as it will not have the same categories as H5AD obs,
                 # preventing Pandas from performing the DataFrame equivalence operation.
                 for key in dataset_obs:
                     if isinstance(dataset_obs[key].dtype, pd.CategoricalDtype):
                         dataset_obs[key] = dataset_obs[key].astype(dataset_obs[key].cat.categories.dtype)
 
-                assert len(dataset_obs) == len(ad.obs), f"{dataset.dataset_id}/{eb.name} obs length mismatch"
+                assert (
+                    len(dataset_obs) == len(ad.obs)
+                ), f"{dataset.dataset_id}/{eb.name} obs length mismatch soma experiment obs len: {len(dataset_obs)} != anndata obs len: {len(ad.obs)}"
                 if ad.n_obs > 0:
-                    eb_info[eb.name].n_obs += ad.n_obs
-                    eb_info[eb.name].dataset_ids.add(dataset_id)
-                    eb_info[eb.name].vars |= set(ad.var.index.array)
-                    ad_obs = ad.obs[list(set(CXG_OBS_TERM_COLUMNS) - set(CENSUS_OBS_STATS_COLUMNS))].reset_index(
-                        drop=True
+                    eb_info[eb_info_key].n_obs += ad.n_obs
+                    eb_info[eb_info_key].dataset_ids.add(dataset_id)
+                    eb_info[eb_info_key].vars |= set(ad.var.index.array)
+                    # TODO: Make this comparison work in the case where slide-seq data does not have the visium specific obs columns
+                    # Ideally, we fill the ad.obs with a fill value for cases where the column is optional
+                    common_cols = ad.obs.columns.intersection(
+                        list({f.name for f in eb.obs_term_fields} - {x.name for x in CENSUS_OBS_STATS_FIELDS})
                     )
+                    ad_obs = ad.obs[common_cols].reset_index(drop=True)
                     assert (
-                        (dataset_obs.sort_index(axis=1) == ad_obs.sort_index(axis=1)).all().all()
+                        (dataset_obs[common_cols].sort_index(axis=1) == ad_obs.sort_index(axis=1)).all().all()
                     ), f"{dataset.dataset_id}/{eb.name} obs content, mismatch"
 
         return eb_info
@@ -341,11 +374,11 @@ def validate_axis_dataframes(
     def reduce_eb_info(results: Sequence[dict[str, EbInfo]]) -> dict[str, EbInfo]:
         eb_info = {}
         for res in results:
-            for name, info in res.items():
-                if name not in eb_info:
-                    eb_info[name] = copy.copy(info)
+            for eb_info_key, info in res.items():
+                if eb_info_key not in eb_info:
+                    eb_info[eb_info_key] = copy.copy(info)
                 else:
-                    eb_info[name].update(info)
+                    eb_info[eb_info_key].update(info)
         return eb_info
 
     eb_info = (
@@ -470,7 +503,7 @@ def validate_X_layers_normalized(
             (
                 (es, id, id + JOINID_STRIDE)
                 for es in experiment_specifications
-                for id in range(0, X_shapes[es.name][0], JOINID_STRIDE)
+                for id in range(0, X_shapes[get_experiment_unique_key(es)][0], JOINID_STRIDE)
             ),
             partition_size=8,
         )
@@ -522,7 +555,7 @@ def validate_X_layers_has_unique_coords(
                 (es, layer_name, id, id + JOINID_STRIDE)
                 for es in experiment_specifications
                 for layer_name in CENSUS_X_LAYERS
-                for id in range(0, X_shapes[es.name][0], JOINID_STRIDE)
+                for id in range(0, X_shapes[get_experiment_unique_key(es)][0], JOINID_STRIDE)
             ),
             partition_size=8,
         )
@@ -545,7 +578,7 @@ def validate_X_layers_presence(
 
     def _read_var_names(path: str) -> npt.NDArray[np.object_]:
         import h5py
-        from anndata.experimental import read_elem
+        from anndata.io import read_elem
 
         with h5py.File(path) as f:
             index_key = f["var"].attrs["_index"]
@@ -717,7 +750,7 @@ def validate_X_layers_raw_contents(
                 # get the joinids for the obs axis
                 obs_df = (
                     exp.obs.read(
-                        column_names=["soma_joinid", "dataset_id", *CENSUS_OBS_STATS_COLUMNS],
+                        column_names=["soma_joinid", "dataset_id", *[x.name for x in CENSUS_OBS_STATS_FIELDS]],
                         value_filter=f"dataset_id == '{dataset.dataset_id}'",
                     )
                     .concat()
@@ -777,7 +810,7 @@ def validate_X_layers_raw_contents(
                     np.add.at(raw_sum, rows_by_position, X_raw_data)
                     assert np.allclose(
                         raw_sum.astype(
-                            CENSUS_OBS_TABLE_SPEC.field("raw_sum").to_pandas_dtype()
+                            es.obs_table_spec.field("raw_sum").to_pandas_dtype()
                         ),  # cast to the storage type
                         obs_df.raw_sum.iloc[idx : idx + STRIDE].to_numpy(),
                     )
@@ -829,13 +862,15 @@ def validate_X_layers_schema(
         with open_experiment(soma_path, eb) as exp:
             assert soma.Collection.exists(exp.ms[MEASUREMENT_RNA_NAME].X.uri)
 
-            n_obs = eb_info[eb.name].n_obs
-            n_vars = eb_info[eb.name].n_vars
+            eb_info_key = get_experiment_uri(soma_path, eb)
+            n_obs = eb_info[eb_info_key].n_obs
+            n_vars = eb_info[eb_info_key].n_vars
             assert n_obs == exp.obs.count
             assert n_vars == exp.ms[MEASUREMENT_RNA_NAME].var.count
 
             if n_obs > 0:
-                for lyr in CENSUS_X_LAYERS:
+                layers = CENSUS_X_LAYERS if not eb.is_exclusively_spatial() else {"raw": pa.float32()}
+                for lyr in layers:
                     assert soma.SparseNDArray.exists(exp.ms[MEASUREMENT_RNA_NAME].X[lyr].uri)
                     X = exp.ms[MEASUREMENT_RNA_NAME].X[lyr]
                     assert X.schema.field("soma_dim_0").type == pa.int64()
@@ -967,12 +1002,15 @@ def validate_internal_consistency(
                 # Assertion 1 - counts are mutually consistent
                 assert obs.nnz.sum() == var.nnz.sum(), f"{eb.name}: axis NNZ mismatch."
                 assert obs.nnz.sum() == exp.ms[MEASUREMENT_RNA_NAME].X["raw"].nnz, f"{eb.name}: axis / X NNZ mismatch."
-                assert (
-                    exp.ms[MEASUREMENT_RNA_NAME].X["raw"].nnz == exp.ms[MEASUREMENT_RNA_NAME].X["normalized"].nnz
-                ), "X['raw'] and X['normalized'] nnz differ."
-                assert (
-                    exp.ms[MEASUREMENT_RNA_NAME].X["raw"].shape == exp.ms[MEASUREMENT_RNA_NAME].X["normalized"].shape
-                ), "X['raw'] and X['normalized'] shape differ."
+                if "normalized" in exp.ms[MEASUREMENT_RNA_NAME].X:
+                    # Checks on assumptions of normalized layer, which is not present for all experiments
+                    assert (
+                        exp.ms[MEASUREMENT_RNA_NAME].X["raw"].nnz == exp.ms[MEASUREMENT_RNA_NAME].X["normalized"].nnz
+                    ), "X['raw'] and X['normalized'] nnz differ."
+                    assert (
+                        exp.ms[MEASUREMENT_RNA_NAME].X["raw"].shape
+                        == exp.ms[MEASUREMENT_RNA_NAME].X["normalized"].shape
+                    ), "X['raw'] and X['normalized'] shape differ."
                 assert exp.ms[MEASUREMENT_RNA_NAME].X["raw"].nnz == var.nnz.sum(), "X['raw'] and axis nnz sum differ."
 
                 # Assertion 2 - obs.n_measured_vars is consistent with presence matrix
@@ -1029,8 +1067,9 @@ def validate_soma_bounding_box(
     # first, confirm we set shape correctly, as the code uses it as the max bounding box
     for eb in experiment_specifications:
         with open_experiment(soma_path, eb) as exp:
-            n_obs = eb_info[eb.name].n_obs
-            n_vars = eb_info[eb.name].n_vars
+            eb_info_key = get_experiment_uri(soma_path, eb)
+            n_obs = eb_info[eb_info_key].n_obs
+            n_vars = eb_info[eb_info_key].n_vars
             for layer_name in exp.ms[MEASUREMENT_RNA_NAME].X:
                 assert exp.ms[MEASUREMENT_RNA_NAME].X[layer_name].shape == (n_obs, n_vars)
             if "feature_dataset_presence_matrix" in exp.ms[MEASUREMENT_RNA_NAME]:

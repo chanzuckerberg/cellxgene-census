@@ -31,7 +31,7 @@ def test_load_manifest_from_file(tmp_path: pathlib.Path, manifest_csv: str, empt
 def test_load_manifest_does_dedup(manifest_csv_with_duplicates: str, empty_blocklist: str) -> None:
     """`load_manifest` should not include duplicate datasets from the manifest"""
     manifest = load_manifest(manifest_csv_with_duplicates, empty_blocklist)
-    assert len(manifest) == 2
+    assert len(manifest) == 2, manifest
 
     with open(manifest_csv_with_duplicates) as fp:
         manifest = load_manifest(fp, empty_blocklist)
@@ -40,8 +40,7 @@ def test_load_manifest_does_dedup(manifest_csv_with_duplicates: str, empty_block
 
 def test_manifest_dataset_block(tmp_path: pathlib.Path, manifest_csv: str, empty_blocklist: str) -> None:
     # grab first item from the manifest, and block it.
-    with open(manifest_csv) as f:
-        first_dataset_id = f.readline().split(",")[0].strip()
+    first_dataset_id = load_manifest(manifest_csv, empty_blocklist)[0].dataset_id
 
     blocklist_fname = f"{tmp_path}/blocklist.txt"
     blocklist_content = f"# a comment\n\n{first_dataset_id}\n\n"

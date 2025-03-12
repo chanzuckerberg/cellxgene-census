@@ -1,5 +1,6 @@
 import pathlib
 from functools import partial
+from textwrap import dedent
 from typing import Literal
 
 import anndata
@@ -180,10 +181,11 @@ def datasets(census_build_args: CensusBuildArgs) -> list[Dataset]:
 
 @pytest.fixture
 def manifest_csv(tmp_path: pathlib.Path) -> str:
-    manifest_content = f"""
-    dataset_id_1, {tmp_path}/data/h5ads/dataset_id_1.h5ad
-    dataset_id_2, {tmp_path}/data/h5ads/dataset_id_2.h5ad
-    """
+    manifest_content = dedent(f"""\
+    dataset_id,dataset_asset_h5ad_uri
+    dataset_id_1,{tmp_path}/data/h5ads/dataset_id_1.h5ad
+    dataset_id_2,{tmp_path}/data/h5ads/dataset_id_2.h5ad
+    """)
     path = f"{tmp_path}/manifest.csv"
     h5ad_path = f"{tmp_path}/data/h5ads/"
     pathlib.Path(h5ad_path).mkdir(parents=True, exist_ok=True)
@@ -197,11 +199,12 @@ def manifest_csv(tmp_path: pathlib.Path) -> str:
 
 @pytest.fixture
 def manifest_csv_with_duplicates(tmp_path: pathlib.Path) -> str:
-    manifest_content = f"""
-    dataset_id_1, {tmp_path}/data/h5ads/dataset_id_1.h5ad
-    dataset_id_2, {tmp_path}/data/h5ads/dataset_id_2.h5ad
-    dataset_id_2, {tmp_path}/data/h5ads/dataset_id_2.h5ad
-    """
+    manifest_content = dedent(f"""\
+    dataset_id,dataset_asset_h5ad_uri
+    dataset_id_1,{tmp_path}/data/h5ads/dataset_id_1.h5ad
+    dataset_id_2,{tmp_path}/data/h5ads/dataset_id_2.h5ad
+    dataset_id_2,{tmp_path}/data/h5ads/dataset_id_2.h5ad
+    """)
     path = f"{tmp_path}/manifest.csv"
     h5ad_path = f"{tmp_path}/data/h5ads/"
     pathlib.Path(h5ad_path).mkdir(parents=True, exist_ok=True)
