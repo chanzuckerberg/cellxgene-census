@@ -43,7 +43,7 @@ experimental = [
     "torch",
     "torchdata~=0.7,<0.10",
     "scikit-learn>=1.2",
-    "scikit-misc>=0.2,<0.4",  # scikit-misc 0.3 dropped Python 3.8 support, and 0.4 doesn't have MacOS/ARM wheels
+    "scikit-misc>=0.3",  # scikit-misc 0.3 dropped Python 3.8 support, and 0.4 doesn't have MacOS/ARM wheels
     "datasets~=2.0",
     "tdigest~=0.5",
     "tiledb-vector-search~=0.11",  # newest version compatible with tiledbsoma's version of TileDB Embedded
