@@ -70,17 +70,17 @@ Open this data release by specifying `census_version = "2025-01-30"` in future c
 
 | Information                       | Value                                                                                 |
 |-----------------------------------|---------------------------------------------------------------------------------------|
-| Census schema version             | [**2.1.0**]([https://github.com/chanzuckerberg/cellxgene-census/blob/**COMMIT**/docs/cellxgene_census_schema.md](https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md)) |
+| Census schema version             | [**2.1.0**](https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md) |
 | Census build date                 | **2025-01-30**                                                                        |
-| Dataset schema version            | [**5.2.0**]([https://github.com/chanzuckerberg/single-cell-curation/blob/**COMMIT**/schema/X.X.X/schema.md](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.2.0/schema.md))      |
+| Dataset schema version            | [**5.2.0**](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.2.0/schema.md)      |
 | Number of datasets                | **1573**                                                                               |
 
 #### Cell and donor counts
 
 | Type              | _Homo sapiens_ | _Mus musculus_ |
 |-------------------|----------------|----------------|
-| Total cells       | **109085698**  | **45351496**        |
-| Unique cells      | **65601657**   | **20208302**        |
+| Total cells       | **109085698**  | **45351496**   |
+| Unique cells      | **65601657**   | **20208302**   |
 | Number of donors  | **390**        | **172**        |
 
 #### Cell metadata
@@ -97,8 +97,7 @@ Open this data release by specifying `census_version = "2025-01-30"` in future c
 | Tissue                  |            379 |             99 |
 | Tissue general          |             68 |             36 |
 
-
-#### Embbedings
+#### Embeddings
 
 Find out more in the [Census model page](https://cellxgene.cziscience.com/census-models).
 
@@ -109,8 +108,6 @@ Available embeddings can be accessed via [`cellxgene_census.experimental.get_emb
 | Method                    | _Homo sapiens_ | _Mus musculus_ |
 |---------------------------|----------------|----------------|
 | scVI                      | `scvi`         | `scvi`         |
-
-
 
 ### LTS 2024-07-01
 
@@ -147,7 +144,7 @@ Open this data release by specifying `census_version = "2024-07-01"` in future c
 | Tissue                  | 267            | 84             |
 | Tissue general          | 55             | 29             |
 
-#### Embbedings
+#### Embeddings
 
 Find out more in the [Census model page](https://cellxgene.cziscience.com/census-models).
 
@@ -195,7 +192,7 @@ Open this data release by specifying `census_version = "2023-12-15"` in future c
 | Tissue                  | 230            | 74             |
 | Tissue general          | 53             | 27             |
 
-#### Embbedings
+#### Embeddings
 
 Find out more in the [Census model page](https://cellxgene.cziscience.com/census-models).
 
