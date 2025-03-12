@@ -39,6 +39,7 @@ from .experiment_specs import make_experiment_builders
 from .globals import (
     CENSUS_DATA_NAME,
     CENSUS_INFO_NAME,
+    CENSUS_POINT_CLOUD_PLATFORM_CONFIG,
     CENSUS_SPATIAL_SEQUENCING_NAME,
     SOMA_TileDB_Context,
 )
@@ -375,6 +376,7 @@ def build_step4a_add_spatial(
                 coordinate_space=coord_space,
                 transform=tiledbsoma.IdentityTransform(("y", "x"), ("y", "x")),
                 domain=[(loc["y"].min(), loc["y"].max()), (loc["x"].min(), loc["x"].max())],
+                platform_config=CENSUS_POINT_CLOUD_PLATFORM_CONFIG,
             ) as loc_sink:
                 loc_sink.write(loc_pa)
 
