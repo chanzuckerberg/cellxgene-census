@@ -28,8 +28,10 @@ jobs:
         run: |
           sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
           sudo apt-get update
-          sudo apt-get install -y libcurl4-openssl-dev libcairo2-dev libglpk-dev gcc-13 g++-13
-          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 60 --slave /usr/bin/g++ g++ /usr/bin/g++-13
+          sudo apt-get install -y libcurl4-openssl-dev libcairo2-dev libglpk-dev gcc-13 g++-13 gfortran-13
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 130 \
+                                    --slave /usr/bin/g++ g++ /usr/bin/g++-13 \
+                                    --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-13
       - uses: r-lib/actions/setup-r@v2
       - name: install packages (macOS)
         if: matrix.os == 'macos-latest'
