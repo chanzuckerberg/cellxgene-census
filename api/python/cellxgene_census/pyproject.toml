@@ -41,7 +41,7 @@ dependencies= [
 [project.optional-dependencies]
 experimental = [
     "torch",
-    "torchdata~=0.7,<0.10",
+    "torchdata~=0.7,<0.10",  # FIXME: delete when the deprecated pytorch loader API prototype is fully graduated to TileDB-SOMA-ML
     "scikit-learn>=1.2",
     "scikit-misc>=0.3",
     "datasets~=2.0",

@@ -473,6 +473,8 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
     ) -> None:
         r"""Construct a new ``ExperimentDataPipe``.
 
+        .. deprecated:: Use `TileDB-SOMA-ML <https://github.com/single-cell-data/TileDB-SOMA-ML>`_ instead.
+
         Args:
             experiment:
                 The :class:`tiledbsoma.Experiment` from which to read data.
@@ -535,8 +537,11 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
                 since the columns will be inferred automatically from the encoders.
 
         Lifecycle:
-            experimental
+            deprecated
         """
+        pytorch_logger.warning(
+            "API deprecated; upgrade to TileDB-SOMA-ML: https://github.com/single-cell-data/TileDB-SOMA-ML"
+        )
         self.exp_uri = experiment.uri
         self.aws_region = experiment.context.tiledb_config.get("vfs.s3.region")
         self.measurement_name = measurement_name
@@ -798,6 +803,8 @@ def experiment_dataloader(
     :class:`torchdata.datapipes.iter.IterDataPipe` (``shuffle``, ``batch_size``, ``sampler``, ``batch_sampler``,
     ``collate_fn``).
 
+    .. deprecated:: Use `TileDB-SOMA-ML <https://github.com/single-cell-data/TileDB-SOMA-ML>`_ instead.
+
     Args:
         datapipe:
             An :class:`torchdata.datapipes.iter.IterDataPipe`, which can be an
@@ -819,8 +826,11 @@ def experiment_dataloader(
             are passed as keyword arguments.
 
     Lifecycle:
-        experimental
+        deprecated
     """
+    pytorch_logger.warning(
+        "API deprecated; upgrade to TileDB-SOMA-ML: https://github.com/single-cell-data/TileDB-SOMA-ML"
+    )
     unsupported_dataloader_args = [
         "shuffle",
         "batch_size",
