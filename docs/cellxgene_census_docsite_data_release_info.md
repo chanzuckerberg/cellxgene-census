@@ -79,9 +79,9 @@ Open this data release by specifying `census_version = "2025-01-30"` in future c
 
 | Type              | _Homo sapiens_ | _Mus musculus_ |
 |-------------------|----------------|----------------|
-| Total cells       | **109085698**  | **45351496**   |
-| Unique cells      | **65601657**   | **20208302**   |
-| Number of donors  | **390**        | **172**        |
+| Total cells       | 109,085,698    | 45,351,496     |
+| Unique cells      | 65,601,657     | 20,208,302     |
+| Number of donors  | 8,510          | 1,439          |
 
 #### Cell metadata
 
