@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false  # Don't stop the workflow if one of the jobs fails
       matrix:
-        os: [sc-dev-64g-runner, macos-latest]
+        os: [x64, macos-latest]
         python-version: ["3.10", "3.11", "3.12"]
         exclude:
           - os: macos-latest
