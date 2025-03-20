@@ -39,7 +39,7 @@ jobs:
 
   build_docker_container:
     name: Build Docker image for Census Builder
-    runs-on: X64
+    runs-on: x64-privileged  # Docker builds require privileged container
     permissions: # these permissions must be set for AWS auth to work!
       id-token: write
       contents: read
