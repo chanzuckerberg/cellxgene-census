@@ -3,6 +3,7 @@ import itertools
 import logging
 import os
 import typing
+import warnings
 from collections.abc import Iterator, Sequence
 from contextlib import contextmanager
 from datetime import timedelta
@@ -539,8 +540,10 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         Lifecycle:
             deprecated
         """
-        pytorch_logger.warning(
-            "API deprecated; upgrade to TileDB-SOMA-ML: https://github.com/single-cell-data/TileDB-SOMA-ML"
+        warnings.warn(
+            "cellxgene_census.experimental.ml.pytorch API will be removed in an upcoming release; upgrade to TileDB-SOMA-ML: https://github.com/single-cell-data/TileDB-SOMA-ML",
+            FutureWarning,
+            stacklevel=2,
         )
         self.exp_uri = experiment.uri
         self.aws_region = experiment.context.tiledb_config.get("vfs.s3.region")
@@ -828,8 +831,10 @@ def experiment_dataloader(
     Lifecycle:
         deprecated
     """
-    pytorch_logger.warning(
-        "API deprecated; upgrade to TileDB-SOMA-ML: https://github.com/single-cell-data/TileDB-SOMA-ML"
+    warnings.warn(
+        "cellxgene_census.experimental.ml.pytorch API will be removed in an upcoming release; upgrade to TileDB-SOMA-ML: https://github.com/single-cell-data/TileDB-SOMA-ML",
+        FutureWarning,
+        stacklevel=2,
     )
     unsupported_dataloader_args = [
         "shuffle",
