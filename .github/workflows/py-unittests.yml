@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false  # Don't stop the workflow if one of the jobs fails
       matrix:
-        os: [x64, macos-latest]
+        os: [x64-xl-privileged, macos-latest]
         python-version: ["3.10", "3.11", "3.12"]
         exclude:
           - os: macos-latest
@@ -39,7 +39,7 @@ jobs:
             api/**/pyproject.toml
             api/**/requirements*.txt
       - name: Install git-lfs (Linux)
-        if: matrix.os == 'x64'
+        if: matrix.os == 'x64-xl-privileged'
         run: |
           sudo apt-get update
           sudo apt-get install git-lfs
@@ -69,7 +69,7 @@ jobs:
   unit_tests_builder:
     strategy:
       matrix:
-        os: [x64]
+        os: [x64-xl-privileged]
         python-version: ["3.11"]
 
     runs-on: ${{matrix.os}}
