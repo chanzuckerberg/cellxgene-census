@@ -88,7 +88,7 @@ Open this data release by specifying `census_version = "2025-01-30"` in future c
 |:------------------------|---------------:|---------------:|
 | Assay                   |             31 |             17 |
 | Cell type               |            827 |            453 |
-| Development stage       |            nan |            nan |
+| Development stage       |            179 |             58 |
 | Disease                 |            140 |             12 |
 | Self-reported ethnicity |             36 |              1 |
 | Sex                     |              3 |              3 |
