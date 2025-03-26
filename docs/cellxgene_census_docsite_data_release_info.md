@@ -81,7 +81,6 @@ Open this data release by specifying `census_version = "2025-01-30"` in future c
 |-------------------|----------------|----------------|
 | Total cells       | 109,085,698    | 45,351,496     |
 | Unique cells      | 65,601,657     | 20,208,302     |
-| Number of donors  | 8,510          | 1,439          |
 
 #### Cell metadata
 
@@ -128,7 +127,6 @@ Open this data release by specifying `census_version = "2024-07-01"` in future c
 |-------------------|----------------|----------------|
 | Total cells       | 74,322,510     | 41,233,630     |
 | Unique cells      | 44,265,932     | 16,332,034     |
-| Number of donors  | 17,651         | 4,216          |
 
 #### Cell metadata
 
@@ -176,7 +174,6 @@ Open this data release by specifying `census_version = "2023-12-15"` in future c
 |-------------------|----------------|----------------|
 | Total cells       | 62,998,417     | 5,684,805      |
 | Unique cells      | 36,227,903     | 4,128,230     |
-| Number of donors  | 15,588         | 1,990          |
 
 #### Cell metadata
 
@@ -233,7 +230,6 @@ Open this data release by specifying `census_version = "2023-07-25"` in future c
 |-------------------|----------------|----------------|
 | Total cells       | 56,400,873     | 5,255,245      |
 | Unique cells      | 33,364,242     | 4,083,531     |
-| Number of donors  | 13,035         | 1,417          |
 
 #### Cell metadata
 
@@ -278,7 +274,6 @@ If you wish to use this data release, you can consider filtering out all of thes
 |-------------------|----------------|----------------|
 | Total cells       | 53,794,728     | 4,086,032      |
 | Unique cells      | 33,758,887     | 2,914,318      |
-| Number of donors  | 12,493         | 1,362          |
 
 #### Cell metadata
 
