@@ -69,7 +69,7 @@ jobs:
   unit_tests_builder:
     strategy:
       matrix:
-        os: [x64]
+        os: [ubuntu-latest]
         python-version: ["3.11"]
 
     runs-on: ${{matrix.os}}
