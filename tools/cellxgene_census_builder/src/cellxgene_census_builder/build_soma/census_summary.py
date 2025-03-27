@@ -23,8 +23,6 @@ def create_census_summary(
         ("dataset_schema_version", CXG_SCHEMA_VERSION),
         ("total_cell_count", str(summary_stats["total_cell_count"])),
         ("unique_cell_count", str(summary_stats["unique_cell_count"])),
-        ("number_donors_homo_sapiens", str(summary_stats["number_donors"]["homo_sapiens"])),
-        ("number_donors_mus_musculus", str(summary_stats["number_donors"]["mus_musculus"])),
     ]
 
     df = pd.DataFrame.from_records(data, columns=["label", "value"])
