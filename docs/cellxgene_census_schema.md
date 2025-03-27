@@ -860,6 +860,10 @@ Cell metadata MUST be encoded as a `SOMADataFrame` with the following columns:
 
 ## Changelog
 
+### Version 2.X.1
+
+* Removed fields `number_donors_homo_sapiens` and `number_donors_mus_musculus` from `census_obj​​["census_info"]["summary"]` as we cannot correctly count donors across datasets.
+
 ### Version 2.2.0
 
 * Allow organoid data, i.e. `tissue_type` can now be `organoid` other than `tissue`.
