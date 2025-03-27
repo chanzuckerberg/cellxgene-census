@@ -4,6 +4,6 @@ requests-mock
 twine
 coverage
 nbqa
-transformers[torch]
 git+https://huggingface.co/ctheodoris/Geneformer@ebc1e096; python_version>='3.10'
+transformers[torch]<4.50  # Pinned Geneformer@ebc1e096 import AdamW from transformers, which was removed in 4.50
 proxy.py

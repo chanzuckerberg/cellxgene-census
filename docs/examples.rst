@@ -15,7 +15,7 @@ Learn how to stream the single-cell data and metadata from Census into your mach
     notebooks/api_demo/census_citation_generation.ipynb
     notebooks/api_demo/census_gget_demo.ipynb
 
-[NEW! 🚀] Accesing spatial transcriptomics data with Census
+[NEW! 🚀] Accessing spatial transcriptomics data with Census
 -----------------------------------------------------------
 
 .. toctree::
