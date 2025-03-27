@@ -204,12 +204,6 @@ This `SOMADataFrame` MUST have the following rows:
 5. Unique number of cells included in this Census build (is_primary_data == True)
    1. label: `"unique_cell_count"`
    2. value: Cell count
-6. Number of human donors included in this Census build. Donors are guaranteed to be unique within datasets, not across all Census.
-   1. label: `"number_donors_homo_sapiens"`
-   2. value: Donor count
-7. Number of mouse donors included in this Census build. Donors are guaranteed to be unique within datasets, not across all Census.
-   1. label: `"number_donors_mus_musculus"`
-   2. value: Donor count
 
 An example of this `SOMADataFrame` is shown below:
 
@@ -240,14 +234,6 @@ An example of this `SOMADataFrame` is shown below:
   <tr>
     <td>unique_cell_count</td>
     <td>1000</td>
-  </tr>
-  <tr>
-    <td>number_donors_homo_sapiens</td>
-    <td>100</td>
-  </tr>
-  <tr>
-    <td>number_donors_mus_musculus</td>
-    <td>100</td>
   </tr>
 </tbody>
 </table>

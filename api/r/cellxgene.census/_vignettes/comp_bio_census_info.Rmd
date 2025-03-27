@@ -108,7 +108,6 @@ Of special interest are the label-value combinations for:
 
 - `total_cell_count` is the total number of cells in the Census.
 - `unique_cell_count` is the number of unique cells, as some cells may be present twice due to meta-analysis or consortia-like data.
-- `number_donors_homo_sapiens` and `number_donors_mus_musculus` are the number of individuals for human and mouse. These are not guaranteed to be unique as one individual ID may be present or identical in different datasets.
 
 ### Cell counts by cell metadata
 
