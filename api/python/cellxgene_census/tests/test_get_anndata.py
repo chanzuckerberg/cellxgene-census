@@ -33,12 +33,14 @@ def test_get_anndata_value_filter(census: soma.Collection) -> None:
 
 
 @pytest.mark.live_corpus
-def test_get_anndata_coords(census: soma.Collection) -> None:
+@pytest.mark.parametrize("modality", ["census_data", "census_spatial_sequencing"])
+def test_get_anndata_coords(census: soma.Collection, modality: str) -> None:
     ad = cellxgene_census.get_anndata(
         census,
         organism="Mus musculus",
         obs_coords=slice(1000),
         var_coords=slice(2000),
+        modality=modality,
     )
 
     assert ad is not None
@@ -119,10 +121,12 @@ def test_get_anndata_two_layers(census: soma.Collection, layers: list[str]) -> N
 
 
 @pytest.mark.live_corpus
-def test_get_anndata_wrong_layer_names(census: soma.Collection) -> None:
+@pytest.mark.parametrize("modality", ["census_data", "census_spatial_sequencing"])
+def test_get_anndata_wrong_layer_names(census: soma.Collection, modality: str) -> None:
     with pytest.raises(ValueError) as raise_info:
         cellxgene_census.get_anndata(
             census,
+            modality=modality,
             organism="Homo sapiens",
             X_name="this_layer_name_is_bad",
             obs_coords=slice(100),
@@ -134,6 +138,7 @@ def test_get_anndata_wrong_layer_names(census: soma.Collection) -> None:
     with pytest.raises(ValueError) as raise_info:
         cellxgene_census.get_anndata(
             census,
+            modality=modality,
             organism="Homo sapiens",
             X_name="raw",
             X_layers=["this_layer_name_is_bad"],

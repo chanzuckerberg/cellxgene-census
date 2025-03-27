@@ -42,6 +42,7 @@ def get_anndata(
     var_embeddings: Sequence[str] | None = (),
     obs_column_names: Sequence[str] | None = None,
     var_column_names: Sequence[str] | None = None,
+    modality: str = "census_data",
 ) -> anndata.AnnData:
     """Convenience wrapper around :class:`tiledbsoma.Experiment` query, to build and execute a query,
     and return it as an :class:`anndata.AnnData` object.
@@ -103,7 +104,7 @@ def get_anndata(
 
         >>> get_anndata(census, "Homo sapiens", obs_coords=slice(0, 1000))
     """
-    exp = _get_experiment(census, organism)
+    exp = _get_experiment(census, organism, modality)
     obs_coords = (slice(None),) if obs_coords is None else (obs_coords,)
     var_coords = (slice(None),) if var_coords is None else (var_coords,)
 
@@ -147,6 +148,9 @@ def get_anndata(
 
         # If obs_embeddings or var_embeddings are defined, inject them in the appropriate slot
         if obs_embeddings or var_embeddings:
+            if modality == "census_spatial_sequencing":
+                raise ValueError("Embeddings are not supported for the spatial sequencing collection at this time.")
+
             from .experimental._embedding import _get_embedding, get_embedding_metadata_by_name
 
             census_version = _extract_census_version(census)
