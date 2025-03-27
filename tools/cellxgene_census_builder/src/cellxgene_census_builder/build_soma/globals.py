@@ -197,6 +197,13 @@ CENSUS_X_LAYERS_PLATFORM_CONFIG = {
         }
     },
 }
+CENSUS_POINT_CLOUD_PLATFORM_CONFIG = {
+    "tiledb": {
+        "create": {
+            "allows_duplicates": True,
+        }
+    }
+}
 
 # list of EFO terms that correspond to RNA seq modality/measurement. These terms
 # define the inclusive filter applied to obs.assay_ontology_term_id. All other
