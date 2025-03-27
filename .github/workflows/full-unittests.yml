@@ -68,7 +68,6 @@ jobs:
       - name: install python dependencies (including experimental)
         run: |
           python -m pip install -U pip setuptools setuptools_scm wheel
-          pip install --use-pep517 accumulation-tree # Geneformer dependency needs --use-pep517 for Cython
           pip install -r ./api/python/cellxgene_census/scripts/requirements-dev.txt
           pip install './api/python/cellxgene_census/[experimental]'
 

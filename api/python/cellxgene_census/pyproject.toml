@@ -162,4 +162,5 @@ markers = [
     "expensive: too expensive to run regularly or in CI",
     "experimental: tests for the `experimental` package",
     "lts_compat_check: check for compatibility with an LTS build",
+    "geneformer: Geneformer tests (not run in CI due to dependency issues)",
 ]

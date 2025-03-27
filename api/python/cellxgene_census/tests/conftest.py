@@ -3,7 +3,7 @@ import multiprocessing
 import pytest
 import tiledbsoma as soma
 
-TEST_MARKERS_SKIPPED_BY_DEFAULT = ["expensive", "experimental"]
+TEST_MARKERS_SKIPPED_BY_DEFAULT = ["expensive", "experimental", "geneformer"]
 
 # tiledb will complain if this isn't set and a process is spawned. May cause segfaults on the proxy test if this isn't set.
 multiprocessing.set_start_method("spawn", force=True)
