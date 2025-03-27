@@ -90,6 +90,9 @@ def get_anndata(
             Columns to fetch for ``obs`` dataframe.
         var_column_names:
             Columns to fetch for ``var`` dataframe.
+        modality
+            Which modality to query, can be one of ``"census_data"`` or ``"census_spatial_sequencing"``.
+            Defaults to ``"census_data"``.
 
     Returns:
         An :class:`anndata.AnnData` object containing the census slice.
