@@ -1,5 +1,3 @@
-import sys
-
 import datasets
 import pytest
 import tiledbsoma
@@ -16,6 +14,7 @@ api/python/cellxgene_census/tests/conftest.py:TEST_MARKERS_SKIPPED_BY_DEFAULT). 
 Geneformer package dependencies tend to cause more CI issues than usage justifies. To run them
 locally as needed, use `pytest -m geneformer --geneformer` (not a typo).
 """
+
 
 @pytest.mark.geneformer
 def test_GeneformerTokenizer_correctness(tmpdir: Path) -> None:
