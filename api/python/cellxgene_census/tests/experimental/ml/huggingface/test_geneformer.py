@@ -8,15 +8,6 @@ from scipy.stats import spearmanr
 
 import cellxgene_census
 
-try:
-    from geneformer import TranscriptomeTokenizer
-
-    from cellxgene_census.experimental.ml.huggingface import GeneformerTokenizer
-except ImportError:
-    # this should only occur when not running `experimental`-marked tests
-    pass
-
-
 CENSUS_VERSION_FOR_GENEFORMER_TESTS = "2023-12-15"
 
 
@@ -28,6 +19,10 @@ def test_GeneformerTokenizer_correctness(tmpdir: Path) -> None:
     Test that GeneformerTokenizer produces the same token sequences as the original
     geneformer.TranscriptomeTokenizer (modulo a small tolerance on Spearman rank correlation)
     """
+    from geneformer import TranscriptomeTokenizer
+
+    from cellxgene_census.experimental.ml.huggingface import GeneformerTokenizer
+
     # causes deterministic selection of roughly 1,000 cells:
     MODULUS = 32768
     # minimum Spearman rank correlation to consider token sequences effectively identical; this
@@ -95,6 +90,8 @@ def test_GeneformerTokenizer_correctness(tmpdir: Path) -> None:
 @pytest.mark.experimental
 @pytest.mark.live_corpus
 def test_GeneformerTokenizer_docstring_example() -> None:
+    from cellxgene_census.experimental.ml.huggingface import GeneformerTokenizer
+
     with cellxgene_census.open_soma(census_version=CENSUS_VERSION_FOR_GENEFORMER_TESTS) as census:
         with GeneformerTokenizer(
             census["census_data"]["homo_sapiens"],
