@@ -1,4 +1,3 @@
-import datasets
 import pytest
 import tiledbsoma
 from py.path import local as Path
@@ -22,6 +21,7 @@ def test_GeneformerTokenizer_correctness(tmpdir: Path) -> None:
     Test that GeneformerTokenizer produces the same token sequences as the original
     geneformer.TranscriptomeTokenizer (modulo a small tolerance on Spearman rank correlation)
     """
+    import datasets
     from geneformer import TranscriptomeTokenizer
 
     from cellxgene_census.experimental.ml.huggingface import GeneformerTokenizer
