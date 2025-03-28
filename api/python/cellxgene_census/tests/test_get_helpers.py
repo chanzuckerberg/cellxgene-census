@@ -25,10 +25,11 @@ def test_get_experiment(census: soma.Collection) -> None:
 
 @pytest.mark.live_corpus
 @pytest.mark.parametrize("organism", ["homo_sapiens", "mus_musculus"])
-def test_get_presence_matrix(organism: str, census: soma.Collection) -> None:
+@pytest.mark.parametrize("modality", ["census_data", "census_spatial_sequencing"])
+def test_get_presence_matrix(organism: str, census: soma.Collection, modality: str) -> None:
     census_datasets = census["census_info"]["datasets"].read().concat().to_pandas()
 
-    pm = cellxgene_census.get_presence_matrix(census, organism)
+    pm = cellxgene_census.get_presence_matrix(census, organism, modality=modality)
     assert isinstance(pm, scipy.sparse.csr_matrix)
     assert pm.shape[0] == len(census_datasets)
     assert pm.shape[1] == len(
