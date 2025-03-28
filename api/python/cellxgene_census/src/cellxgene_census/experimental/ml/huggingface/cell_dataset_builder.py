@@ -1,4 +1,5 @@
 import uuid
+import warnings
 from abc import ABC, abstractmethod
 from collections.abc import Generator
 from typing import Any
@@ -13,6 +14,9 @@ class CellDatasetBuilder(ExperimentAxisQuery, ABC):  # type: ignore
     Subclasses implement the `cell_item()` method to process each row of an X layer
     into a Dataset item, and may also override `__init__()` and context `__enter__()`
     to perform any necessary preprocessing.
+
+    **DEPRECATION NOTICE:** this is planned for removal from the cellxgene_census API and
+    migrated into git:cellxgene-census/tools/models/geneformer.
 
     The base class inherits ExperimentAxisQuery, so typical usage would be:
 
@@ -54,6 +58,11 @@ class CellDatasetBuilder(ExperimentAxisQuery, ABC):  # type: ignore
         super().__init__(experiment, measurement_name, **kwargs)
         self.layer_name = layer_name
         self.block_size = block_size
+        warnings.warn(
+            "cellxgene_census.experimental.ml.huggingface will be removed from API in an upcoming release and migrated to git:cellxgene-census/tools/models/geneformer",
+            FutureWarning,
+            stacklevel=2,
+        )
 
     def build(self, from_generator_kwargs: dict[str, Any] | None = None) -> "Dataset":  # type: ignore  # noqa: F821
         """Build the dataset from query results.
