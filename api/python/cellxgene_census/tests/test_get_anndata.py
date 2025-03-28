@@ -33,12 +33,14 @@ def test_get_anndata_value_filter(census: soma.Collection) -> None:
 
 
 @pytest.mark.live_corpus
-def test_get_anndata_coords(census: soma.Collection) -> None:
+@pytest.mark.parametrize("modality", ["census_data", "census_spatial_sequencing"])
+def test_get_anndata_coords(census: soma.Collection, modality: str) -> None:
     ad = cellxgene_census.get_anndata(
         census,
         organism="Mus musculus",
         obs_coords=slice(1000),
         var_coords=slice(2000),
+        modality=modality,
     )
 
     assert ad is not None
@@ -119,10 +121,12 @@ def test_get_anndata_two_layers(census: soma.Collection, layers: list[str]) -> N
 
 
 @pytest.mark.live_corpus
-def test_get_anndata_wrong_layer_names(census: soma.Collection) -> None:
+@pytest.mark.parametrize("modality", ["census_data", "census_spatial_sequencing"])
+def test_get_anndata_wrong_layer_names(census: soma.Collection, modality: str) -> None:
     with pytest.raises(ValueError) as raise_info:
         cellxgene_census.get_anndata(
             census,
+            modality=modality,
             organism="Homo sapiens",
             X_name="this_layer_name_is_bad",
             obs_coords=slice(100),
@@ -134,6 +138,7 @@ def test_get_anndata_wrong_layer_names(census: soma.Collection) -> None:
     with pytest.raises(ValueError) as raise_info:
         cellxgene_census.get_anndata(
             census,
+            modality=modality,
             organism="Homo sapiens",
             X_name="raw",
             X_layers=["this_layer_name_is_bad"],
@@ -334,11 +339,12 @@ def _map_to_get_anndata_args(query: dict[str, Any], axis: Literal["obs", "var"])
         pytest.param({"value_filter": "tissue_general == 'vasculature'"}, id="value_filter"),
     ],
 )
-def test_get_obs(lts_census: soma.Collection, query: dict[str, Any]) -> None:
+@pytest.mark.parametrize("modality", ["census_data", "census_spatial_sequencing"])
+def test_get_obs(lts_census: soma.Collection, query: dict[str, Any], modality: str) -> None:
     adata_obs = cellxgene_census.get_anndata(
-        lts_census, organism="Mus musculus", **_map_to_get_anndata_args(query, "obs")
+        lts_census, organism="Mus musculus", modality=modality, **_map_to_get_anndata_args(query, "obs")
     ).obs
-    only_obs = cellxgene_census.get_obs(lts_census, "Mus musculus", **query)
+    only_obs = cellxgene_census.get_obs(lts_census, "Mus musculus", modality=modality, **query)
     # account for a difference:
     only_obs.index = only_obs.index.astype(str)
 
@@ -360,11 +366,16 @@ def test_get_obs(lts_census: soma.Collection, query: dict[str, Any]) -> None:
         pytest.param({"value_filter": "feature_name in ['Gm53058', '0610010K14Rik']"}, id="value_filter"),
     ],
 )
-def test_get_var(lts_census: soma.Collection, query: dict[str, Any]) -> None:
+@pytest.mark.parametrize("modality", ["census_data", "census_spatial_sequencing"])
+def test_get_var(lts_census: soma.Collection, query: dict[str, Any], modality: str) -> None:
     adata_var = cellxgene_census.get_anndata(
-        lts_census, organism="Mus musculus", obs_coords=slice(0), **_map_to_get_anndata_args(query, "var")
+        lts_census,
+        organism="Mus musculus",
+        obs_coords=slice(0),
+        modality=modality,
+        **_map_to_get_anndata_args(query, "var"),
     ).var
-    only_var = cellxgene_census.get_var(lts_census, "Mus musculus", **query)
+    only_var = cellxgene_census.get_var(lts_census, "Mus musculus", modality=modality, **query)
     # AnnData instantiation converts the index to string, so we match that behaviour for comparisons sake
     only_var.index = only_var.index.astype(str)
 

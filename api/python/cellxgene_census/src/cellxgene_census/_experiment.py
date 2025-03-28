@@ -18,7 +18,11 @@ def _get_experiment_name(organism: str) -> str:
     return re.sub(r"[ ]+", "_", organism).lower()
 
 
-def _get_experiment(census: soma.Collection, organism: str) -> soma.Experiment:
+def _get_experiment(
+    census: soma.Collection,
+    organism: str,
+    modality: str = "census_data",
+) -> soma.Experiment:
     """Given a census :class:`tiledbsoma.Collection`, return the experiment for the named organism.
     Organism matching is somewhat flexible, attempting to map from human-friendly
     names to the underlying collection element name.
