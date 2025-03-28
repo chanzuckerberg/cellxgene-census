@@ -44,12 +44,8 @@ experimental = [
     "torchdata~=0.7,<0.10",  # FIXME: delete when the deprecated pytorch loader API prototype is fully graduated to TileDB-SOMA-ML
     "scikit-learn>=1.2",
     "scikit-misc>=0.3",
-    "datasets~=2.0",
-    "tdigest~=0.5",
     "tiledb-vector-search~=0.11",  # newest version compatible with tiledbsoma's version of TileDB Embedded
-    # Not expressible in pyproject.toml:
-    #"git+https://huggingface.co/ctheodoris/Geneformer",
-    # instead, experimental/ml/geneformer_tokenizer.py catches ImportError to ask user to install that.
+    "psutil",
 ]
 spatial = [
     "spatialdata>=0.2.5",
@@ -162,4 +158,5 @@ markers = [
     "expensive: too expensive to run regularly or in CI",
     "experimental: tests for the `experimental` package",
     "lts_compat_check: check for compatibility with an LTS build",
+    "geneformer: Geneformer tests (not run in CI due to dependency issues)",
 ]
