@@ -42,7 +42,7 @@ env:
 
 jobs:
   py_unit_tests:
-    runs-on: sc-dev-64g-runner
+    runs-on: x64
     timeout-minutes: 1440 # 24 hour timeout
     strategy:
       fail-fast: false # prevent this job from killing other jobs
@@ -68,7 +68,6 @@ jobs:
       - name: install python dependencies (including experimental)
         run: |
           python -m pip install -U pip setuptools setuptools_scm wheel
-          pip install --use-pep517 accumulation-tree # Geneformer dependency needs --use-pep517 for Cython
           pip install -r ./api/python/cellxgene_census/scripts/requirements-dev.txt
           pip install './api/python/cellxgene_census/[experimental]'
 
@@ -88,7 +87,7 @@ jobs:
           PYTHONPATH=. pytest -v --durations=0 -rP --experimental --expensive ./api/python/cellxgene_census/tests/
 
   r_unit_tests:
-    runs-on: sc-dev-64g-runner
+    runs-on: x64
     timeout-minutes: 1440 # 24 hour timeout
     strategy:
       fail-fast: false # prevent this job from killing other jobs
