@@ -102,3 +102,4 @@ Learn about features to do data modeling directly from Census into machine learn
     :maxdepth: 1
     
     notebooks/experimental/pytorch.ipynb
+    notebooks/experimental/pytorch_scvi.ipynb
