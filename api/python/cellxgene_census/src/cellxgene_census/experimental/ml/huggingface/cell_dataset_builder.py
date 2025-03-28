@@ -4,7 +4,6 @@ from collections.abc import Generator
 from typing import Any
 
 import scipy.sparse
-from datasets import Dataset
 from tiledbsoma import Experiment, ExperimentAxisQuery
 
 
@@ -56,11 +55,13 @@ class CellDatasetBuilder(ExperimentAxisQuery, ABC):  # type: ignore
         self.layer_name = layer_name
         self.block_size = block_size
 
-    def build(self, from_generator_kwargs: dict[str, Any] | None = None) -> Dataset:
+    def build(self, from_generator_kwargs: dict[str, Any] | None = None) -> "Dataset":  # type: ignore  # noqa: F821
         """Build the dataset from query results.
 
         - `from_generator_kwargs`: kwargs passed through to `Dataset.from_generator()`
         """
+        # late binding to simplify CI dependencies:
+        from datasets import Dataset
 
         def gen() -> Generator[dict[str, Any], None, None]:
             for Xblock, (block_cell_joinids, _) in (
