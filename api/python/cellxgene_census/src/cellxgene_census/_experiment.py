@@ -18,7 +18,11 @@ def _get_experiment_name(organism: str) -> str:
     return re.sub(r"[ ]+", "_", organism).lower()
 
 
-def _get_experiment(census: soma.Collection, organism: str) -> soma.Experiment:
+def _get_experiment(
+    census: soma.Collection,
+    organism: str,
+    modality: str = "census_data",
+) -> soma.Experiment:
     """Given a census :class:`tiledbsoma.Collection`, return the experiment for the named organism.
     Organism matching is somewhat flexible, attempting to map from human-friendly
     names to the underlying collection element name.
@@ -49,7 +53,7 @@ def _get_experiment(census: soma.Collection, organism: str) -> soma.Experiment:
 
     if exp_name not in census["census_data"]:
         raise ValueError(f"Unknown organism {organism} - does not exist")
-    exp = census["census_data"][exp_name]
+    exp = census[modality][exp_name]
     if exp.soma_type != "SOMAExperiment":
         raise ValueError(f"Unknown organism {organism} - not a SOMA Experiment")
 

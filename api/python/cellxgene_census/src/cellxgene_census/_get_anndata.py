@@ -42,6 +42,7 @@ def get_anndata(
     var_embeddings: Sequence[str] | None = (),
     obs_column_names: Sequence[str] | None = None,
     var_column_names: Sequence[str] | None = None,
+    modality: str = "census_data",
 ) -> anndata.AnnData:
     """Convenience wrapper around :class:`tiledbsoma.Experiment` query, to build and execute a query,
     and return it as an :class:`anndata.AnnData` object.
@@ -89,6 +90,9 @@ def get_anndata(
             Columns to fetch for ``obs`` dataframe.
         var_column_names:
             Columns to fetch for ``var`` dataframe.
+        modality:
+            Which modality to query, can be one of ``"census_data"`` or ``"census_spatial_sequencing"``.
+            Defaults to ``"census_data"``.
 
     Returns:
         An :class:`anndata.AnnData` object containing the census slice.
@@ -103,7 +107,7 @@ def get_anndata(
 
         >>> get_anndata(census, "Homo sapiens", obs_coords=slice(0, 1000))
     """
-    exp = _get_experiment(census, organism)
+    exp = _get_experiment(census, organism, modality)
     obs_coords = (slice(None),) if obs_coords is None else (obs_coords,)
     var_coords = (slice(None),) if var_coords is None else (var_coords,)
 
@@ -147,6 +151,9 @@ def get_anndata(
 
         # If obs_embeddings or var_embeddings are defined, inject them in the appropriate slot
         if obs_embeddings or var_embeddings:
+            if modality == "census_spatial_sequencing":
+                raise ValueError("Embeddings are not supported for the spatial sequencing collection at this time.")
+
             from .experimental._embedding import _get_embedding, get_embedding_metadata_by_name
 
             census_version = _extract_census_version(census)
@@ -176,12 +183,13 @@ def _get_axis_metadata(
     census: soma.Collection,
     axis: Literal["obs", "var"],
     organism: str,
+    modality: str = "census_data",
     *,
     value_filter: str | None = None,
     coords: SparseDFCoord | None = slice(None),
     column_names: Sequence[str] | None = None,
 ) -> pd.DataFrame:
-    exp = _get_experiment(census, organism)
+    exp = _get_experiment(census, organism, modality=modality)
     coords = (slice(None),) if coords is None else (coords,)
     if axis == "obs":
         df = exp.obs
@@ -202,6 +210,7 @@ def get_obs(
     value_filter: str | None = None,
     coords: SparseDFCoord | None = slice(None),
     column_names: Sequence[str] | None = None,
+    modality: str = "census_data",
 ) -> pd.DataFrame:
     """Get the observation metadata for a query on the census.
 
@@ -218,12 +227,21 @@ def get_obs(
             May be an ``int``, a list of ``int``, or a slice. The default, ``None``, selects all.
         column_names:
             Columns to fetch.
+        modality
+            Which modality to query, can be one of ``"census_data"`` or ``"census_spatial_sequencing"``.
+            Defaults to ``"census_data"``.
 
     Returns:
         A :class:`pandas.DataFrame` object containing metadata for the queried slice.
     """
     return _get_axis_metadata(
-        census, "obs", organism, value_filter=value_filter, coords=coords, column_names=column_names
+        census,
+        "obs",
+        organism,
+        value_filter=value_filter,
+        coords=coords,
+        column_names=column_names,
+        modality=modality,
     )
 
 
@@ -234,6 +252,7 @@ def get_var(
     value_filter: str | None = None,
     coords: SparseDFCoord | None = slice(None),
     column_names: Sequence[str] | None = None,
+    modality: str = "census_data",
 ) -> pd.DataFrame:
     """Get the variable metadata for a query on the census.
 
@@ -250,10 +269,19 @@ def get_var(
             May be an ``int``, a list of ``int``, or a slice. The default, ``None``, selects all.
         column_names:
             Columns to fetch.
+        modality:
+            Which modality to query, can be one of ``"census_data"`` or ``"census_spatial_sequencing"``.
+            Defaults to ``"census_data"``.
 
     Returns:
         A :class:`pandas.DataFrame` object containing metadata for the queried slice.
     """
     return _get_axis_metadata(
-        census, "var", organism, value_filter=value_filter, coords=coords, column_names=column_names
+        census,
+        "var",
+        organism,
+        value_filter=value_filter,
+        coords=coords,
+        column_names=column_names,
+        modality=modality,
     )
