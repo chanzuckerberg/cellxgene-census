@@ -30,7 +30,7 @@ def get_presence_matrix(
             The organism to query, usually one of ``"Homo sapiens"`` or ``"Mus musculus"``.
         measurement_name:
             The measurement object to query. Deafults to ``"RNA"``.
-        modality
+        modality:
             Which modality to query, can be one of ``"census_data"`` or ``"census_spatial_sequencing"``.
             Defaults to ``"census_data"``.
 

@@ -90,7 +90,7 @@ def get_anndata(
             Columns to fetch for ``obs`` dataframe.
         var_column_names:
             Columns to fetch for ``var`` dataframe.
-        modality
+        modality:
             Which modality to query, can be one of ``"census_data"`` or ``"census_spatial_sequencing"``.
             Defaults to ``"census_data"``.
 
@@ -269,7 +269,7 @@ def get_var(
             May be an ``int``, a list of ``int``, or a slice. The default, ``None``, selects all.
         column_names:
             Columns to fetch.
-        modality
+        modality:
             Which modality to query, can be one of ``"census_data"`` or ``"census_spatial_sequencing"``.
             Defaults to ``"census_data"``.
 
