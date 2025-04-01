@@ -53,7 +53,7 @@ def _get_experiment(
 
     if exp_name not in census["census_data"]:
         raise ValueError(f"Unknown organism {organism} - does not exist")
-    exp = census["census_data"][exp_name]
+    exp = census[modality][exp_name]
     if exp.soma_type != "SOMAExperiment":
         raise ValueError(f"Unknown organism {organism} - not a SOMA Experiment")
 
