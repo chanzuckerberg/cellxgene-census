@@ -1,8 +1,8 @@
 # CZ CELLxGENE Discover Census Schema
 
-**Version**: 2.2.0
+**Version**: 2.3.0
 
-**Last edited**: January, 2025.
+**Last edited**: April, 2025.
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED" "MAY", and "OPTIONAL" in this document are to be interpreted as described in [BCP 14](https://tools.ietf.org/html/bcp14), [RFC2119](https://www.rfc-editor.org/rfc/rfc2119.txt), and [RFC8174](https://www.rfc-editor.org/rfc/rfc8174.txt) when, and only when, they appear in all capitals, as shown here.
 
@@ -126,8 +126,9 @@ These assays were selected with the following criteria:
 > * Can be done at the single-cell level.
 > * May include nascent or elongating RNA data.
 > * May be targeted to specific genes in an assay-specific manner.
+> * May include spatial data only from Visium or Slide-seq.
+> * Doesn’t measure spatial data from other assays,
 > * Doesn't measure other non-RNA molecules concurrently.
-> * Doesn’t measure spatial information.
 > * Doesn’t require author metadata for correct interpretability (e.g. perturbation-based technologies).
 > * Doesn’t intend to primarily measure RNA structure, RNA fusions, RNA modifications, or RNA interactions.
 > * Doesn’t intend to primarily measure non-mRNA (e.g. tRNA, rRNA, small RNAs).
@@ -140,6 +141,15 @@ These assays were selected with the following criteria:
 From the list of accepted assays, this list of [full-gene sequencing assays](./census_accepted_assays_full_gene.csv) are those that when used at the single-cell level will always perform full-gene sequencing.
 
 These data need to be normalized by gene length for downstream analysis.
+
+##### Spatial Assays
+
+Only observations from Visium and Slide-seq assays MUST be included in Census, as indicated in the list of [accepted assays](./census_accepted_assays.csv).  Per the CELLxGENE dataset schema, datasets with spatial observations can be identified with the presence of the slot `uns["spatial"]`. For these assays, only observations from datasets that contain "one Space Ranger output for a single tissue section" MUST be included in Census.
+
+The full logic above can be asserted as follows:
+
+* If a dataset has the slot `uns["spatial"]` and `True` in `uns["spatial"]["is_single"]`, then all observations MUST be included.
+* If a dataset has the slot `uns["spatial"]` and `False` in `uns["spatial"]["is_single"]`, then all observations MUST be excluded.
 
 #### Data matrix types
 
@@ -198,10 +208,10 @@ This `SOMADataFrame` MUST have the following rows:
 3. Dataset schema version:
    1. label: `"dataset_schema_version"`
    2. value: The CELLxGENE Discover schema version of the source H5AD files.
-4. Total number of cells included in this Census build:
+4. Total number of cells or spatial spots included in this Census build:
    1. label: `"total_cell_count"`
    2. value: Cell count
-5. Unique number of cells included in this Census build (is_primary_data == True)
+5. Unique number of cells or spatial spots included in this Census build (is_primary_data == True)
    1. label: `"unique_cell_count"`
    2. value: Cell count
 6. Number of human donors included in this Census build. Donors are guaranteed to be unique within datasets, not across all Census.
@@ -872,7 +882,179 @@ Cell metadata MUST be encoded as a `SOMADataFrame` with the following columns:
 </tbody>
 </table>
 
+### Census Spatial Sequencing Data – `census_obj["census_spatial_sequencing"][organism]` – `SOMAExperiment`
+
+Only Visium and Slide-seq are supported for spatial data. [See the "assays included" section above](####assays
+).
+
+Spatial data for *Homo sapiens* MUST be stored as a `SOMAExperiment` in `census_obj["census_spatial_sequencing"]["homo_sapiens"]`.
+
+Spatial data for *Mus musculus* MUST be stored as a `SOMAExperiment` in `census_obj["census_spatial_sequencing"]["mus_musculus"]`.
+
+For each organism the `SOMAExperiment` MUST contain the following:
+
+* Cell metadata – `census_obj["census_spatial_sequencing"][organism].obs` – `SOMADataFrame`
+* Non-spatial data  –  `census_obj["census_spatial_sequencing"][organism].ms` – `SOMACollection`. This `SOMACollection` MUST only contain one `SOMAMeasurement` in `census_obj["census_spatial_sequencing"][organism].ms["RNA"]` with the following:
+  * Matrix  data –  `census_obj["census_spatial_sequencing"][organism].ms["RNA"].X` – `SOMACollection`. It MUST contain exactly one layers:
+    * Count matrix – `census_obj["census_spatial_sequencing"][organism].ms["RNA"].X["raw"]` – `SOMASparseNDArray`
+  * Feature metadata – `census_obj["census_spatial_sequencing"][organism].ms["RNA"].var` – `SOMAIndexedDataFrame`
+  * Feature dataset presence matrix – `census_obj["census_spatial_sequencing"][organism].ms["RNA"]["feature_dataset_presence_matrix"]` – `SOMASparseNDArray`
+* Obs to spatial data mapping:
+  * Obs to spatial data – `census_obj["census_spatial_sequencing"][organism].obs_scene`. It indicates the link between an observation and a scene, it MUST have three columns: 1) `soma_joinid` corresponding to `soma_joinid` of `obs` and 2) `scene_id` corresponding to the associated scene and 3) `data` which is a boolean value indicating presence.
+* Spatial data  –  `census_obj["census_spatial_sequencing"][organism].spatial` – `SOMACollection`.
+  * Spatial Scenes with spatial data  –  `census_obj["census_spatial_sequencing"][organism].spatial[scene_id]`  – `SOMAScene`.  There will be as many as Spatial Scenes as  spatial datasets. Each`SOMAScene` MUST contain the following:
+    * MUST contain a positions array – `census_obj["census_spatial_sequencing"][organism].spatial[scene_id].obsl["loc"]` – `SOMAGeometryNDArray`. This will contain the spatial array positions for each observation, the geometry points associated to them, and additional metadata.
+    * MUST contain a high resolution image  – `census_obj["census_spatial_sequencing"][organism].spatial[scene_id].img[library_id]["highres_image"]` – `SOMAImageNDArray`.
+
+#### Matrix Data, count (raw) matrix – `census_obj["census_spatial_sequencing"][organism].ms["RNA"].X["raw"]` – `SOMASparseNDArray`
+
+Same as non-spatial data. See the corresponding section [here](#matrix-data-count-raw-matrix--census_objcensus_dataorganismmsrnaxraw--somasparsendarray).
+
+#### Feature metadata – `census_obj["census_spatial_sequencing"][organism].ms["RNA"].var` – `SOMADataFrame`
+
+Same as non-spatial data. See the corresponding section [here](#feature-metadata--census_objcensus_dataorganismmsrnavar--somadataframe).
+
+#### Feature dataset presence matrix – `census_obj["census_spatial_sequencing"][organism].ms["RNA"]["feature_dataset_presence_matrix"]` – `SOMASparseNDArray`
+
+Same as non-spatial data. See the corresponding section [here](#feature-dataset-presence-matrix--census_objcensus_dataorganismmsrnafeature_dataset_presence_matrix--somasparsendarray).
+
+#### Cell metadata – `census_obj["census_spatial_sequencing"][organism].obs` – `SOMADataFrame`
+
+Same as non-spatial data. See the corresponding section [here](#cell-metadata--census_objcensus_dataorganismobs--somadataframe).
+
+**Important note:** In addition, the following spatial `obs` columns from the CELLxGENE dataset schema MUST be included in this `SOMADataFrame`
+
+<table>
+<thead>
+  <tr>
+    <th>Column</th>
+    <th>Encoding</th>
+    <th>Description</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td>array_col</td>
+    <td colspan="2" rowspan="3">As defined in CELLxGENE dataset schema</td>
+  </tr>
+  <tr>
+    <td>array_row</td>
+  </tr>
+  <tr>
+    <td>in_tissue</td>
+  </tr>
+</tbody>
+</table>
+
+#### Obs to spatial mapping –  `census_obj["census_spatial_sequencing"][organism].obs_presence_matrix` – `SOMADataFrame`
+
+It indicates the link between an observation and a scene.  Each row corresponds to an observation with the following columns:
+
+<table>
+<thead>
+  <tr>
+    <th>Column</th>
+    <th>Encoding</th>
+    <th>Description</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td>soma_joinid</td>
+    <td>int</td>
+    <td>It MUST be valid <code>soma_joinid</code> from <code>census_obj["census_spatial_sequencing"][organism].obs</code>.</td>
+  </tr>
+  </tr>
+    <td>scene_id</td>
+    <td>string</td>
+    <td>It MUST be valid <code>scene_id</code> from <code>census_obj["census_spatial_sequencing"][organism].spatial</code>.</td>
+  </tr>
+  <tr>
+    <td>value</td>
+    <td>bool</td>
+    <td>It MUST be <code>True</code> if the scene contains spatial information about the oberservation, otherwise it MUST be <code>False</code>.</td>
+  </tr>
+  </tbody>
+</table>
+
+#### Positions array of a Scene – `census_obj["census_spatial_sequencing"][organism].spatial[scene_id].obsl["loc"]` – `PointCloudDataFrame`
+
+`scene_id` MUST correspond to the values `scene_id` in `census_obj["census_spatial_sequencing"][organism].obs_presence_matrix`.
+
+For each observation in each Scene, spatial array positions and additional positional metadata MUST be encoded as a `PointCloudDataFrame`.  Each row corresponds to an observation with the following columns:
+
+<table>
+<thead>
+  <tr>
+    <th>Column</th>
+    <th>Encoding</th>
+    <th>Description</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td>x</td>
+    <td>float</td>
+    <td>It MUST be the corresponding value in the <b>first</b> column of <code>obsm["spatial"]</code>. As defined in the CELLxGENE dataset schema.</td>
+  </tr>
+  </tr>
+    <td>y</td>
+    <td>float</td>
+    <td>It MUST be the corresponding value in the <b>second</b> column of <code>obsm["spatial"]</code>. As defined in the CELLxGENE dataset schema.</td>
+  </tr>
+  <tr>
+    <td>soma_joinid</td>
+    <td>integer</td>
+    <td>It MUST be valid <code>soma_joinid</code> from <code>census_obj["census_spatial_sequencing"][organism].obs</code>.</td>
+  </tr>
+  </tr>
+  </tr>
+ </tbody>
+</table>
+
+If Visium ("EFO:0010961") the units for the spatial array positions are pixels from the high-resolution image (`spatial[scene_soma_joinid].img[library_id]`). Otherwise TBD.
+
+The location dataframe MUST have the metadata fields:
+
+<table>
+<thead>
+  <tr>
+    <th>Key</th>
+    <th>Encoding</th>
+    <th>Description</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td>soma_geometry_type</td>
+    <td>str</td>
+    <td>MUST be "radius"</td>
+  </tr>
+  </tr>
+    <td>soma_geometry</td>
+    <td>float</td>
+    <td>Radius of points: <code>dimeter/2</code>. If Visium ("EFO:0010961") <code>diameter</code> MUST be <code>.uns["spatial"][library_id]['spot_diameter_fullres']</code>.  As defined in the CELLxGENE dataset schema. Otherwise TBD-TODO (else for Slide-seq it should be  0.003% of the radius occupied by the full cloud of points).</td>
+  </tr>
+ </tbody>
+</table>
+
+#### Images of a Scene - `census_obj["census_spatial_sequencing"][organism].spatial[scene_soma_joinid].img[library_id]` – `Collection` of `MultiscaleImage`
+
+Images of a Visium ("EFO:0010961") scene MUST adhere to the following specifications. Other assays MUST NOT have images, and MUST NOT include the `img` collection.
+
+`library_id` MUST be the corresponding value in the source H5AD slot `.uns["spatial"][library_id]`, as defined in the CELLxGENE dataset schema.
+
+##### High resolution image of a Scene  – `census_obj["census_spatial_sequencing"][organism].spatial[scene_soma_joinid].img[library_id]["highres_image"]` – `MultiscaleImage`
+
+The high resolution image of a Visium ("EFO:0010961") scene MUST be included and MUST be encoded as a `SOMAImageNDArray`.
+
+**Value:** the image from `uns["spatial"][library_id]['images']['hires']` as defined in the CELLxGENE dataset schema.
+
 ## Changelog
+
+### Version 2.3.0
+
+* Added new top level object for holding spatial information, `census_spatial_sequencing`.
 
 ### Version 2.2.0
 
