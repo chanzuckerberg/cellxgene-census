@@ -652,11 +652,11 @@ An example of this `SOMADataFrame` is shown below:
 </tbody>
 </table>
 
-### Census Data – `census_obj["census_data"][organism]` – `SOMAExperiment`
+### Single Cell Census Data – `census_obj["census_data"][organism]` – `SOMAExperiment`
 
-Data for *Homo sapiens* MUST be stored as a `SOMAExperiment` in `census_obj["homo_sapiens"]`.
+Non-spatial data for *Homo sapiens* MUST be stored as a `SOMAExperiment` in `census_obj["census_data"]["homo_sapiens"]`.
 
-Data for *Mus musculus* MUST be stored as a `SOMAExperiment` in `census_obj["mus_musculus"]`.
+Non-spatial data for *Mus musculus* MUST be stored as a `SOMAExperiment` in `census_obj["census_data"]["mus_musculus"]`.
 
 For each organism the `SOMAExperiment` MUST contain the following:
 
