@@ -949,6 +949,7 @@ Same as non-spatial data. See the corresponding section [here](#cell-metadata--c
 
 It indicates the link between an observation and a scene.  Each row corresponds to an observation with the following columns:
 
+<!-- markdownlint-disable reference-links-images -->
 <table>
 <thead>
   <tr>
@@ -975,6 +976,7 @@ It indicates the link between an observation and a scene.  Each row corresponds 
   </tr>
   </tbody>
 </table>
+<!-- markdownlint-enable reference-links-images -->
 
 #### Positions array of a Scene – `census_obj["census_spatial_sequencing"][organism].spatial[scene_id].obsl["loc"]` – `PointCloudDataFrame`
 
@@ -982,6 +984,7 @@ It indicates the link between an observation and a scene.  Each row corresponds 
 
 For each observation in each Scene, spatial array positions and additional positional metadata MUST be encoded as a `PointCloudDataFrame`.  Each row corresponds to an observation with the following columns:
 
+<!-- markdownlint-disable reference-links-images -->
 <table>
 <thead>
   <tr>
@@ -1010,11 +1013,13 @@ For each observation in each Scene, spatial array positions and additional posit
   </tr>
  </tbody>
 </table>
+<!-- markdownlint-enable reference-links-images -->
 
 If Visium ("EFO:0010961") the units for the spatial array positions are pixels from the high-resolution image (`spatial[scene_soma_joinid].img[library_id]`). Otherwise TBD.
 
 The location dataframe MUST have the metadata fields:
 
+<!-- markdownlint-disable reference-links-images -->
 <table>
 <thead>
   <tr>
@@ -1036,6 +1041,7 @@ The location dataframe MUST have the metadata fields:
   </tr>
  </tbody>
 </table>
+<!-- markdownlint-enable reference-links-images -->
 
 #### Images of a Scene - `census_obj["census_spatial_sequencing"][organism].spatial[scene_soma_joinid].img[library_id]` – `Collection` of `MultiscaleImage`
 
