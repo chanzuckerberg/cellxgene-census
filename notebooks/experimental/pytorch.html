@@ -157,7 +157,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../python-api.html">Python API</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../../examples.html">Python tutorials</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../../examples.html#exporting-data">Exporting data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../examples.html#new-accesing-spatial-transcriptomics-data-with-census">[NEW! 🚀] Accesing spatial transcriptomics data with Census</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#new-accessing-spatial-transcriptomics-data-with-census">[NEW! 🚀] Accessing spatial transcriptomics data with Census</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../examples.html#using-integrated-embeddings-and-models">Using integrated embeddings and models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../examples.html#understanding-census-data">Understanding Census data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../examples.html#analyzing-census-data">Analyzing Census data</a></li>
@@ -165,7 +165,7 @@
 <li class="toctree-l2 current"><a class="reference internal" href="../../examples.html#scalable-machine-learning">Scalable machine learning</a><ul class="current">
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Training a PyTorch Model</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#Open-the-Census">Open the Census</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#Create-an-ExperimentDataPipe">Create an ExperimentDataPipe</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Create-an-ExperimentDataset">Create an ExperimentDataset</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#Split-the-dataset">Split the dataset</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#Create-the-DataLoader">Create the DataLoader</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#Define-the-model">Define the model</a></li>
@@ -220,15 +220,16 @@
                 
   <section id="Training-a-PyTorch-Model">
 <h1>Training a PyTorch Model<a class="headerlink" href="#Training-a-PyTorch-Model" title="Permalink to this heading"></a></h1>
-<p>This tutorial shows how to train a Logistic Regression model in PyTorch using the Census API’s <code class="docutils literal notranslate"><span class="pre">experimental.ml.ExperimentDataPipe</span></code> class. This is intended only to demonstrate the use of the <code class="docutils literal notranslate"><span class="pre">ExperimentDataPipe</span></code>, and not as an example of how to train a biologically useful model.</p>
-<p>This tutorial assumes a basic familiarity with PyTorch and the Census API. See the <a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/notebooks/api_demo/census_query_extract.html">Querying and fetching the single-cell data and cell/gene metadata</a> notebook tutorial for a quick primer on Census API usage.</p>
+<p>This tutorial demonstrates training a simple Logistic Regression model using Census data, PyTorch, and <a class="reference external" href="https://github.com/single-cell-data/TileDB-SOMA-ML">TileDB-SOMA-ML</a>, which provides a PyTorch loader for SOMA datasets like Census. <em>Note: an earlier version of this notebook used a prototype loader in the ``cellxgene_census.experimental`` API, now replaced by TileDB-SOMA-ML.</em></p>
+<p>We assume basic familiarity with PyTorch and the Census API. See the <a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/notebooks/api_demo/census_query_extract.html">Querying and fetching the single-cell data and cell/gene metadata</a> notebook tutorial for a quick primer on Census API usage.</p>
 <p><strong>Contents</strong></p>
 <ul class="simple">
-<li><p><a class="reference internal" href="#Open-the-Census"><span class="std std-ref">Open the Census</span></a></p></li>
-<li><p>Create a DataLoader</p></li>
-<li><p><a class="reference internal" href="#Define-the-model"><span class="std std-ref">Define the model</span></a></p></li>
-<li><p><a class="reference internal" href="#Train-the-model"><span class="std std-ref">Train the model</span></a></p></li>
-<li><p><a class="reference internal" href="#Make-predictions-with-the-model"><span class="std std-ref">Make predictions with the model</span></a></p></li>
+<li><p>Create an ExperimentDataset</p></li>
+<li><p>Split the dataset</p></li>
+<li><p>Create the DataLoader</p></li>
+<li><p>Define the model</p></li>
+<li><p>Train the model</p></li>
+<li><p>Make predictions with the model</p></li>
 </ul>
 <section id="Open-the-Census">
 <h2>Open the Census<a class="headerlink" href="#Open-the-Census" title="Permalink to this heading"></a></h2>
@@ -248,69 +249,54 @@
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-The &#34;stable&#34; release is currently 2024-07-01. Specify &#39;census_version=&#34;2024-07-01&#34;&#39; in future calls to open_soma() to ensure data consistency.
+The &#34;stable&#34; release is currently 2025-01-30. Specify &#39;census_version=&#34;2025-01-30&#34;&#39; in future calls to open_soma() to ensure data consistency.
 </pre></div></div>
 </div>
 </section>
-<section id="Create-an-ExperimentDataPipe">
-<h2>Create an ExperimentDataPipe<a class="headerlink" href="#Create-an-ExperimentDataPipe" title="Permalink to this heading"></a></h2>
-<p>To train a model in PyTorch using this <code class="docutils literal notranslate"><span class="pre">census</span></code> data object, first instantiate an <code class="docutils literal notranslate"><span class="pre">ExperimentDataPipe</span></code> as follows:</p>
-<div class="nbinput docutils container">
+<section id="Create-an-ExperimentDataset">
+<h2>Create an ExperimentDataset<a class="headerlink" href="#Create-an-ExperimentDataset" title="Permalink to this heading"></a></h2>
+<p>To set up a PyTorch dataset from a Census slice, open an <code class="docutils literal notranslate"><span class="pre">`ExperimentAxisQuery</span></code> &lt;<a class="reference external" href="https://tiledbsoma.readthedocs.io/en/stable/python-tiledbsoma-experimentaxisquery.html">https://tiledbsoma.readthedocs.io/en/stable/python-tiledbsoma-experimentaxisquery.html</a>&gt;`__ and create a TileDB-SOMA-ML <code class="docutils literal notranslate"><span class="pre">`ExperimentDataset</span></code> &lt;<a class="reference external" href="https://single-cell-data.github.io/TileDB-SOMA-ML/#tiledbsoma_ml.ExperimentDataset">https://single-cell-data.github.io/TileDB-SOMA-ML/#tiledbsoma_ml.ExperimentDataset</a>&gt;`__ for it. We will also prepare a scikit-learn <code class="docutils literal notranslate"><span class="pre">`LabelEncoder</span></code> &lt;<a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html">https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html</a>&gt;`__ to help with mapping between
+Census cell types (categorical metadata) and PyTorch tensors.</p>
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">cellxgene_census.experimental.ml</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">census_ml</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">tiledbsoma</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">soma</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">tiledbsoma</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">soma</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">LabelEncoder</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tiledbsoma_ml</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExperimentDataset</span>
 
 <span class="n">experiment</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span>
-
-<span class="n">experiment_datapipe</span> <span class="o">=</span> <span class="n">census_ml</span><span class="o">.</span><span class="n">ExperimentDataPipe</span><span class="p">(</span>
-    <span class="n">experiment</span><span class="p">,</span>
+<span class="k">with</span> <span class="n">experiment</span><span class="o">.</span><span class="n">axis_query</span><span class="p">(</span>
     <span class="n">measurement_name</span><span class="o">=</span><span class="s2">&quot;RNA&quot;</span><span class="p">,</span>
-    <span class="n">X_name</span><span class="o">=</span><span class="s2">&quot;raw&quot;</span><span class="p">,</span>
     <span class="n">obs_query</span><span class="o">=</span><span class="n">soma</span><span class="o">.</span><span class="n">AxisQuery</span><span class="p">(</span><span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;tissue_general == &#39;tongue&#39; and is_primary_data == True&quot;</span><span class="p">),</span>
-    <span class="n">obs_column_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">],</span>
-    <span class="n">batch_size</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span>
-    <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">soma_chunk_size</span><span class="o">=</span><span class="mi">10_000</span><span class="p">,</span>
-<span class="p">)</span>
+<span class="p">)</span> <span class="k">as</span> <span class="n">query</span><span class="p">:</span>
+    <span class="n">experiment_dataset</span> <span class="o">=</span> <span class="n">ExperimentDataset</span><span class="p">(</span>
+        <span class="n">query</span><span class="p">,</span>
+        <span class="n">layer_name</span><span class="o">=</span><span class="s2">&quot;raw&quot;</span><span class="p">,</span>
+        <span class="n">obs_column_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">],</span>
+        <span class="n">batch_size</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span>
+        <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">seed</span><span class="o">=</span><span class="mi">111</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">obs_df</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">obs</span><span class="p">(</span><span class="n">column_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+    <span class="n">cell_type_encoder</span> <span class="o">=</span> <span class="n">LabelEncoder</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">obs_df</span><span class="p">[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-/opt/cellxgene-census/venv/lib/python3.10/site-packages/tqdm/auto.py:21: TqdmWarning: IProgress not found. Please update jupyter and ipywidgets. See https://ipywidgets.readthedocs.io/en/stable/user_install.html
-  from .autonotebook import tqdm as notebook_tqdm
-</pre></div></div>
-</div>
-<section id="ExperimentDataPipe-class-explained">
-<h3><code class="docutils literal notranslate"><span class="pre">ExperimentDataPipe</span></code> class explained<a class="headerlink" href="#ExperimentDataPipe-class-explained" title="Permalink to this heading"></a></h3>
-<p>This class provides an implementation of PyTorch’s <a class="reference external" href="https://pytorch.org/data/main/torchdata.datapipes.iter.html">DataPipe interface</a>, which defines a common mechanism for wrapping and accessing training data from any underlying source. The <code class="docutils literal notranslate"><span class="pre">ExperimentDataPipe</span></code> class encapsulates the details of querying and retrieving Census data from a single SOMA <code class="docutils literal notranslate"><span class="pre">Experiment</span></code> and returning it to the caller as PyTorch Tensors. Most importantly, it retrieves the data lazily from the Census in batches,
-avoiding having to load the entire training dataset into memory at once. (Note: PyTorch also provides <code class="docutils literal notranslate"><span class="pre">DataSet</span></code> as a legacy interface for wrapping and accessing training data sources, but a <code class="docutils literal notranslate"><span class="pre">DataPipe</span></code> can be used interchangeably.)</p>
-</section>
-<section id="ExperimentDataPipe-parameters-explained">
-<h3><code class="docutils literal notranslate"><span class="pre">ExperimentDataPipe</span></code> parameters explained<a class="headerlink" href="#ExperimentDataPipe-parameters-explained" title="Permalink to this heading"></a></h3>
-<p>The constructor only requires a single parameter, <code class="docutils literal notranslate"><span class="pre">experiment</span></code>, which is a <code class="docutils literal notranslate"><span class="pre">soma.Experiment</span></code> containing the data of the organism to be used for training.</p>
-<p>To retrieve a subset of the Experiment’s data, along either the <code class="docutils literal notranslate"><span class="pre">obs</span></code> or <code class="docutils literal notranslate"><span class="pre">var</span></code> axes, you may specify query filters via the <code class="docutils literal notranslate"><span class="pre">obs_query</span></code> and <code class="docutils literal notranslate"><span class="pre">var_query</span></code> parameters, which are both <code class="docutils literal notranslate"><span class="pre">soma.AxisQuery</span></code> objects.</p>
-<p>The values for the prediction label(s) that you intend to use for training are specified via the <code class="docutils literal notranslate"><span class="pre">obs_column_names</span></code> array.</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">batch_size</span></code> allows you to specify the number of obs rows (cells) to be returned by each return PyTorch tensor. You may exclude this parameter if you want single rows (<code class="docutils literal notranslate"><span class="pre">batch_size=1</span></code>).</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">shuffle</span></code> flag allows you to randomize the ordering of the training data for each training epoch. Note:</p>
-<ul class="simple">
-<li><p>You should use this flag instead of the <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> <code class="docutils literal notranslate"><span class="pre">shuffle</span></code> flag, as <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> does not support shuffling when used with an <code class="docutils literal notranslate"><span class="pre">IterDataPipe</span></code> dataset.</p></li>
-<li><p>PyTorch’s TorchData library provides a <a class="reference external" href="https://pytorch.org/data/main/generated/torchdata.datapipes.iter.Shuffler.html">Shuffler</a> <code class="docutils literal notranslate"><span class="pre">DataPipe</span></code>, which is alternate mechanism one can use to perform shuffling of an <code class="docutils literal notranslate"><span class="pre">IterDataPipe</span></code>. However, the <code class="docutils literal notranslate"><span class="pre">Shuffler</span></code> will not “globally” randomize the training data, as it only “locally” randomizes the ordering of the training data within fixed-size “windows”. Due to the layout of Census data, a given “window” of Census data may be highly homogeneous in
-terms of its <code class="docutils literal notranslate"><span class="pre">obs</span></code> axis attribute values, and so this shuffling strategy may not provide sufficient randomization for certain types of models.</p></li>
-</ul>
-<p>The <code class="docutils literal notranslate"><span class="pre">soma_chunk_size</span></code> sets the number of rows of data that are retrieved from the Census and held in memory at a given time. This controls the maximum memory usage of the <code class="docutils literal notranslate"><span class="pre">ExperimentDataPipe</span></code>. Smaller values will require less memory but will also result in lower read performance. If you are running out of memory when training a model, try reducing this value. The default is set to retrieve ~1GB of data per chunk, which takes into account how many <code class="docutils literal notranslate"><span class="pre">var</span></code> (gene) columns are being requested.
-This parameter also affects the granularity of the “global” shuffling step when <code class="docutils literal notranslate"><span class="pre">shuffle=True</span></code> (see <code class="docutils literal notranslate"><span class="pre">shuffle</span></code> parameter API docs for details).</p>
-<p>You can inspect the shape of the full dataset, without causing the full dataset to be loaded:</p>
+<section id="`ExperimentDataset-&lt;https://single-cell-data.github.io/TileDB-SOMA-ML/#tiledbsoma_ml.ExperimentDataset&gt;`__-class-explained">
+<h3><code class="docutils literal notranslate"><span class="pre">`ExperimentDataset</span></code> &lt;<a class="reference external" href="https://single-cell-data.github.io/TileDB-SOMA-ML/#tiledbsoma_ml.ExperimentDataset">https://single-cell-data.github.io/TileDB-SOMA-ML/#tiledbsoma_ml.ExperimentDataset</a>&gt;`__ class explained<a class="headerlink" href="#`ExperimentDataset-<https://single-cell-data.github.io/TileDB-SOMA-ML/#tiledbsoma_ml.ExperimentDataset>`__-class-explained" title="Permalink to this heading"></a></h3>
+<p>This class provides an implementation of PyTorch’s <code class="docutils literal notranslate"><span class="pre">IterableDataset</span></code> interface for accessing data from abstract sources. It encapsulates streaming the result set of a SOMA <code class="docutils literal notranslate"><span class="pre">`ExperimentAxisQuery</span></code> &lt;<a class="reference external" href="https://tiledbsoma.readthedocs.io/en/stable/python-tiledbsoma-experimentaxisquery.html">https://tiledbsoma.readthedocs.io/en/stable/python-tiledbsoma-experimentaxisquery.html</a>&gt;`__ in a series of “batches,” each consisting of a NumPy <code class="docutils literal notranslate"><span class="pre">ndarray</span></code> (batch of X results) and a Pandas <code class="docutils literal notranslate"><span class="pre">DataFrame</span></code> (corresponding batch of obs results). Most importantly, it avoids loading large result sets into
+memory all at once.</p>
+<p>The constructor requires the <code class="docutils literal notranslate"><span class="pre">`ExperimentAxisQuery</span></code> &lt;<a class="reference external" href="https://tiledbsoma.readthedocs.io/en/stable/python-tiledbsoma-experimentaxisquery.html">https://tiledbsoma.readthedocs.io/en/stable/python-tiledbsoma-experimentaxisquery.html</a>&gt;`__ defining the desired slice of Census data, and the name of the X layer to access.</p>
+<p><code class="docutils literal notranslate"><span class="pre">obs_column_names</span></code> sets the columns to be included in the DataFrame for each batch, to be used as data labels or model inputs.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">batch_size</span></code> parameter specifies the target number of rows (cells) in each batch.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">shuffle</span></code> flag supports randomizing the ordering of the training data for each training epoch (default: <code class="docutils literal notranslate"><span class="pre">True</span></code>). This should be used instead of <code class="docutils literal notranslate"><span class="pre">`DataLoader</span></code> &lt;<a class="reference external" href="https://pytorch.org/docs/stable/data.html">https://pytorch.org/docs/stable/data.html</a>&gt;`__’s <code class="docutils literal notranslate"><span class="pre">shuffle</span></code> flag, as the implementation is more efficient.</p>
+<p>You can inspect the shape of the full dataset, without causing the full dataset to be loaded. The <code class="docutils literal notranslate"><span class="pre">shape</span></code> property returns the number of batches on the first dimension:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">experiment_datapipe</span><span class="o">.</span><span class="n">shape</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">experiment_dataset</span><span class="o">.</span><span class="n">shape</span>
 </pre></div>
 </div>
 </div>
@@ -320,41 +306,91 @@ This parameter also affects the granularity of the “global” shuffling step w
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-(15020, 60530)
+(303, 61888)
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">experiment_dataset</span><span class="o">.</span><span class="n">query_ids</span><span class="o">.</span><span class="n">obs_joinids</span><span class="o">.</span><span class="n">shape</span>  <span class="c1"># total result count</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(38754,)
 </pre></div></div>
 </div>
 </section>
 </section>
 <section id="Split-the-dataset">
 <h2>Split the dataset<a class="headerlink" href="#Split-the-dataset" title="Permalink to this heading"></a></h2>
-<p>You may split the overall dataset into the typical training, validation, and test sets by using the PyTorch <a class="reference external" href="https://pytorch.org/data/main/generated/torchdata.datapipes.iter.RandomSplitter.html#torchdata.datapipes.iter.RandomSplitter">RandomSplitter</a> <code class="docutils literal notranslate"><span class="pre">DataPipe</span></code>. Using PyTorch’s functional form for chaining <code class="docutils literal notranslate"><span class="pre">DataPipe</span></code>s, this is done as follows:</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<p>You may split the query results into the typical training and test sets using the <code class="docutils literal notranslate"><span class="pre">`ExperimentDataset.random_split()</span></code> &lt;<a class="reference external" href="https://single-cell-data.github.io/TileDB-SOMA-ML/#tiledbsoma_ml.ExperimentDataset.random_split">https://single-cell-data.github.io/TileDB-SOMA-ML/#tiledbsoma_ml.ExperimentDataset.random_split</a>&gt;`__ method:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">train_datapipe</span><span class="p">,</span> <span class="n">test_datapipe</span> <span class="o">=</span> <span class="n">experiment_datapipe</span><span class="o">.</span><span class="n">random_split</span><span class="p">(</span><span class="n">weights</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;train&quot;</span><span class="p">:</span> <span class="mf">0.8</span><span class="p">,</span> <span class="s2">&quot;test&quot;</span><span class="p">:</span> <span class="mf">0.2</span><span class="p">},</span> <span class="n">seed</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">train_dataset</span><span class="p">,</span> <span class="n">test_dataset</span> <span class="o">=</span> <span class="n">experiment_dataset</span><span class="o">.</span><span class="n">random_split</span><span class="p">(</span>
+    <span class="mf">0.8</span><span class="p">,</span>
+    <span class="mf">0.2</span><span class="p">,</span>
+    <span class="n">seed</span><span class="o">=</span><span class="mi">111</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">train_dataset</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">test_dataset</span><span class="o">.</span><span class="n">shape</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+((243, 61888), (61, 61888))
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">train_dataset</span><span class="o">.</span><span class="n">query_ids</span><span class="o">.</span><span class="n">obs_joinids</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">test_dataset</span><span class="o">.</span><span class="n">query_ids</span><span class="o">.</span><span class="n">obs_joinids</span><span class="o">.</span><span class="n">shape</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+((31003,), (7751,))
+</pre></div></div>
 </div>
 </section>
 <section id="Create-the-DataLoader">
 <h2>Create the DataLoader<a class="headerlink" href="#Create-the-DataLoader" title="Permalink to this heading"></a></h2>
-<p>With the full set of DataPipe operations chained together, we can now instantiate a PyTorch <a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader">DataLoader</a> on the training data.</p>
+<p>Now you can prepare a PyTorch <code class="docutils literal notranslate"><span class="pre">`DataLoader</span></code> &lt;<a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader">https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader</a>&gt;`__ on the training data. While not shown here, the DataLoader can be configured with multiple worker processes to stream the result batches as quickly as possible.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">experiment_dataloader</span> <span class="o">=</span> <span class="n">census_ml</span><span class="o">.</span><span class="n">experiment_dataloader</span><span class="p">(</span><span class="n">train_datapipe</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">tiledbsoma_ml</span><span class="w"> </span><span class="kn">import</span> <span class="n">experiment_dataloader</span>
+
+<span class="n">train_dataloader</span> <span class="o">=</span> <span class="n">experiment_dataloader</span><span class="p">(</span><span class="n">train_dataset</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
-<p>Alternately, you can instantiate a <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> object directly via its constructor. However, many of the parameters are not usable with iterable-style DataPipes, which is the case for <code class="docutils literal notranslate"><span class="pre">ExperimentDataPipe</span></code>. In particular, the <code class="docutils literal notranslate"><span class="pre">shuffle</span></code>, <code class="docutils literal notranslate"><span class="pre">batch_size</span></code>, <code class="docutils literal notranslate"><span class="pre">sampler</span></code>, <code class="docutils literal notranslate"><span class="pre">batch_sampler</span></code>, <code class="docutils literal notranslate"><span class="pre">collate_fn</span></code> parameters should not be specified. Using <code class="docutils literal notranslate"><span class="pre">experiment_dataloader</span></code> helps enforce correct usage.</p>
+<p>(Instantiating a PyTorch <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> object directly is not recommended, as <code class="docutils literal notranslate"><span class="pre">`experiment_dataloader()</span></code> &lt;<a class="reference external" href="https://single-cell-data.github.io/TileDB-SOMA-ML/#tiledbsoma_ml.experiment_dataloader">https://single-cell-data.github.io/TileDB-SOMA-ML/#tiledbsoma_ml.experiment_dataloader</a>&gt;`__ enforces correct and performant usage.)</p>
 </section>
 <section id="Define-the-model">
 <h2>Define the model<a class="headerlink" href="#Define-the-model" title="Permalink to this heading"></a></h2>
 <p>With the training data retrieval code now in place, we can move on to defining a simple logistic regression model, using PyTorch’s <code class="docutils literal notranslate"><span class="pre">torch.nn.Linear</span></code> class:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
@@ -362,7 +398,7 @@ This parameter also affects the granularity of the “global” shuffling step w
 
 <span class="k">class</span><span class="w"> </span><span class="nc">LogisticRegression</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_dim</span><span class="p">,</span> <span class="n">output_dim</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">LogisticRegression</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>  <span class="c1"># noqa: UP008</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">linear</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">input_dim</span><span class="p">,</span> <span class="n">output_dim</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
@@ -373,7 +409,7 @@ This parameter also affects the granularity of the “global” shuffling step w
 </div>
 <p>Next, we define a function to train the model for a single epoch:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">train_epoch</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">train_dataloader</span><span class="p">,</span> <span class="n">loss_fn</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">device</span><span class="p">):</span>
@@ -382,11 +418,11 @@ This parameter also affects the granularity of the “global” shuffling step w
     <span class="n">train_correct</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">train_total</span> <span class="o">=</span> <span class="mi">0</span>
 
-    <span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="n">train_dataloader</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">X_batch</span><span class="p">,</span> <span class="n">obs_batch</span> <span class="ow">in</span> <span class="n">train_dataloader</span><span class="p">:</span>
         <span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
-        <span class="n">X_batch</span><span class="p">,</span> <span class="n">y_batch</span> <span class="o">=</span> <span class="n">batch</span>
 
-        <span class="n">X_batch</span> <span class="o">=</span> <span class="n">X_batch</span><span class="o">.</span><span class="n">float</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+        <span class="c1"># convert X_batch numpy ndarray into PyTorch tensor</span>
+        <span class="n">X_batch</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">X_batch</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
 
         <span class="c1"># Perform prediction</span>
         <span class="n">outputs</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">X_batch</span><span class="p">)</span>
@@ -395,15 +431,12 @@ This parameter also affects the granularity of the “global” shuffling step w
         <span class="n">probabilities</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
         <span class="n">predictions</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">probabilities</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
-        <span class="c1"># Compute the loss and perform back propagation</span>
-
-        <span class="n">y_batch</span> <span class="o">=</span> <span class="n">y_batch</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
-        <span class="n">y_batch</span> <span class="o">=</span> <span class="n">y_batch</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
-
-        <span class="n">train_correct</span> <span class="o">+=</span> <span class="p">(</span><span class="n">predictions</span> <span class="o">==</span> <span class="n">y_batch</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+        <span class="c1"># Compute the loss using encoded labels and perform back propagation</span>
+        <span class="n">label_batch</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">cell_type_encoder</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">obs_batch</span><span class="p">[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">]))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">train_correct</span> <span class="o">+=</span> <span class="p">(</span><span class="n">predictions</span> <span class="o">==</span> <span class="n">label_batch</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
         <span class="n">train_total</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">predictions</span><span class="p">)</span>
 
-        <span class="n">loss</span> <span class="o">=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">y_batch</span><span class="o">.</span><span class="n">long</span><span class="p">())</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">label_batch</span><span class="o">.</span><span class="n">long</span><span class="p">())</span>
         <span class="n">train_loss</span> <span class="o">+=</span> <span class="n">loss</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
         <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
         <span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
@@ -414,48 +447,29 @@ This parameter also affects the granularity of the “global” shuffling step w
 </pre></div>
 </div>
 </div>
-<p>Note the line, <code class="docutils literal notranslate"><span class="pre">X_batch,</span> <span class="pre">y_batch</span> <span class="pre">=</span> <span class="pre">batch</span></code>. Since the <code class="docutils literal notranslate"><span class="pre">train_dataloader</span></code> was configured with <code class="docutils literal notranslate"><span class="pre">batch_size=16</span></code>, these variables will hold tensors of rank 2. The <code class="docutils literal notranslate"><span class="pre">X_batch</span></code> tensor will appear, for example, as:</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>tensor([[0., 0., 0.,  ..., 1., 0., 0.],
-        [0., 0., 2.,  ..., 0., 3., 0.],
-        [0., 0., 0.,  ..., 0., 0., 0.],
-        ...,
-        [0., 0., 0.,  ..., 0., 0., 0.],
-        [0., 1., 0.,  ..., 0., 0., 0.],
-        [0., 0., 0.,  ..., 0., 0., 8.]])
-</pre></div>
-</div>
-<p>For <code class="docutils literal notranslate"><span class="pre">batch_size=1</span></code>, the tensors will be of rank 1. The <code class="docutils literal notranslate"><span class="pre">X_batch</span></code> tensor will appear, for example, as:</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>tensor([0., 0., 0.,  ..., 1., 0., 0.])
-</pre></div>
-</div>
-<p>For <code class="docutils literal notranslate"><span class="pre">y_batch</span></code>, this will contain the user-specified <code class="docutils literal notranslate"><span class="pre">obs</span></code> <code class="docutils literal notranslate"><span class="pre">cell_type</span></code> training labels. By default, these are encoded using a LabelEncoder and it will be a matrix where each column represents the encoded values of each column specified in <code class="docutils literal notranslate"><span class="pre">obs_column_names</span></code> when creating the datapipe (in this case, only the cell type). It will look like this:</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>tensor([1, 1, 3, ..., 2, 1, 4])
-</pre></div>
-</div>
-<p>Note that cell type values are integer-encoded values, which can be decoded using <code class="docutils literal notranslate"><span class="pre">experiment_datapipe.obs_encoders</span></code> (more on this below).</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">X_batch</span></code> ndarray (later tensor) has the slice of the RNA X matrix for the current batch of results. Similarly, the <code class="docutils literal notranslate"><span class="pre">obs_batch</span></code> dataframe has the slice of <code class="docutils literal notranslate"><span class="pre">obs</span></code> with <code class="docutils literal notranslate"><span class="pre">cell_type</span></code> metadata. We use <code class="docutils literal notranslate"><span class="pre">cell_type_encoder</span></code> to encode these categorical cell types into integer-valued tensors for comparison with the model predictions.</p>
 </section>
 <section id="Train-the-model">
 <h2>Train the model<a class="headerlink" href="#Train-the-model" title="Permalink to this heading"></a></h2>
-<p>Finally, we are ready to train the model. Here we instantiate the model, a loss function, and an optimization method and then iterate through the desired number of training epochs. Note how the <code class="docutils literal notranslate"><span class="pre">train_dataloader</span></code> is passed into <code class="docutils literal notranslate"><span class="pre">train_epoch</span></code>, where for each epoch it will provide a new iterator through the training dataset.</p>
+<p>Finally, we are ready to train the model. Here we instantiate the model, a loss function, and an optimization method, then iterate through the desired number of training epochs. Note how the <code class="docutils literal notranslate"><span class="pre">train_dataloader</span></code> is passed into <code class="docutils literal notranslate"><span class="pre">train_epoch</span></code>, where for each epoch it will provide a new iterator through the training dataset.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
 
 <span class="c1"># The size of the input dimension is the number of genes</span>
-<span class="n">input_dim</span> <span class="o">=</span> <span class="n">experiment_datapipe</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">input_dim</span> <span class="o">=</span> <span class="n">experiment_dataset</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
 <span class="c1"># The size of the output dimension is the number of distinct cell_type values</span>
-<span class="n">cell_type_encoder</span> <span class="o">=</span> <span class="n">experiment_datapipe</span><span class="o">.</span><span class="n">obs_encoders</span><span class="p">[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">]</span>
 <span class="n">output_dim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cell_type_encoder</span><span class="o">.</span><span class="n">classes_</span><span class="p">)</span>
 
 <span class="n">model</span> <span class="o">=</span> <span class="n">LogisticRegression</span><span class="p">(</span><span class="n">input_dim</span><span class="p">,</span> <span class="n">output_dim</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
 <span class="n">loss_fn</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">CrossEntropyLoss</span><span class="p">()</span>
-<span class="n">optimizer</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">1e-05</span><span class="p">)</span>
+<span class="n">optimizer</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">)</span>
 
-<span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
-    <span class="n">train_loss</span><span class="p">,</span> <span class="n">train_accuracy</span> <span class="o">=</span> <span class="n">train_epoch</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">experiment_dataloader</span><span class="p">,</span> <span class="n">loss_fn</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">25</span><span class="p">):</span>
+    <span class="n">train_loss</span><span class="p">,</span> <span class="n">train_accuracy</span> <span class="o">=</span> <span class="n">train_epoch</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">train_dataloader</span><span class="p">,</span> <span class="n">loss_fn</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Epoch </span><span class="si">{</span><span class="n">epoch</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">: Train Loss: </span><span class="si">{</span><span class="n">train_loss</span><span class="si">:</span><span class="s2">.7f</span><span class="si">}</span><span class="s2"> Accuracy </span><span class="si">{</span><span class="n">train_accuracy</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -465,34 +479,51 @@ This parameter also affects the granularity of the “global” shuffling step w
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Epoch 1: Train Loss: 0.0164523 Accuracy 0.3699
-Epoch 2: Train Loss: 0.0145778 Accuracy 0.4928
-Epoch 3: Train Loss: 0.0142274 Accuracy 0.4965
-Epoch 4: Train Loss: 0.0140366 Accuracy 0.5423
-Epoch 5: Train Loss: 0.0139020 Accuracy 0.6057
-Epoch 6: Train Loss: 0.0137726 Accuracy 0.7272
-Epoch 7: Train Loss: 0.0136123 Accuracy 0.8630
-Epoch 8: Train Loss: 0.0134781 Accuracy 0.9024
-Epoch 9: Train Loss: 0.0133959 Accuracy 0.9071
-Epoch 10: Train Loss: 0.0133454 Accuracy 0.9126
+Epoch 1: Train Loss: 0.0196637 Accuracy 0.4806
+Epoch 2: Train Loss: 0.0186214 Accuracy 0.7383
+Epoch 3: Train Loss: 0.0183390 Accuracy 0.8257
+Epoch 4: Train Loss: 0.0181079 Accuracy 0.8503
+Epoch 5: Train Loss: 0.0180089 Accuracy 0.8603
+Epoch 6: Train Loss: 0.0179505 Accuracy 0.8641
+Epoch 7: Train Loss: 0.0179011 Accuracy 0.8678
+Epoch 8: Train Loss: 0.0178689 Accuracy 0.8694
+Epoch 9: Train Loss: 0.0178441 Accuracy 0.8718
+Epoch 10: Train Loss: 0.0178233 Accuracy 0.8728
+Epoch 11: Train Loss: 0.0178058 Accuracy 0.8741
+Epoch 12: Train Loss: 0.0177893 Accuracy 0.8755
+Epoch 13: Train Loss: 0.0177776 Accuracy 0.8737
+Epoch 14: Train Loss: 0.0177634 Accuracy 0.8771
+Epoch 15: Train Loss: 0.0177532 Accuracy 0.8783
+Epoch 16: Train Loss: 0.0177437 Accuracy 0.8793
+Epoch 17: Train Loss: 0.0177350 Accuracy 0.8802
+Epoch 18: Train Loss: 0.0177275 Accuracy 0.8811
+Epoch 19: Train Loss: 0.0177217 Accuracy 0.8816
+Epoch 20: Train Loss: 0.0177154 Accuracy 0.8823
+Epoch 21: Train Loss: 0.0177091 Accuracy 0.8838
+Epoch 22: Train Loss: 0.0177030 Accuracy 0.8840
+Epoch 23: Train Loss: 0.0176972 Accuracy 0.8847
+Epoch 24: Train Loss: 0.0176921 Accuracy 0.8851
+Epoch 25: Train Loss: 0.0176756 Accuracy 0.8856
 </pre></div></div>
 </div>
 </section>
 <section id="Make-predictions-with-the-model">
 <h2>Make predictions with the model<a class="headerlink" href="#Make-predictions-with-the-model" title="Permalink to this heading"></a></h2>
-<p>To make predictions with the model, we first create a new <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> using the <code class="docutils literal notranslate"><span class="pre">test_datapipe</span></code>, which provides the “test” split of the original dataset. For this example, we will only make predictions on a single batch of data from the test split.</p>
+<p>To make predictions with the model, we first create a new <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> using the <code class="docutils literal notranslate"><span class="pre">test_dataset</span></code>, which provides the “test” split of the original dataset. For this example, we will only make predictions on a single batch of data from the test split.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">experiment_dataloader</span> <span class="o">=</span> <span class="n">census_ml</span><span class="o">.</span><span class="n">experiment_dataloader</span><span class="p">(</span><span class="n">test_datapipe</span><span class="p">)</span>
-<span class="n">X_batch</span><span class="p">,</span> <span class="n">y_batch</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">experiment_dataloader</span><span class="p">))</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">test_dataloader</span> <span class="o">=</span> <span class="n">experiment_dataloader</span><span class="p">(</span><span class="n">test_dataset</span><span class="p">)</span>
+<span class="n">X_batch</span><span class="p">,</span> <span class="n">obs_batch</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">test_dataloader</span><span class="p">))</span>
+<span class="n">X_batch</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">X_batch</span><span class="p">)</span>
+<span class="n">true_cell_types</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">cell_type_encoder</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">obs_batch</span><span class="p">[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">]))</span>
 </pre></div>
 </div>
 </div>
 <p>Next, we invoke the model on the <code class="docutils literal notranslate"><span class="pre">X_batch</span></code> input data and extract the predictions:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
@@ -502,100 +533,123 @@ Epoch 10: Train Loss: 0.0133454 Accuracy 0.9126
 
 <span class="n">probabilities</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 <span class="n">predictions</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">probabilities</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-
-<span class="n">display</span><span class="p">(</span><span class="n">predictions</span><span class="p">)</span>
+<span class="n">predictions</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-tensor([ 8,  1,  1,  8,  7,  7,  1,  8,  1,  8,  5,  1,  7,  1,  1,  1,  1,  7,
-         1,  7,  1,  1,  1,  1,  1,  7,  6,  8,  1,  1,  8,  8,  5,  5,  1,  1,
-         8,  7,  1,  7,  1,  1,  1,  1,  7,  1,  8,  5,  8,  1,  1,  1,  8,  2,
-         8,  1,  1,  7,  7,  1,  1,  1,  7,  1,  7,  7,  5,  7,  1,  5,  5,  7,
-         8,  1,  1,  1, 11,  5,  1,  1,  1,  8,  1,  1,  7,  7,  1,  7,  8,  1,
-         1,  5,  1,  1,  5,  1,  8,  5,  5,  1,  1,  7,  7,  7,  5,  1,  7,  7,
-         1,  7,  5,  7,  1,  8,  1,  5,  7,  1,  1,  1,  1,  5,  8,  5,  1,  1,
-         1,  7])
+tensor([ 5,  8,  6, 20, 20, 20, 20,  5,  5, 20,  5,  8, 19,  9, 22,  5,  6,  5,
+        20,  5,  5,  9,  5, 20, 20,  1,  8,  5,  1,  0,  8,  5, 20,  5, 20,  5,
+         8, 20, 20,  5, 20,  1, 20, 20,  5, 20, 10,  9,  5,  5, 20,  5,  6,  9,
+         2,  5, 20,  8, 20,  5,  5,  5,  5,  5, 20, 20,  5,  1,  5,  5,  9, 20,
+         5, 20, 20,  5,  5,  5,  6, 12,  5,  5, 20,  1,  5,  5,  5, 20, 20, 20,
+        20,  5, 20, 22, 20,  5,  5,  5,  5,  5, 20,  2,  1, 19,  5,  5,  5,  5,
+        20,  5,  5, 20,  0, 22,  5,  1, 20,  2, 20, 20, 19,  5,  5,  5,  5,  5,
+        16, 19], device=&#39;cuda:0&#39;)
 </pre></div></div>
 </div>
-<p>The predictions are returned as the encoded values of <code class="docutils literal notranslate"><span class="pre">cell_type</span></code> label. To recover the original cell type labels as strings, we decode using the encoders from <code class="docutils literal notranslate"><span class="pre">experiment_datapipe.obs_encoders</span></code>.</p>
-<p>At inference time, if the model inputs are not obtained via an <code class="docutils literal notranslate"><span class="pre">ExperimentDataPipe</span></code>, one could pickle the encoder at training time and save it along with the model. Then, at inference time it can be unpickled and used as shown below.</p>
+<p>The predictions are returned as the encoded values of <code class="docutils literal notranslate"><span class="pre">cell_type</span></code> label. To recover the original cell type labels as strings, we decode using the same <code class="docutils literal notranslate"><span class="pre">LabelEncoder</span></code> used for training.</p>
+<p>At inference time, if the model inputs are not obtained via an <code class="docutils literal notranslate"><span class="pre">ExperimentDataset</span></code>, one could pickle the encoder at training time and save it along with the model. Then, at inference time it can be unpickled and used as shown below.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cell_type_encoder</span> <span class="o">=</span> <span class="n">experiment_datapipe</span><span class="o">.</span><span class="n">obs_encoders</span><span class="p">[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">]</span>
-
-<span class="n">predicted_cell_types</span> <span class="o">=</span> <span class="n">cell_type_encoder</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span><span class="n">predictions</span><span class="o">.</span><span class="n">cpu</span><span class="p">())</span>
-
-<span class="n">display</span><span class="p">(</span><span class="n">predicted_cell_types</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">predicted_cell_types</span> <span class="o">=</span> <span class="n">cell_type_encoder</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span><span class="n">predictions</span><span class="o">.</span><span class="n">cpu</span><span class="p">())</span>
+<span class="n">predicted_cell_types</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-array([&#39;leukocyte&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;leukocyte&#39;,
-       &#39;keratinocyte&#39;, &#39;keratinocyte&#39;, &#39;basal cell&#39;, &#39;leukocyte&#39;,
-       &#39;basal cell&#39;, &#39;leukocyte&#39;, &#39;epithelial cell&#39;, &#39;basal cell&#39;,
-       &#39;keratinocyte&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;,
-       &#39;basal cell&#39;, &#39;keratinocyte&#39;, &#39;basal cell&#39;, &#39;keratinocyte&#39;,
+array([&#39;basal cell&#39;, &#39;fibroblast&#39;, &#39;endothelial cell&#39;,
+       &#39;stratified squamous epithelial cell&#39;,
+       &#39;stratified squamous epithelial cell&#39;,
+       &#39;stratified squamous epithelial cell&#39;,
+       &#39;stratified squamous epithelial cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;,
+       &#39;stratified squamous epithelial cell&#39;, &#39;basal cell&#39;, &#39;fibroblast&#39;,
+       &#39;salivary gland cell&#39;, &#39;macrophage&#39;, &#39;tongue muscle cell&#39;,
+       &#39;basal cell&#39;, &#39;endothelial cell&#39;, &#39;basal cell&#39;,
+       &#39;stratified squamous epithelial cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;,
+       &#39;macrophage&#39;, &#39;basal cell&#39;, &#39;stratified squamous epithelial cell&#39;,
+       &#39;stratified squamous epithelial cell&#39;,
+       &#39;CD4-positive, alpha-beta T cell&#39;, &#39;fibroblast&#39;, &#39;basal cell&#39;,
+       &#39;CD4-positive, alpha-beta T cell&#39;, &#39;B cell&#39;, &#39;fibroblast&#39;,
+       &#39;basal cell&#39;, &#39;stratified squamous epithelial cell&#39;, &#39;basal cell&#39;,
+       &#39;stratified squamous epithelial cell&#39;, &#39;basal cell&#39;, &#39;fibroblast&#39;,
+       &#39;stratified squamous epithelial cell&#39;,
+       &#39;stratified squamous epithelial cell&#39;, &#39;basal cell&#39;,
+       &#39;stratified squamous epithelial cell&#39;,
+       &#39;CD4-positive, alpha-beta T cell&#39;,
+       &#39;stratified squamous epithelial cell&#39;,
+       &#39;stratified squamous epithelial cell&#39;, &#39;basal cell&#39;,
+       &#39;stratified squamous epithelial cell&#39;, &#39;mast cell&#39;, &#39;macrophage&#39;,
+       &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;stratified squamous epithelial cell&#39;,
+       &#39;basal cell&#39;, &#39;endothelial cell&#39;, &#39;macrophage&#39;,
+       &#39;CD8-positive, alpha-beta T cell&#39;, &#39;basal cell&#39;,
+       &#39;stratified squamous epithelial cell&#39;, &#39;fibroblast&#39;,
+       &#39;stratified squamous epithelial cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;,
+       &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;,
+       &#39;stratified squamous epithelial cell&#39;,
+       &#39;stratified squamous epithelial cell&#39;, &#39;basal cell&#39;,
+       &#39;CD4-positive, alpha-beta T cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;,
+       &#39;macrophage&#39;, &#39;stratified squamous epithelial cell&#39;, &#39;basal cell&#39;,
+       &#39;stratified squamous epithelial cell&#39;,
+       &#39;stratified squamous epithelial cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;,
+       &#39;basal cell&#39;, &#39;endothelial cell&#39;, &#39;mural cell&#39;, &#39;basal cell&#39;,
+       &#39;basal cell&#39;, &#39;stratified squamous epithelial cell&#39;,
+       &#39;CD4-positive, alpha-beta T cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;,
+       &#39;basal cell&#39;, &#39;stratified squamous epithelial cell&#39;,
+       &#39;stratified squamous epithelial cell&#39;,
+       &#39;stratified squamous epithelial cell&#39;,
+       &#39;stratified squamous epithelial cell&#39;, &#39;basal cell&#39;,
+       &#39;stratified squamous epithelial cell&#39;, &#39;tongue muscle cell&#39;,
+       &#39;stratified squamous epithelial cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;,
+       &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;,
+       &#39;stratified squamous epithelial cell&#39;,
+       &#39;CD8-positive, alpha-beta T cell&#39;,
+       &#39;CD4-positive, alpha-beta T cell&#39;, &#39;salivary gland cell&#39;,
        &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;,
-       &#39;basal cell&#39;, &#39;keratinocyte&#39;, &#39;fibroblast&#39;, &#39;leukocyte&#39;,
-       &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;leukocyte&#39;, &#39;leukocyte&#39;,
-       &#39;epithelial cell&#39;, &#39;epithelial cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;,
-       &#39;leukocyte&#39;, &#39;keratinocyte&#39;, &#39;basal cell&#39;, &#39;keratinocyte&#39;,
+       &#39;stratified squamous epithelial cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;,
+       &#39;stratified squamous epithelial cell&#39;, &#39;B cell&#39;,
+       &#39;tongue muscle cell&#39;, &#39;basal cell&#39;,
+       &#39;CD4-positive, alpha-beta T cell&#39;,
+       &#39;stratified squamous epithelial cell&#39;,
+       &#39;CD8-positive, alpha-beta T cell&#39;,
+       &#39;stratified squamous epithelial cell&#39;,
+       &#39;stratified squamous epithelial cell&#39;, &#39;salivary gland cell&#39;,
        &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;,
-       &#39;keratinocyte&#39;, &#39;basal cell&#39;, &#39;leukocyte&#39;, &#39;epithelial cell&#39;,
-       &#39;leukocyte&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;leukocyte&#39;,
-       &#39;capillary endothelial cell&#39;, &#39;leukocyte&#39;, &#39;basal cell&#39;,
-       &#39;basal cell&#39;, &#39;keratinocyte&#39;, &#39;keratinocyte&#39;, &#39;basal cell&#39;,
-       &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;keratinocyte&#39;, &#39;basal cell&#39;,
-       &#39;keratinocyte&#39;, &#39;keratinocyte&#39;, &#39;epithelial cell&#39;, &#39;keratinocyte&#39;,
-       &#39;basal cell&#39;, &#39;epithelial cell&#39;, &#39;epithelial cell&#39;, &#39;keratinocyte&#39;,
-       &#39;leukocyte&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;,
-       &#39;vein endothelial cell&#39;, &#39;epithelial cell&#39;, &#39;basal cell&#39;,
-       &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;leukocyte&#39;, &#39;basal cell&#39;,
-       &#39;basal cell&#39;, &#39;keratinocyte&#39;, &#39;keratinocyte&#39;, &#39;basal cell&#39;,
-       &#39;keratinocyte&#39;, &#39;leukocyte&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;,
-       &#39;epithelial cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;epithelial cell&#39;,
-       &#39;basal cell&#39;, &#39;leukocyte&#39;, &#39;epithelial cell&#39;, &#39;epithelial cell&#39;,
-       &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;keratinocyte&#39;, &#39;keratinocyte&#39;,
-       &#39;keratinocyte&#39;, &#39;epithelial cell&#39;, &#39;basal cell&#39;, &#39;keratinocyte&#39;,
-       &#39;keratinocyte&#39;, &#39;basal cell&#39;, &#39;keratinocyte&#39;, &#39;epithelial cell&#39;,
-       &#39;keratinocyte&#39;, &#39;basal cell&#39;, &#39;leukocyte&#39;, &#39;basal cell&#39;,
-       &#39;epithelial cell&#39;, &#39;keratinocyte&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;,
-       &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;epithelial cell&#39;, &#39;leukocyte&#39;,
-       &#39;epithelial cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;,
-       &#39;keratinocyte&#39;], dtype=object)
+       &#39;basal cell&#39;, &#39;neutrophil&#39;, &#39;salivary gland cell&#39;], dtype=object)
 </pre></div></div>
 </div>
 <p>Finally, we create a Pandas DataFrame to examine the predictions:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 
-<span class="n">display</span><span class="p">(</span>
-    <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
-        <span class="p">{</span>
-            <span class="s2">&quot;actual cell type&quot;</span><span class="p">:</span> <span class="n">cell_type_encoder</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span><span class="n">y_batch</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()),</span>
-            <span class="s2">&quot;predicted cell type&quot;</span><span class="p">:</span> <span class="n">predicted_cell_types</span><span class="p">,</span>
-        <span class="p">}</span>
-    <span class="p">)</span>
+<span class="n">batch_cmp_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;true cell type&quot;</span><span class="p">:</span> <span class="n">cell_type_encoder</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span><span class="n">true_cell_types</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()),</span>
+        <span class="s2">&quot;predicted cell type&quot;</span><span class="p">:</span> <span class="n">predicted_cell_types</span><span class="p">,</span>
+    <span class="p">}</span>
 <span class="p">)</span>
+<span class="n">batch_cmp_df</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
 <div>
@@ -616,35 +670,35 @@ array([&#39;leukocyte&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;leu
   <thead>
     <tr style="text-align: right;">
       <th></th>
-      <th>actual cell type</th>
+      <th>true cell type</th>
       <th>predicted cell type</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <th>0</th>
-      <td>leukocyte</td>
-      <td>leukocyte</td>
+      <td>stratified squamous epithelial cell</td>
+      <td>basal cell</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>leukocyte</td>
-      <td>basal cell</td>
+      <td>fibroblast</td>
+      <td>fibroblast</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>keratinocyte</td>
       <td>basal cell</td>
+      <td>endothelial cell</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>leukocyte</td>
-      <td>leukocyte</td>
+      <td>stratified squamous epithelial cell</td>
+      <td>stratified squamous epithelial cell</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>keratinocyte</td>
-      <td>keratinocyte</td>
+      <td>stratified squamous epithelial cell</td>
+      <td>stratified squamous epithelial cell</td>
     </tr>
     <tr>
       <th>...</th>
@@ -653,8 +707,8 @@ array([&#39;leukocyte&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;leu
     </tr>
     <tr>
       <th>123</th>
-      <td>epithelial cell</td>
-      <td>epithelial cell</td>
+      <td>basal cell</td>
+      <td>basal cell</td>
     </tr>
     <tr>
       <th>124</th>
@@ -669,16 +723,342 @@ array([&#39;leukocyte&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;leu
     <tr>
       <th>126</th>
       <td>basal cell</td>
-      <td>basal cell</td>
+      <td>neutrophil</td>
     </tr>
     <tr>
       <th>127</th>
-      <td>keratinocyte</td>
-      <td>keratinocyte</td>
+      <td>salivary gland cell</td>
+      <td>salivary gland cell</td>
     </tr>
   </tbody>
 </table>
 <p>128 rows × 2 columns</p>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pd</span><span class="o">.</span><span class="n">crosstab</span><span class="p">(</span>
+    <span class="n">batch_cmp_df</span><span class="p">[</span><span class="s2">&quot;true cell type&quot;</span><span class="p">],</span>
+    <span class="n">batch_cmp_df</span><span class="p">[</span><span class="s2">&quot;predicted cell type&quot;</span><span class="p">],</span>
+<span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>predicted cell type</th>
+      <th>B cell</th>
+      <th>CD4-positive, alpha-beta T cell</th>
+      <th>CD8-positive, alpha-beta T cell</th>
+      <th>basal cell</th>
+      <th>endothelial cell</th>
+      <th>fibroblast</th>
+      <th>macrophage</th>
+      <th>mast cell</th>
+      <th>mural cell</th>
+      <th>neutrophil</th>
+      <th>salivary gland cell</th>
+      <th>stratified squamous epithelial cell</th>
+      <th>tongue muscle cell</th>
+    </tr>
+    <tr>
+      <th>true cell type</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>B cell</th>
+      <td>2</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>CD4-positive, alpha-beta T cell</th>
+      <td></td>
+      <td>6</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>CD8-positive, alpha-beta T cell</th>
+      <td></td>
+      <td></td>
+      <td>3</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>Schwann cell</th>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>basal cell</th>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>46</td>
+      <td>1</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>1</td>
+      <td></td>
+      <td>3</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>endothelial cell</th>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>3</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>fibroblast</th>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>6</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>macrophage</th>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>2</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>mast cell</th>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>1</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>monocyte</th>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>3</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>mural cell</th>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>1</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>myoepithelial cell</th>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>1</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>regulatory T cell</th>
+      <td></td>
+      <td>1</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>salivary gland cell</th>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>2</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>4</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>stratified squamous epithelial cell</th>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>5</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>34</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>tongue muscle cell</th>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>2</td>
+    </tr>
+  </tbody>
+</table>
 </div></div>
 </div>
 <div class="nbinput nblast docutils container">

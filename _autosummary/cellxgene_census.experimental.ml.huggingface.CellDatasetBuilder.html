@@ -226,6 +226,8 @@ results into a Hugging Face Dataset in which each item represents one cell.
 Subclasses implement the <cite>cell_item()</cite> method to process each row of an X layer
 into a Dataset item, and may also override <cite>__init__()</cite> and context <cite>__enter__()</cite>
 to perform any necessary preprocessing.</p>
+<p><strong>DEPRECATION NOTICE:</strong> this is planned for removal from the cellxgene_census API and
+migrated into git:cellxgene-census/tools/models/geneformer.</p>
 <p>The base class inherits ExperimentAxisQuery, so typical usage would be:</p>
 <p><a href="#id1"><span class="problematic" id="id2">``</span></a>`
 import cellxgene_census
