@@ -48,5 +48,5 @@ COPY helpers ./helpers
 COPY *.py ./
 COPY finetune-geneformer.config.yml .
 
-# run test_GeneformerTokenizer.py tests, which will exercise cellxgene_census/tiledbsoma, Geneformer, and helpers/
-RUN pytest -v
+# run GeneformerTokenizer unit tests, which will exercise cellxgene_census/tiledbsoma, Geneformer, and helpers/
+RUN pytest -v test_GeneformerTokenizer.py
