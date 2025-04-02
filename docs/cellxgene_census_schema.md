@@ -884,8 +884,7 @@ Cell metadata MUST be encoded as a `SOMADataFrame` with the following columns:
 
 ### Census Spatial Sequencing Data – `census_obj["census_spatial_sequencing"][organism]` – `SOMAExperiment`
 
-Only Visium and Slide-seq are supported for spatial data. [See the "assays included" section above](####assays
-).
+Only Visium and Slide-seq are supported for spatial data. [See the "assays included" section above](assays).
 
 Spatial data for *Homo sapiens* MUST be stored as a `SOMAExperiment` in `census_obj["census_spatial_sequencing"]["homo_sapiens"]`.
 
