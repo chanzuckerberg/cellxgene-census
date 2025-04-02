@@ -900,11 +900,11 @@ For each organism the `SOMAExperiment` MUST contain the following:
   * Feature metadata – `census_obj["census_spatial_sequencing"][organism].ms["RNA"].var` – `SOMAIndexedDataFrame`
   * Feature dataset presence matrix – `census_obj["census_spatial_sequencing"][organism].ms["RNA"]["feature_dataset_presence_matrix"]` – `SOMASparseNDArray`
 * Obs to spatial data mapping:
-  * Obs to spatial data – `census_obj["census_spatial_sequencing"][organism].obs_scene`. It indicates the link between an observation and a scene, it MUST have three columns: 1) `soma_joinid` corresponding to `soma_joinid` of `obs` and 2) `scene_id` corresponding to the associated scene and 3) `data` which is a boolean value indicating presence.
+  * Obs to spatial data – `census_obj["census_spatial_sequencing"][organism].obs_spatial_presence`. It indicates the link between an observation and a scene, it MUST have three columns: 1) `soma_joinid` corresponding to `soma_joinid` of `obs` and 2) `scene_id` corresponding to the associated scene and 3) `data` which is a boolean value indicating presence.
 * Spatial data  –  `census_obj["census_spatial_sequencing"][organism].spatial` – `SOMACollection`.
   * Spatial Scenes with spatial data  –  `census_obj["census_spatial_sequencing"][organism].spatial[scene_id]`  – `SOMAScene`.  There will be as many as Spatial Scenes as  spatial datasets. Each`SOMAScene` MUST contain the following:
-    * MUST contain a positions array – `census_obj["census_spatial_sequencing"][organism].spatial[scene_id].obsl["loc"]` – `SOMAGeometryNDArray`. This will contain the spatial array positions for each observation, the geometry points associated to them, and additional metadata.
-    * MUST contain a high resolution image  – `census_obj["census_spatial_sequencing"][organism].spatial[scene_id].img[library_id]["highres_image"]` – `SOMAImageNDArray`.
+    * MUST contain a positions array – `census_obj["census_spatial_sequencing"][organism].spatial[scene_id].obsl["loc"]` – `PointCloudDataFrame`. This will contain the spatial array positions for each observation, the geometry points associated to them, and additional metadata.
+    * MUST contain a high resolution image  – `census_obj["census_spatial_sequencing"][organism].spatial[scene_id].img[library_id]["highres_image"]` – `MultiscaleImage`.
 
 #### Matrix Data, count (raw) matrix – `census_obj["census_spatial_sequencing"][organism].ms["RNA"].X["raw"]` – `SOMASparseNDArray`
 
@@ -970,7 +970,7 @@ It indicates the link between an observation and a scene.  Each row corresponds 
     <td>It MUST be valid <code>scene_id</code> from <code>census_obj["census_spatial_sequencing"][organism].spatial</code>.</td>
   </tr>
   <tr>
-    <td>value</td>
+    <td>data</td>
     <td>bool</td>
     <td>It MUST be <code>True</code> if the scene contains spatial information about the oberservation, otherwise it MUST be <code>False</code>.</td>
   </tr>
