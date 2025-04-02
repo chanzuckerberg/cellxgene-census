@@ -1,3 +1,4 @@
+# Unit tests for helpers.geneformer_tokenizer; these are executed in the Docker build.
 import os
 import sys
 
