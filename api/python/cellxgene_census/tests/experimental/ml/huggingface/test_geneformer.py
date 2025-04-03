@@ -1,6 +1,3 @@
-import sys
-
-import datasets
 import pytest
 import tiledbsoma
 from py.path import local as Path
@@ -10,15 +7,21 @@ import cellxgene_census
 
 CENSUS_VERSION_FOR_GENEFORMER_TESTS = "2023-12-15"
 
+"""
+NOTE: These tests have been disabled by default (by @pytest.mark.geneformer, which is listed in
+api/python/cellxgene_census/tests/conftest.py:TEST_MARKERS_SKIPPED_BY_DEFAULT). This is because the
+Geneformer package dependencies tend to cause more CI issues than usage justifies. To run them
+locally as needed, use `pytest -m geneformer --geneformer` (not a typo).
+"""
 
-@pytest.mark.skip("Needs to be investigated.")
-@pytest.mark.experimental
-@pytest.mark.live_corpus
+
+@pytest.mark.geneformer
 def test_GeneformerTokenizer_correctness(tmpdir: Path) -> None:
     """
     Test that GeneformerTokenizer produces the same token sequences as the original
     geneformer.TranscriptomeTokenizer (modulo a small tolerance on Spearman rank correlation)
     """
+    import datasets
     from geneformer import TranscriptomeTokenizer
 
     from cellxgene_census.experimental.ml.huggingface import GeneformerTokenizer
@@ -86,9 +89,7 @@ def test_GeneformerTokenizer_correctness(tmpdir: Path) -> None:
         assert identical / len(cell_ids) >= EXACT_THRESHOLD
 
 
-@pytest.mark.skipif(sys.version_info < (3, 10), reason="requires python3.10 or higher")
-@pytest.mark.experimental
-@pytest.mark.live_corpus
+@pytest.mark.geneformer
 def test_GeneformerTokenizer_docstring_example() -> None:
     from cellxgene_census.experimental.ml.huggingface import GeneformerTokenizer
 

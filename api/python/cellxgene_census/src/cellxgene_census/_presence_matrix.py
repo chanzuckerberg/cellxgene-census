@@ -17,6 +17,7 @@ def get_presence_matrix(
     census: soma.Collection,
     organism: str,
     measurement_name: str = "RNA",
+    modality: str = "census_data",
 ) -> sparse.csr_matrix:
     """Read the feature dataset presence matrix and return as a :class:`scipy.sparse.csr_array`. The
     returned sparse matrix is indexed on the first dimension by the dataset ``soma_joinid`` values,
@@ -29,6 +30,9 @@ def get_presence_matrix(
             The organism to query, usually one of ``"Homo sapiens"`` or ``"Mus musculus"``.
         measurement_name:
             The measurement object to query. Deafults to ``"RNA"``.
+        modality:
+            Which modality to query, can be one of ``"census_data"`` or ``"census_spatial_sequencing"``.
+            Defaults to ``"census_data"``.
 
     Returns:
         A :class:`scipy.sparse.csr_array` object containing the presence matrix.
@@ -44,6 +48,6 @@ def get_presence_matrix(
         <321x60554 sparse array of type '<class 'numpy.uint8'>'
         with 6441269 stored elements in Compressed Sparse Row format>
     """
-    exp = _get_experiment(census, organism)
+    exp = _get_experiment(census, organism, modality=modality)
     presence = exp.ms[measurement_name]["feature_dataset_presence_matrix"]
     return presence.read((slice(None),)).coos().concat().to_scipy().tocsr()

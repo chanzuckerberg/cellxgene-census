@@ -1,6 +1,6 @@
 # Census data releases
 
-**Last edited**: July 8th, 2024.
+**Last edited**: Feb 13th, 2024.
 
 **Contents:**
 
@@ -13,7 +13,7 @@
 It is a Census build that is publicly hosted online. A Census build is
 a [TileDB-SOMA](https://github.com/single-cell-data/TileDB-SOMA) collection with the Census data from [CZ CELLxGENE Discover](https://cellxgene.cziscience.com/) as specified in the [Census schema](cellxgene_census_docsite_schema.md).
 
-Any given Census build is named with a unique tag, normally the date of build, e.g., `"2023-05-15"`.
+Any given Census build is named with a unique tag, normally the date of build, e.g., `"2025-01-30"`.
 
 ### Long-term supported (LTS) Census releases
 
@@ -62,6 +62,52 @@ census <- open_soma(census_version = "latest")
 
 ## List of LTS Census data releases
 
+### LTS 2025-01-30
+
+Open this data release by specifying `census_version = "2025-01-30"` in future calls to `open_soma()`.
+
+#### Version information
+
+| Information                       | Value                                                                                 |
+|-----------------------------------|---------------------------------------------------------------------------------------|
+| Census schema version             | [**2.1.0**](https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md) |
+| Census build date                 | **2025-01-30**                                                                        |
+| Dataset schema version            | [**5.2.0**](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.2.0/schema.md)      |
+| Number of datasets                | **1573**                                                                               |
+
+#### Cell and donor counts
+
+| Type              | _Homo sapiens_ | _Mus musculus_ |
+|-------------------|----------------|----------------|
+| Total cells       | 109,085,698    | 45,351,496     |
+| Unique cells      | 65,601,657     | 20,208,302     |
+
+#### Cell metadata
+
+| Category                | _Homo sapiens_ | _Mus musculus_ |
+|:------------------------|---------------:|---------------:|
+| Assay                   |             31 |             17 |
+| Cell type               |            827 |            453 |
+| Development stage       |            179 |             58 |
+| Disease                 |            140 |             12 |
+| Self-reported ethnicity |             36 |              1 |
+| Sex                     |              3 |              3 |
+| Suspension type         |              1 |              1 |
+| Tissue                  |            379 |             99 |
+| Tissue general          |             68 |             36 |
+
+#### Embeddings
+
+Find out more in the [Census model page](https://cellxgene.cziscience.com/census-models).
+
+Available embeddings can be accessed via [`cellxgene_census.experimental.get_embedding()`](https://chanzuckerberg.github.io/cellxgene-census/_autosummary/cellxgene_census.experimental.get_embedding.html#cellxgene_census.experimental.get_embedding), or by specifying the `obs_embeddings`/`var_embeddings` field in [`cellxgene_census.get_anndata()`](https://chanzuckerberg.github.io/cellxgene-census/_autosummary/cellxgene_census.get_anndata.html#cellxgene_census.get_anndata).
+
+##### Cells
+
+| Method                    | _Homo sapiens_ | _Mus musculus_ |
+|---------------------------|----------------|----------------|
+| scVI                      | `scvi`         | `scvi`         |
+
 ### LTS 2024-07-01
 
 Open this data release by specifying `census_version = "2024-07-01"` in future calls to `open_soma()`.
@@ -81,7 +127,6 @@ Open this data release by specifying `census_version = "2024-07-01"` in future c
 |-------------------|----------------|----------------|
 | Total cells       | 74,322,510     | 41,233,630     |
 | Unique cells      | 44,265,932     | 16,332,034     |
-| Number of donors  | 17,651         | 4,216          |
 
 #### Cell metadata
 
@@ -97,7 +142,7 @@ Open this data release by specifying `census_version = "2024-07-01"` in future c
 | Tissue                  | 267            | 84             |
 | Tissue general          | 55             | 29             |
 
-#### Embbedings
+#### Embeddings
 
 Find out more in the [Census model page](https://cellxgene.cziscience.com/census-models).
 
@@ -129,7 +174,6 @@ Open this data release by specifying `census_version = "2023-12-15"` in future c
 |-------------------|----------------|----------------|
 | Total cells       | 62,998,417     | 5,684,805      |
 | Unique cells      | 36,227,903     | 4,128,230     |
-| Number of donors  | 15,588         | 1,990          |
 
 #### Cell metadata
 
@@ -145,7 +189,7 @@ Open this data release by specifying `census_version = "2023-12-15"` in future c
 | Tissue                  | 230            | 74             |
 | Tissue general          | 53             | 27             |
 
-#### Embbedings
+#### Embeddings
 
 Find out more in the [Census model page](https://cellxgene.cziscience.com/census-models).
 
@@ -186,7 +230,6 @@ Open this data release by specifying `census_version = "2023-07-25"` in future c
 |-------------------|----------------|----------------|
 | Total cells       | 56,400,873     | 5,255,245      |
 | Unique cells      | 33,364,242     | 4,083,531     |
-| Number of donors  | 13,035         | 1,417          |
 
 #### Cell metadata
 
@@ -231,7 +274,6 @@ If you wish to use this data release, you can consider filtering out all of thes
 |-------------------|----------------|----------------|
 | Total cells       | 53,794,728     | 4,086,032      |
 | Unique cells      | 33,758,887     | 2,914,318      |
-| Number of donors  | 12,493         | 1,362          |
 
 #### Cell metadata
 
