@@ -126,8 +126,7 @@ These assays were selected with the following criteria:
 > * Can be done at the single-cell level.
 > * May include nascent or elongating RNA data.
 > * May be targeted to specific genes in an assay-specific manner.
-> * May include spatial data only from Visium or Slide-seq.
-> * Doesn’t measure spatial data from other assays,
+> * May include spatial data exclusively from Visium or Slide-seq.
 > * Doesn't measure other non-RNA molecules concurrently.
 > * Doesn’t require author metadata for correct interpretability (e.g. perturbation-based technologies).
 > * Doesn’t intend to primarily measure RNA structure, RNA fusions, RNA modifications, or RNA interactions.
