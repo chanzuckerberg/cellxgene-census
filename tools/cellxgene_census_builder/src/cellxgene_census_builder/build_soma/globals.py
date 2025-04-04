@@ -208,6 +208,7 @@ CENSUS_POINT_CLOUD_PLATFORM_CONFIG = {
 # list of EFO terms that correspond to RNA seq modality/measurement. These terms
 # define the inclusive filter applied to obs.assay_ontology_term_id. All other
 # terms are excluded from the Census.
+# This list plus ALLOWED_SPATIAL_ASSAYS, should be kept in sync with docs/census_accepted_assays.csv
 RNA_SEQ = [
     "EFO:0003755",  # FL-cDNA
     "EFO:0008440",  #
@@ -325,6 +326,7 @@ ALLOWED_SPATIAL_ASSAYS = [
 ]
 
 # Full-gene assays have special handling in the "normalized" X layers
+# This list should be kept in sync with docs/census_accepted_assays_full_gene.csv
 FULL_GENE_ASSAY = [
     "EFO:0003755",  # FL-cDNA
     "EFO:0008441",  # full length single cell RNA sequencing
