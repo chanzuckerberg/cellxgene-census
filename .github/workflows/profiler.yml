@@ -12,7 +12,7 @@ jobs:
     name: Run Profiler
     strategy:
       matrix:
-        os: [x64]
+        os: [amd64-privileged]
         python-version: ["3.11"]
     runs-on: ${{matrix.os}}
     permissions: # these permissions must be set for AWS auth to work!
