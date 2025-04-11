@@ -13,7 +13,7 @@ env:
 jobs:
   build-and-deploy:
     concurrency: ci-${{ github.ref }}
-    runs-on: x64
+    runs-on: amd64-privileged
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@v4
