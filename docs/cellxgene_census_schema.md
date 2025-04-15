@@ -898,27 +898,27 @@ For each organism the `SOMAExperiment` MUST contain the following:
   * Feature metadata – `census_obj["census_spatial_sequencing"][organism].ms["RNA"].var` – `SOMAIndexedDataFrame`
   * Feature dataset presence matrix – `census_obj["census_spatial_sequencing"][organism].ms["RNA"]["feature_dataset_presence_matrix"]` – `SOMASparseNDArray`
 * Obs to spatial data mapping:
-  * Obs to spatial data – `census_obj["census_spatial_sequencing"][organism].obs_spatial_presence`. It indicates the link between an observation and a scene, it MUST have three columns: 1) `soma_joinid` corresponding to `soma_joinid` of `obs` and 2) `scene_id` corresponding to the associated scene and 3) `data` which is a boolean value indicating presence.
+  * Obs to spatial data – `census_obj["census_spatial_sequencing"][organism].obs_spatial_presence` – `SOMADataFrame`
 * Spatial data  –  `census_obj["census_spatial_sequencing"][organism].spatial` – `SOMACollection`.
   * Spatial Scenes with spatial data  –  `census_obj["census_spatial_sequencing"][organism].spatial[scene_id]`  – `SOMAScene`.  There will be as many as Spatial Scenes as  spatial datasets. Each`SOMAScene` MUST contain the following:
-    * MUST contain a positions array – `census_obj["census_spatial_sequencing"][organism].spatial[scene_id].obsl["loc"]` – `PointCloudDataFrame`. This will contain the spatial array positions for each observation, the geometry points associated to them, and additional metadata.
-    * MUST contain a high resolution image  – `census_obj["census_spatial_sequencing"][organism].spatial[scene_id].img[library_id]["highres_image"]` – `MultiscaleImage`.
+    * Positions array – `census_obj["census_spatial_sequencing"][organism].spatial[scene_id].obsl["loc"]` – `SOMAPointCloudDataFrame`.
+    * High resolution image  – `census_obj["census_spatial_sequencing"][organism].spatial[scene_id].img[library_id]["highres_image"]` – `MultiscaleImage`.
 
 #### Matrix Data, count (raw) matrix – `census_obj["census_spatial_sequencing"][organism].ms["RNA"].X["raw"]` – `SOMASparseNDArray`
 
-Same as non-spatial data. See the corresponding section [here](#matrix-data-count-raw-matrix--census_objcensus_dataorganismmsrnaxraw--somasparsendarray).
+Spatial and non-spatial data share the [same requirements](#matrix-data-count-raw-matrix--census_objcensus_dataorganismmsrnaxraw--somasparsendarray).
 
 #### Feature metadata – `census_obj["census_spatial_sequencing"][organism].ms["RNA"].var` – `SOMADataFrame`
 
-Same as non-spatial data. See the corresponding section [here](#feature-metadata--census_objcensus_dataorganismmsrnavar--somadataframe).
+Spatial and non-spatial data share the [same requirements](#feature-metadata--census_objcensus_dataorganismmsrnavar--somadataframe).
 
 #### Feature dataset presence matrix – `census_obj["census_spatial_sequencing"][organism].ms["RNA"]["feature_dataset_presence_matrix"]` – `SOMASparseNDArray`
 
-Same as non-spatial data. See the corresponding section [here](#feature-dataset-presence-matrix--census_objcensus_dataorganismmsrnafeature_dataset_presence_matrix--somasparsendarray).
+Spatial and non-spatial data share the [same requirements](#feature-dataset-presence-matrix--census_objcensus_dataorganismmsrnafeature_dataset_presence_matrix--somasparsendarray).
 
 #### Cell metadata – `census_obj["census_spatial_sequencing"][organism].obs` – `SOMADataFrame`
 
-Same as non-spatial data. See the corresponding section [here](#cell-metadata--census_objcensus_dataorganismobs--somadataframe).
+Spatial and non-spatial data share the [same requirements](#cell-metadata--census_objcensus_dataorganismobs--somadataframe).
 
 **Important note:** In addition, the following spatial `obs` columns from the CELLxGENE dataset schema MUST be included in this `SOMADataFrame`
 
@@ -977,11 +977,11 @@ It indicates the link between an observation and a scene.  Each row corresponds 
 </table>
 <!-- markdownlint-enable reference-links-images -->
 
-#### Positions array of a Scene – `census_obj["census_spatial_sequencing"][organism].spatial[scene_id].obsl["loc"]` – `PointCloudDataFrame`
+#### Positions array of a Scene – `census_obj["census_spatial_sequencing"][organism].spatial[scene_id].obsl["loc"]` – `SOMAPointCloudDataFrame`
 
 `scene_id` MUST correspond to the values `scene_id` in `census_obj["census_spatial_sequencing"][organism].obs_presence_matrix`.
 
-For each observation in each Scene, spatial array positions and additional positional metadata MUST be encoded as a `PointCloudDataFrame`.  Each row corresponds to an observation with the following columns:
+For each observation in each Scene, spatial array positions and additional positional metadata MUST be encoded as a `SOMAPointCloudDataFrame`.  Each row corresponds to an observation with the following columns:
 
 <!-- markdownlint-disable reference-links-images -->
 <table>
