@@ -894,7 +894,7 @@ For each organism the `SOMAExperiment` MUST contain the following:
 
 * Cell metadata – `census_obj["census_spatial_sequencing"][organism].obs` – `SOMADataFrame`
 * Non-spatial data  –  `census_obj["census_spatial_sequencing"][organism].ms` – `SOMACollection`. This `SOMACollection` MUST only contain one `SOMAMeasurement` in `census_obj["census_spatial_sequencing"][organism].ms["RNA"]` with the following:
-  * Matrix  data –  `census_obj["census_spatial_sequencing"][organism].ms["RNA"].X` – `SOMACollection`. It MUST contain exactly one layers:
+  * Matrix  data –  `census_obj["census_spatial_sequencing"][organism].ms["RNA"].X` – `SOMACollection`. It MUST contain exactly one layer:
     * Count matrix – `census_obj["census_spatial_sequencing"][organism].ms["RNA"].X["raw"]` – `SOMASparseNDArray`
   * Feature metadata – `census_obj["census_spatial_sequencing"][organism].ms["RNA"].var` – `SOMAIndexedDataFrame`
   * Feature dataset presence matrix – `census_obj["census_spatial_sequencing"][organism].ms["RNA"]["feature_dataset_presence_matrix"]` – `SOMASparseNDArray`
