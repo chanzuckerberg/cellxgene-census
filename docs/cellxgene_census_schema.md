@@ -22,6 +22,7 @@ The following terms are used throughout this document:
 * Census data release – a versioned Census object deposited in a public bucket and accessible by APIs.
 * tissue – original tissue annotation.
 * tissue\_general – high-level mapping of a tissue, e.g. "Heart" is the tissue_general of "Heart left ventricle" .
+* scene – a collection of spatially resolved data that can be registered to a single coordinate space.
 
 ## Census Schema versioning
 
