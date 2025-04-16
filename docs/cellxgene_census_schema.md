@@ -1015,7 +1015,7 @@ For each observation in each Scene, spatial array positions and additional posit
 </table>
 <!-- markdownlint-enable reference-links-images -->
 
-If Visium ("EFO:0010961") the units for the spatial array positions are pixels from the high-resolution image (`spatial[scene_soma_joinid].img[library_id]`). Otherwise TBD.
+If Visium ("EFO:0010961") the units for the spatial array positions are pixels from the full-resolution image.
 
 The location dataframe MUST have the metadata fields:
 
