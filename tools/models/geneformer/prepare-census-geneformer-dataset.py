@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.dirname(__file__))  # to find ./helpers
 import cellxgene_census
 import numpy as np
 import tiledbsoma
-from cellxgene_census.experimental.ml.huggingface import GeneformerTokenizer
+from helpers import GeneformerTokenizer
 
 # TODO: switch to https://github.com/chanzuckerberg/cellxgene-ontology-guide
 from helpers.ontology_mapper import CellSubclassMapper
