@@ -51,7 +51,8 @@ intersphinx_mapping = {
     'scanpy': ('https://scanpy.readthedocs.io/en/stable/', None),
     'torch': ('https://pytorch.org/docs/stable/', None),
     'torchdata': ('https://pytorch.org/data/beta/', None),
-    'sklearn': ('http://scikit-learn.org/stable', None),
+    'sklearn': ('https://scikit-learn.org/stable', None),
+    'tiledbsoma_ml': ('https://single-cell-data.github.io/TileDB-SOMA-ML/', None),
 }
 
 templates_path = ['_templates']
