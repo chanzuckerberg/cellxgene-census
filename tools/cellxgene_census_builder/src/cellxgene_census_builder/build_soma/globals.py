@@ -10,6 +10,7 @@ from .schema_util import FieldSpec, TableSpec
 # DataFrame columns. True is enabled, False is disabled.
 USE_ARROW_DICTIONARY = True
 
+# TODO: BUMP THIS
 CENSUS_SCHEMA_VERSION = "2.1.0"
 
 CXG_SCHEMA_VERSION = "5.2.0"  # the CELLxGENE schema version supported
@@ -349,8 +350,6 @@ FULL_GENE_ASSAY = [
     "EFO:0030061",  # mcSCRB-seq
     "EFO:0700016",  # Smart-seq v4
 ]
-
-DONOR_ID_IGNORE = ["pooled", "unknown"]
 
 
 # The default configuration for TileDB contexts used in the builder.
