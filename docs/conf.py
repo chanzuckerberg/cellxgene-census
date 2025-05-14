@@ -7,7 +7,7 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'cellxgene-census'
-copyright = '2022, Chan Zuckerberg Initiative'
+copyright = '2022-Present, Chan Zuckerberg Initiative'
 author = 'Chan Zuckerberg Initiative'
 
 from packaging.version import Version
