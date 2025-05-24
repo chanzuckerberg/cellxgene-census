@@ -1,14 +1,15 @@
 """census_transcriptformer driver.
 
 - Queries Census for cells matching specified criteria
-- Batches the cells into groups of up to k
-- For each batch, retrieves the Census data as an h5ad file
+- Groups the cells in "megabatches" of up to k
+- For each megabatch, retrieves the Census data as an h5ad file
 - Runs `transcriptformer inference` on the h5ad file
-- Inference runs as a background process while preparing the next batch h5ad
+- Inference runs as a background process while we prepare the next megabatch h5ad
 """
 
 import argparse
 import logging
+import math
 import os
 import subprocess
 import sys
@@ -52,7 +53,7 @@ def main():
 
     logging.basicConfig(
         level=logging.INFO,
-        format="[census_transcriptformer] %(asctime)s - %(levelname)s - %(message)s",
+        format="[%(asctime)s][census_transcriptformer][%(levelname)s] - %(message)s",
     )
     with cellxgene_census.open_soma(uri=args.census_uri) as census:
         bgproc = None
@@ -94,7 +95,8 @@ def main():
             ]
             logging.info(f"Starting: {' '.join(cmd)}")
             bgproc = CheckedPopen(cmd)
-            # TODO: run put_embeddings.py at this point (in its own venv)
+            # TODO: run put_embeddings.py at this point on the last embeddings (in its own venv)
+            #       and clean them up
             last_h5ad = h5ad
         if bgproc is not None:
             bgproc.wait()
@@ -112,23 +114,32 @@ def plan_obs_coords(
     obs_mod,
     k,
 ):
-    """Yield obs soma_joinid's matching the given criteria, in batches of up to k."""
+    """Yield obs soma_joinid's matching the given criteria, in "megabatches" of up to k."""
     obs_df = cellxgene_census.get_obs(
         census,
         organism,
         value_filter=obs_value_filter,
-        coords=slice(obs_lo, obs_hi - 1),
+        coords=slice(obs_lo, obs_hi - 1),  # NB: TileDB expects closed intervals
         column_names=("soma_joinid",),
     )
     obs_ids = obs_df["soma_joinid"].astype(int).tolist()
     if obs_mod is not None:
         obs_ids = [id for id in obs_ids if id % obs_mod == 0]
+    n = len(obs_ids)
     logging.info(
-        f"Begin processing {len(obs_ids)} cells in batches of up to {k};"
+        f"Begin processing {len(obs_ids)} cells in megabatches of up to {k};"
         f" obs soma_joinid min={obs_lo} max={obs_hi}"
     )
-    for i in range(0, len(obs_ids), k):
-        yield obs_ids[i : i + k]
+    if n == 0:
+        return
+    num_mbatches = math.ceil(n / k)
+    base_size = n // num_mbatches
+    rem = n % num_mbatches
+    offset = 0
+    for i in range(num_mbatches):
+        size = base_size + (1 if i < rem else 0)
+        yield obs_ids[offset : offset + size]
+        offset += size
 
 
 def get_census_h5ad(
