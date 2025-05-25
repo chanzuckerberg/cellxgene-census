@@ -1,16 +1,19 @@
 """census_transcriptformer driver.
 
 - Queries Census for cells matching specified criteria
-- Groups the cells in "megabatches" of up to k
+- Groups the cells in "megabatches" of up to k (megabatch in contrast to the torch batch size)
 - For each megabatch, retrieves the Census data as an h5ad file
 - Runs `transcriptformer inference` on the h5ad file
-- Inference runs as a background process while we prepare the next megabatch h5ad
+- Calls put_embeddings.py to write the embeddings into a tiledbsoma.SparseNDArray
+- Inference runs as a background process while we're writing the last megabatch of embeddings and
+  preparing the next megabatch h5ad
 """
 
 import argparse
 import logging
 import math
 import os
+import shutil
 import subprocess
 import sys
 import time
@@ -33,12 +36,8 @@ def main():
         default="Homo sapiens",
         choices=("Homo sapiens", "Mus musculus"),
     )
-    parser.add_argument(
-        "--obs-lo", type=int, default=0, help="obs soma_joinid range start (inclusive)"
-    )
-    parser.add_argument(
-        "--obs-hi", type=int, default=sys.maxsize, help="obs soma_joinid range stop (exclusive)"
-    )
+    parser.add_argument("--obs-lo", type=int, default=0, help="obs soma_joinid range start (inclusive)")
+    parser.add_argument("--obs-hi", type=int, default=sys.maxsize, help="obs soma_joinid range stop (exclusive)")
     parser.add_argument("--obs-value-filter", type=str)
     parser.add_argument("--obs-mod", type=int)
     parser.add_argument("-k", type=int, default=25000)
@@ -49,6 +48,7 @@ def main():
         choices=["metazoa", "exemplar", "tf_sapiens"],
     )
     parser.add_argument("--batch-size", type=int, default=8)
+    parser.add_argument("--array", type=str, required=True, help="existing tiledbsoma.SOMASparseNDArray for output")
     args = parser.parse_args()
 
     logging.basicConfig(
@@ -69,18 +69,19 @@ def main():
         ):
             start_time = time.time()
             assert len(obs_coords) > 0
+            # prepare current megabatch h5ad
             h5ad = f"{obs_coords[0]}_{obs_coords[-1]}.h5ad"
             get_census_h5ad(census, args.organism, obs_coords=obs_coords, h5ad_filename=h5ad)
             logging.info(f"Generated {h5ad} in {time.time() - start_time:.2f}s")
             if bgproc is not None:
+                # wait for inference on the last megabatch to finish
                 wait_start = time.time()
                 bgproc.wait()
                 wait_time = time.time() - wait_start
                 wait_log = logging.info if wait_time >= 1.0 else logging.warning
-                wait_log(
-                    f"Waited {time.time() - wait_start:.2f}s for transcriptformer inference on {last_h5ad}"
-                )
+                wait_log(f"Waited {time.time() - wait_start:.2f}s for transcriptformer inference on {last_h5ad}")
                 os.remove(last_h5ad)
+            # start `transcriptformer inference` on the current megabatch
             cmd = [
                 "transcriptformer",
                 "inference",
@@ -95,12 +96,13 @@ def main():
             ]
             logging.info(f"Starting: {' '.join(cmd)}")
             bgproc = CheckedPopen(cmd)
-            # TODO: run put_embeddings.py at this point on the last embeddings (in its own venv)
-            #       and clean them up
+            # with inference running, write the last megabatch embeddings to the output array
+            put_embeddings(f"./inference_{last_h5ad}/embeddings.h5ad", args.array)
             last_h5ad = h5ad
         if bgproc is not None:
             bgproc.wait()
             os.remove(last_h5ad)
+            put_embeddings(f"./inference_{last_h5ad}/embeddings.h5ad", args.array)
         logging.info("DONE")
 
 
@@ -127,8 +129,7 @@ def plan_obs_coords(
         obs_ids = [id for id in obs_ids if id % obs_mod == 0]
     n = len(obs_ids)
     logging.info(
-        f"Begin processing {len(obs_ids)} cells in megabatches of up to {k};"
-        f" obs soma_joinid min={obs_lo} max={obs_hi}"
+        f"Begin processing {len(obs_ids)} cells in megabatches of up to {k}; obs soma_joinid min={obs_lo} max={obs_hi}"
     )
     if n == 0:
         return
@@ -140,6 +141,7 @@ def plan_obs_coords(
         size = base_size + (1 if i < rem else 0)
         yield obs_ids[offset : offset + size]
         offset += size
+    assert offset == n
 
 
 def get_census_h5ad(
@@ -160,6 +162,19 @@ def get_census_h5ad(
     )
     adata.var["ensembl_id"] = adata.var["feature_id"]
     adata.write_h5ad(h5ad_filename, compression="lzf")
+
+
+def put_embeddings(embeddings_h5ad, array):
+    subprocess.run(
+        [
+            os.path.join(HERE, "embeddings_tiledbsoma_venv", "bin", "python"),
+            os.path.join(HERE, "put_embeddings.py"),
+            embeddings_h5ad,
+            array,
+        ],
+        check=True,
+    )
+    shutil.rmtree(os.path.dirname(embeddings_h5ad))
 
 
 class CheckedPopen(subprocess.Popen):
