@@ -6,10 +6,10 @@ RUN apt-get update && apt-get install -y \
 RUN pip3 install --break-system-packages \
         transcriptformer==0.2.1 \
         cellxgene-census
-WORKDIR /app
+WORKDIR /census-transcriptformer
 RUN transcriptformer download tf-sapiens
-#RUN transcriptformer download tf-exemplar
-#RUN transcriptformer download tf-metazoa
+RUN transcriptformer download tf-exemplar
+RUN transcriptformer download tf-metazoa
 
 # Set the tiledbsoma version used to write the embeddings SparseNDArray, to ensure
 # compatibility with the Census embeddings curator
@@ -19,4 +19,4 @@ ARG EMBEDDINGS_TILEDBSOMA_VERSION=1.11.4
 RUN python3 -m venv embeddings_tiledbsoma_venv
 RUN embeddings_tiledbsoma_venv/bin/pip install tiledbsoma==${EMBEDDINGS_TILEDBSOMA_VERSION} anndata
 
-COPY driver.py put_embeddings.py .
+COPY driver.py put_embeddings.py ./

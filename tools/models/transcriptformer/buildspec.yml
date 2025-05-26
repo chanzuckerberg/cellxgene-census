@@ -1,0 +1,14 @@
+# This AWS CodeBuild spec builds the docker image and pushes it to ECR.
+# (The image is large enough to be rather painful to push from outside AWS.)
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+    - aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin 699936264352.dkr.ecr.us-west-2.amazonaws.com
+  build:
+    commands:
+    - docker build -t 699936264352.dkr.ecr.us-west-2.amazonaws.com/omics:census-transcriptformer --build-arg CELLXGENE_CENSUS_VERSION=$CODEBUILD_RESOLVED_SOURCE_VERSION tools/models/transcriptformer
+  post_build:
+    commands:
+    - docker push 699936264352.dkr.ecr.us-west-2.amazonaws.com/omics:census-transcriptformer
