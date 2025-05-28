@@ -40,7 +40,7 @@ def main():
     parser.add_argument("--obs-hi", type=int, default=sys.maxsize, help="obs soma_joinid range stop (exclusive)")
     parser.add_argument("--obs-value-filter", type=str)
     parser.add_argument("--obs-mod", type=int)
-    parser.add_argument("-k", type=int, default=25000)
+    parser.add_argument("-k", "--megabatch-size", type=int, default=25000)
     parser.add_argument(
         "--model",
         type=str,
