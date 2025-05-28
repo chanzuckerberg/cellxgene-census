@@ -2,7 +2,8 @@ FROM ubuntu:24.04
 RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
-    python3-venv
+    python3-venv \
+    git-core git-lfs
 RUN pip3 install --break-system-packages \
         transcriptformer==0.2.1 \
         cellxgene-census
