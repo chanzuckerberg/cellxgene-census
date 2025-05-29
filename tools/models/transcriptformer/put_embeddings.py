@@ -19,12 +19,10 @@ def main():
     parser.add_argument(
         "h5ad",
         type=str,
-        required=True,
     )
     parser.add_argument(
         "array",
         type=str,
-        required=True,
     )
     args = parser.parse_args()
 

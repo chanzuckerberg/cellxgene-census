@@ -97,7 +97,8 @@ def main():
             logging.info(f"Starting: {' '.join(cmd)}")
             bgproc = CheckedPopen(cmd)
             # with inference running, write the last megabatch embeddings to the output array
-            put_embeddings(f"./inference_{last_h5ad}/embeddings.h5ad", args.array)
+            if last_h5ad is not None:
+                put_embeddings(f"./inference_{last_h5ad}/embeddings.h5ad", args.array)
             last_h5ad = h5ad
         if bgproc is not None:
             bgproc.wait()
