@@ -54,7 +54,7 @@ task prepare {
         set -euo pipefail
         # use venv with pinned, older tiledbsoma/tiledb to ensure compatibility with
         # Census embeddings curator
-        source /census-census_transcriptformer/embeddings_tiledbsoma_venv/bin/activate
+        source /census-transcriptformer/embeddings_tiledbsoma_venv/bin/activate
         python3 - <<'EOF'
         import tiledb
         import tiledbsoma
@@ -105,7 +105,7 @@ task generate_embeddings {
         export AWS_DEFAULT_REGION='~{s3_region}'
         export TQDM_MININTERVAL=10
         python3 /census-transcriptformer/driver.py \
-            ~{"--obs-value-filter " + value_filter} \
+            ~{"--obs-value-filter '" + value_filter + "'"} \
             ~{"--obs-mod " + s_mod} \
             ~{"--megabatch-size " + s_megabatch_size} \
             ~{"--batch-size " + s_batch_size} \

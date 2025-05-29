@@ -65,7 +65,7 @@ def main():
             obs_hi=args.obs_hi,
             obs_value_filter=args.obs_value_filter,
             obs_mod=args.obs_mod,
-            k=args.k,
+            k=args.megabatch_size,
         ):
             start_time = time.time()
             assert len(obs_coords) > 0
