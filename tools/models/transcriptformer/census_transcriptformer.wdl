@@ -106,6 +106,7 @@ task prepare {
     }
 
     output {
+        # plan files written by planner.py
         Array[File] plans_json = glob("plan_*.json")
     }
 }

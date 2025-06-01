@@ -101,6 +101,9 @@ def main():
 
 
 def plan_megabatches(obs_ids, megabatch_size):
+    """Subdivide the plan list of cell IDs into "megabatches". This ensures
+    `transcriptformer inference` runs in limited memory, and lets us pipeline the inference with
+    reading the Census data and writing back the output embeddings."""
     n = len(obs_ids)
     num_mbatches = math.ceil(n / megabatch_size)
     base_size = n // num_mbatches
@@ -122,6 +125,8 @@ def get_census_h5ad(
     obs_column_names=("soma_joinid", "assay"),
     var_column_names=("soma_joinid", "feature_id"),
 ):
+    """Retrieve the Census raw RNA counts for the specified cell IDs (obs_coords) as a h5ad file
+    suitable for `transcriptformer inference`."""
     adata = cellxgene_census.get_anndata(
         census,
         organism,
@@ -134,6 +139,8 @@ def get_census_h5ad(
 
 
 def put_embeddings(embeddings_h5ad, array):
+    """Run put_embeddings.py in a specially-prepared venv, to ensure the output array is readable
+    by the Census embeddings curator tool."""
     subprocess.run(
         [
             os.path.join(HERE, "embeddings_tiledbsoma_venv", "bin", "python"),

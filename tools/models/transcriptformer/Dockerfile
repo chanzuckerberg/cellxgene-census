@@ -5,7 +5,7 @@ RUN apt-get update && apt-get install -y \
     python3-venv \
     git-core git-lfs
 RUN pip3 install --break-system-packages \
-        transcriptformer==0.2.1 \
+        transcriptformer==0.3.0 \
         cellxgene-census
 WORKDIR /census-transcriptformer
 RUN transcriptformer download tf-sapiens
