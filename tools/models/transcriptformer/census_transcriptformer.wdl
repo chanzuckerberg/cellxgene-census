@@ -30,7 +30,7 @@ workflow census_transcriptformer {
     String output_uri2 = sub(output_uri, "s3_//", "s3://")
     String census_uri = "s3://cellxgene-census-public-us-west-2/cell-census/~{census_version}/soma/"
 
-    # create the output TileDB array
+    # plan sharding and create the output TileDB array
     call prepare {
         input:
         census_uri, organism, value_filter, mod, shards,
@@ -38,9 +38,9 @@ workflow census_transcriptformer {
         docker, planner_py
     }
 
-    # generate embeddings and write them into the above-created array
+    # for each shard, generate embeddings and write them into the output array
     scatter (plan_json in prepare.plans_json) {
-        call generate_embeddings after prepare {
+        call generate_embeddings {
             input:
             plan_json, model,
             output_uri = output_uri2, s3_region, docker,
@@ -78,7 +78,7 @@ task prepare {
         fi
         >&2 sha256sum /census-transcriptformer/*.py
 
-        python3 planner.py \
+        python3 /census-transcriptformer/planner.py \
             --census-uri '~{census_uri}' --organism '~{organism}' \
             ~{"--value-filter '" + value_filter + "'"} \
             ~{"--mod " + s_mod} \

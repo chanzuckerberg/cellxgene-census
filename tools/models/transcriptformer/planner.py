@@ -49,11 +49,9 @@ def main():
     if n == 0:
         logging.warning("No observation IDs found matching criteria. Exiting.")
         return
-    logging.info("Census query result count: %d", n)
     if args.shards > n:
         logging.warning("Reducing shards to %d", n)
         args.shards = n
-    logging.info("Total observation IDs after filtering: %d", n)
     logging.info("Splitting %d obs ids into %d shards", n, args.shards)
     base_size = n // args.shards
     rem = n % args.shards
