@@ -39,8 +39,8 @@ def main():
         default="tf_metazoa",
         choices=["tf_metazoa", "tf_exemplar", "tf_sapiens"],
     )
-    parser.add_argument("--megabatch-size", type=int, default=25000)
-    parser.add_argument("--batch-size", type=int, default=8)
+    parser.add_argument("--megabatch-size", type=int, default=16384)
+    parser.add_argument("--batch-size", type=int, default=10)
     args = parser.parse_args()
 
     with open(args.plan_json) as f:
@@ -63,7 +63,7 @@ def main():
             h5ad = f"{obs_coords[0]}_{obs_coords[-1]}.h5ad"
             get_census_h5ad(census, plan["organism"], obs_coords=obs_coords, h5ad_filename=h5ad)
             logging.info(
-                f"Generated {h5ad} in {time.time() - start_time:.2f}s" f" (megabatch {i} of {len(megabatches)})"
+                f"Generated {h5ad} in {time.time() - start_time:.2f}s" f" (megabatch {i+1} of {len(megabatches)})"
             )
             if bgproc is not None:
                 # wait for inference on the last megabatch to finish (we expect to be ready well

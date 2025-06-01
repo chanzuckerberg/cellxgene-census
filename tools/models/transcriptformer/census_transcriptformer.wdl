@@ -148,12 +148,12 @@ task generate_embeddings {
     >>>
 
     runtime {
-        # sizing to g5.2xlarge
-        cpu: 8
-        memory: "30G"
+        # sizing to g6e.xlarge
+        cpu: 4
+        memory: "30GiB"
         gpu: true
         acceleratorCount: 1
-        acceleratorType: "nvidia-tesla-a10g"
+        acceleratorType: "nvidia-l40s"
         docker: docker
         # for robustness to sporadic errors e.g.
         # https://github.com/pytorch/pytorch/issues/21819
