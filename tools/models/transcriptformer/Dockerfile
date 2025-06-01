@@ -20,4 +20,4 @@ ARG EMBEDDINGS_TILEDBSOMA_VERSION=1.11.4
 RUN python3 -m venv embeddings_tiledbsoma_venv
 RUN embeddings_tiledbsoma_venv/bin/pip install tiledbsoma==${EMBEDDINGS_TILEDBSOMA_VERSION} anndata
 
-COPY driver.py put_embeddings.py ./
+COPY planner.py inference_driver.py put_embeddings.py ./

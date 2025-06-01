@@ -2,9 +2,9 @@
 an existing tiledbsoma.SparseNDArray.
 """
 
-import os
 import argparse
 import logging
+import os
 
 import anndata as ad
 import numpy as np
@@ -53,7 +53,7 @@ def main():
         dim1 = np.tile(np.arange(embedding_dim), n)
         data = embeddings.flatten()
         array.write(pa.SparseCOOTensor.from_scipy(coo_matrix((data, (dim0, dim1)))))
-    logging.info(f"wrote embeddings to tiledbsoma.SparseNDArray {args.array},")
+    logging.info(f"wrote embeddings to tiledbsoma.SparseNDArray {args.array}")
 
 
 if __name__ == "__main__":

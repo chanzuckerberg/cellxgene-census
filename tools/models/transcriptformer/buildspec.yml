@@ -1,5 +1,11 @@
 # This AWS CodeBuild spec builds the docker image and pushes it to ECR.
-# (The image is large enough to be rather painful to push from outside AWS.)
+# (The image is >10GB, thus rather painful to push from outside AWS.)
+# Create a CodeBuild project with:
+#   - Source provider: GitHub
+#   - Source repository: https://github.com/chanzuckerberg/cellxgene-census
+#   - Source version: (your working branch)
+#   - Buildspec file name: tools/models/transcriptformer/buildspec.yml
+#   - Service role with ECR write permissions
 version: 0.2
 
 phases:

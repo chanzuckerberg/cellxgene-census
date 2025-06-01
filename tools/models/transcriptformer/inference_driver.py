@@ -1,80 +1,73 @@
-"""census_transcriptformer driver.
+"""driver for `transcriptformer inference`.
 
-- Queries Census for cells matching specified criteria
-- Groups the cells in "megabatches" of up to k (megabatch in contrast to the torch batch size)
+- Reads planner's JSON file with obs (cell) soma_joinid's to process.
+- Splits the cells into "megabatches" (as distinct from torch batches)
 - For each megabatch, retrieves the Census data as an h5ad file
 - Runs `transcriptformer inference` on the h5ad file
 - Calls put_embeddings.py to write the embeddings into a tiledbsoma.SparseNDArray
 - Inference runs as a background process while we're writing the last megabatch of embeddings and
-  preparing the next megabatch h5ad
+  preparing the next megabatch h5ad, so that we should have the next megabatch ready as soon as the
+  previous one finishes.
 """
 
 import argparse
+import json
 import logging
 import math
 import os
 import shutil
 import subprocess
-import sys
 import time
 
 import cellxgene_census
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="[%(asctime)s][inference_driver][%(levelname)s] - %(message)s",
+)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 
 def main():
     parser = argparse.ArgumentParser(description="Generate TranscriptFormer embeddings for Census")
-    parser.add_argument(
-        "--census-uri",
-        type=str,
-        default=("s3://cellxgene-census-public-us-west-2/cell-census/2025-01-30/soma/"),
-    )
-    parser.add_argument(
-        "--organism",
-        type=str,
-        default="Homo sapiens",
-        choices=("Homo sapiens", "Mus musculus"),
-    )
-    parser.add_argument("--obs-lo", type=int, default=0, help="obs soma_joinid range start (inclusive)")
-    parser.add_argument("--obs-hi", type=int, default=sys.maxsize, help="obs soma_joinid range stop (exclusive)")
-    parser.add_argument("--obs-value-filter", type=str)
-    parser.add_argument("--obs-mod", type=int)
-    parser.add_argument("-k", "--megabatch-size", type=int, default=25000)
+    parser.add_argument("plan_json", type=str, help="shard JSON file from planner")
+    parser.add_argument("array", type=str, help="existing tiledbsoma.SOMASparseNDArray for output")
     parser.add_argument(
         "--model",
         type=str,
-        default="metazoa",
-        choices=["metazoa", "exemplar", "tf_sapiens"],
+        default="tf_metazoa",
+        choices=["tf_metazoa", "tf_exemplar", "tf_sapiens"],
     )
+    parser.add_argument("--megabatch-size", type=int, default=25000)
     parser.add_argument("--batch-size", type=int, default=8)
-    parser.add_argument("--array", type=str, required=True, help="existing tiledbsoma.SOMASparseNDArray for output")
     args = parser.parse_args()
 
-    logging.basicConfig(
-        level=logging.INFO,
-        format="[%(asctime)s][census_transcriptformer][%(levelname)s] - %(message)s",
-    )
-    with cellxgene_census.open_soma(uri=args.census_uri) as census:
+    with open(args.plan_json) as f:
+        plan = json.load(f)
+
+    with cellxgene_census.open_soma(uri=plan["census_uri"]) as census:
+        # plan megabatches
+        megabatches = list(
+            plan_megabatches(
+                plan["obs_ids"],
+                args.megabatch_size,
+            )
+        )
         bgproc = None
         last_h5ad = None
-        for obs_coords in plan_obs_coords(
-            census,
-            args.organism,
-            obs_lo=args.obs_lo,
-            obs_hi=args.obs_hi,
-            obs_value_filter=args.obs_value_filter,
-            obs_mod=args.obs_mod,
-            k=args.megabatch_size,
-        ):
+        for i, obs_coords in enumerate(megabatches):
             start_time = time.time()
             assert len(obs_coords) > 0
             # prepare current megabatch h5ad
             h5ad = f"{obs_coords[0]}_{obs_coords[-1]}.h5ad"
-            get_census_h5ad(census, args.organism, obs_coords=obs_coords, h5ad_filename=h5ad)
-            logging.info(f"Generated {h5ad} in {time.time() - start_time:.2f}s")
+            get_census_h5ad(census, plan["organism"], obs_coords=obs_coords, h5ad_filename=h5ad)
+            logging.info(
+                f"Generated {h5ad} in {time.time() - start_time:.2f}s" f" (megabatch {i} of {len(megabatches)})"
+            )
             if bgproc is not None:
-                # wait for inference on the last megabatch to finish
+                # wait for inference on the last megabatch to finish (we expect to be ready well
+                # before bgproc)
                 wait_start = time.time()
                 bgproc.wait()
                 wait_time = time.time() - wait_start
@@ -107,34 +100,9 @@ def main():
         logging.info("DONE")
 
 
-def plan_obs_coords(
-    census,
-    organism,
-    *,
-    obs_lo,
-    obs_hi,
-    obs_value_filter,
-    obs_mod,
-    k,
-):
-    """Yield obs soma_joinid's matching the given criteria, in "megabatches" of up to k."""
-    obs_df = cellxgene_census.get_obs(
-        census,
-        organism,
-        value_filter=obs_value_filter,
-        coords=slice(obs_lo, obs_hi - 1),  # NB: TileDB expects closed intervals
-        column_names=("soma_joinid",),
-    )
-    obs_ids = obs_df["soma_joinid"].astype(int).tolist()
-    if obs_mod is not None:
-        obs_ids = [id for id in obs_ids if id % obs_mod == 0]
+def plan_megabatches(obs_ids, megabatch_size):
     n = len(obs_ids)
-    logging.info(
-        f"Begin processing {len(obs_ids)} cells in megabatches of up to {k}; obs soma_joinid min={obs_lo} max={obs_hi}"
-    )
-    if n == 0:
-        return
-    num_mbatches = math.ceil(n / k)
+    num_mbatches = math.ceil(n / megabatch_size)
     base_size = n // num_mbatches
     rem = n % num_mbatches
     offset = 0
