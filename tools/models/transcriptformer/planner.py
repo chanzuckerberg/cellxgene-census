@@ -3,6 +3,7 @@
 1. Query Census for all obs soma_joinid's matching specified criteria.
 2. Split them up into desired number of shards.
 3. Write each shard into a plan_*.json file, to be processed by an inference worker.
+4. Write the full list of obs soma_joinid's to a text file.
 """
 
 import argparse
@@ -64,19 +65,22 @@ def main():
     assert offset == n
 
     chk = 0
-    for obs_ids in obs_id_shards:
-        filename = f"plan_{obs_ids[0]}_{obs_ids[-1]}.json"
-        logging.info("Writing %d obs ids to %s", len(obs_ids), filename)
-        with open(filename, "w") as f:
-            obj = {
-                "census_uri": args.census_uri,
-                "organism": args.organism,
-                "value_filter": args.value_filter,
-                "mod": args.mod,
-                "obs_ids": obs_ids,
-            }
-            json.dump(obj, f)
-        chk += len(obs_ids)
+    with open("obs_ids.txt", "w") as obs_ids_txt:
+        for obs_ids in obs_id_shards:
+            filename = f"plan_{obs_ids[0]}_{obs_ids[-1]}.json"
+            logging.info("Writing %d obs ids to %s", len(obs_ids), filename)
+            with open(filename, "w") as f:
+                obj = {
+                    "census_uri": args.census_uri,
+                    "organism": args.organism,
+                    "value_filter": args.value_filter,
+                    "mod": args.mod,
+                    "obs_ids": obs_ids,
+                }
+                json.dump(obj, f)
+            for obs_id in obs_ids:
+                obs_ids_txt.write(f"{obs_id}\n")
+                chk += 1
     assert chk == n
 
 

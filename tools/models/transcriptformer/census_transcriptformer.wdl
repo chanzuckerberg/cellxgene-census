@@ -49,7 +49,9 @@ workflow census_transcriptformer {
         }
     }
 
-    output {}
+    output {
+        File obs_ids = prepare.obs_ids
+    }
 }
 
 task prepare {
@@ -108,6 +110,7 @@ task prepare {
     output {
         # plan files written by planner.py
         Array[File] plans_json = glob("plan_*.json")
+        File obs_ids = "obs_ids.txt"
     }
 }
 
