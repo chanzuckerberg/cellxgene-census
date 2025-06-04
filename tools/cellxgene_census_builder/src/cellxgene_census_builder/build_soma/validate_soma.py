@@ -991,7 +991,7 @@ def validate_internal_consistency(
                     (
                         presence_tbl["soma_data"],
                         (
-                            datasets_df.index.get_indexer(presence_tbl["soma_dim_0"]),  # type: ignore[no-untyped-call]
+                            datasets_df.index.get_indexer(presence_tbl["soma_dim_0"]),
                             var.index.get_indexer(presence_tbl["soma_dim_1"]),
                         ),
                     ),
