@@ -50,7 +50,6 @@ intersphinx_mapping = {
     'pandas': ('https://pandas.pydata.org/docs/', None),
     'scanpy': ('https://scanpy.readthedocs.io/en/stable/', None),
     'torch': ('https://pytorch.org/docs/stable/', None),
-    'torchdata': ('https://pytorch.org/data/beta/', None),
     'sklearn': ('http://scikit-learn.org/stable', None),
 }
 
