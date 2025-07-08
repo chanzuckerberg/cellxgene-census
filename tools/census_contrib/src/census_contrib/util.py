@@ -133,7 +133,7 @@ def blockwise_axis0_tables(
         for dim in range(2):
             col = tbl.column(f"soma_dim_{dim}").to_numpy()
             if dim not in reindex_disable_on_axis:
-                col = pd.Index(coord_chunk).get_indexer(col)  # type: ignore
+                col = pd.Index(coord_chunk).get_indexer(col)
             pytbl[f"soma_dim_{dim}"] = col
         pytbl["soma_data"] = tbl.column("soma_data").to_numpy()
         tbl = pa.Table.from_pydict(pytbl)
