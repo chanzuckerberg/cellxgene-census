@@ -1,7 +1,5 @@
 <span style="background-color: #f3bfcb; color; font-size: 18px"> 🚀 Now in testing: Spatial! From Jan 16th, latest builds will include data from Slide-seq and Visium assays. ⚠️ Opening these builds requires `tiledbsoma>=1.15.3` ⚠️. [Learn more](articles/2025/20250117-spatial.md)!
 
-<span style="background-color: #f3bfcb; color; font-size: 18px"> 🚀 New to the Census: Train PyTorch models directly with Census data with our efficient and easy-to-use PyTorch loaders. [Learn more](https://chanzuckerberg.github.io/cellxgene-census/articles/2024/20240709-pytorch.html)!
-
 <span style="background-color: #f3bfcb; color; font-size: 18px"> 💻 Explore benchmarks of Census models and embeddings. [See the report](https://chanzuckerberg.github.io/cellxgene-census/articles/2024/20240710_embedding_metrics_dec_2023_lts.html)!
 
  </span>
@@ -70,14 +68,6 @@ Starting May 15th, 2023, Census data releases with long-term support will be pub
 - Bugs can be submitted via [github issues](https://github.com/chanzuckerberg/cellxgene-census/issues).
 - If you believe you have found a security issue, please disclose it by contacting <security@chanzuckerberg.com>.
 - Additional FAQs can be found [here](cellxgene_census_docsite_FAQ.md).
-
-## Coming Soon!
-
-- We are currently working on creating the tooling necessary to perform data modeling at scale with seamless integration of the Census and [PyTorch](https://pytorch.org/).
-- To increase the usability of the Census for research, in 2023 and 2024 we are planning to explore the following areas:
-  - Include organism-wide normalized layers.
-  - Include organism-wide embeddings.
-  - On-demand information-rich subsampling.
 
 ## Projects and Tools Using Census
 
