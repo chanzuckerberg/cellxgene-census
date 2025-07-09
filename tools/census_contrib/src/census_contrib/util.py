@@ -48,6 +48,9 @@ def soma_context(tiledb_config: dict[str, Any] | None = None) -> soma.options.SO
         tiledb_config={
             "py.init_buffer_bytes": DEFAULT_READ_BUFFER_SIZE + 10 * 1024,
             "soma.init_buffer_bytes": DEFAULT_READ_BUFFER_SIZE + 10 * 1024,
+            # scalability guidance: https://forum.tiledb.com/t/tips-on-consolidating-sparse-arrays-python/559/2
+            "sm.mem.total_budget": 40 * 2**30,
+            "sm.consolidation.buffer_size": 2**30,
             **tiledb_config,
         }
     )
@@ -130,7 +133,7 @@ def blockwise_axis0_tables(
         for dim in range(2):
             col = tbl.column(f"soma_dim_{dim}").to_numpy()
             if dim not in reindex_disable_on_axis:
-                col = pd.Index(coord_chunk).get_indexer(col)  # type: ignore
+                col = pd.Index(coord_chunk).get_indexer(col)
             pytbl[f"soma_dim_{dim}"] = col
         pytbl["soma_data"] = tbl.column("soma_data").to_numpy()
         tbl = pa.Table.from_pydict(pytbl)
