@@ -8,21 +8,22 @@ Workflow outline:
 2. Shard the list for distribution to a fleet of g6e.xlarge inference workers.
     - The parallel workflow is implemented in [WDL](https://github.com/openwdl/wdl) meant to run on [HealthOmics](https://aws.amazon.com/healthomics/). ([census_transcriptformer.wdl](census_transcriptformer.wdl))
     - But the workflow structure is simple enough to express in any reasonable Docker orchestrator.
-2. On each worker node, further subdivide its obs ID shard into "megabatches" (as distinct from torch batches). ([inference_driver.py](inference_driver.py))
+3. On each worker node, further subdivide its obs ID shard into "megabatches" (as distinct from torch batches). ([inference_driver.py](inference_driver.py))
     - Megabatch size is a 'Goldilocks' value:
         - Too low: won't amortize startup cost of `transcriptformer inference` loading/instantiating the model
         - Too high: `transcriptformer inference` runs out of main memory preparing input tensors
-3. For each megabatch of obs IDs, [get AnnData](https://chanzuckerberg.github.io/cellxgene-census/_autosummary/cellxgene_census.get_anndata.html#cellxgene_census.get_anndata) with the cells' RNA counts and save h5ad.
-4. Run each h5ad through `transcriptformer inference`, generating the 2048-dimensional embedding vector for each cell.
-5. Deposit the embedding vectors to a `tiledbsoma.SparseNDArray` on S3 ([put_embeddings.py](put_embeddings.py))
+4. For each megabatch of obs IDs, [get AnnData](https://chanzuckerberg.github.io/cellxgene-census/_autosummary/cellxgene_census.get_anndata.html#cellxgene_census.get_anndata) with the cells' RNA counts and save h5ad.
+5. Run each h5ad through `transcriptformer inference`, generating the 2048-dimensional embedding vector for each cell.
+6. Deposit the embedding vectors to a `tiledbsoma.SparseNDArray` on S3 ([put_embeddings.py](put_embeddings.py))
     - TileDB on S3 is a convenient "sink" because it allows all the workers to write into one logical array, without a separate "gather" step.
     - The array is meant to be postprocessed by [census_contrib](https://github.com/chanzuckerberg/cellxgene-census/tree/main/tools/census_contrib) for eventual publication. We go a little out of our way to write the array using the same version of `tiledbsoma` that `census_contrib` uses (typically older than the version used by `cellxgene_census`), ensuring compatibility.
+    - As an optimization, while `transcriptformer inference` is running on one megabatch, in the background we're writing the embeddings from the prior megabatch and preparing the next megabatch h5ad.
 
 The [Dockerfile](Dockerfile) bundles these scripts along with `transcriptformer` and all dependencies. To use from ECR, it's best to build it from AWS in the first place ([buildspec.yaml](buildspec.yaml)), since its size is painful to push from your laptop (>10GiB).
 
 Example launch invocation using [miniwdl-omics-run](https://github.com/miniwdl-ext/miniwdl-omics-run):
 
-```
+```bash
 miniwdl-omics-run \
     --role poweromics --output-uri s3://${WORK_BUCKET}/transcriptformer/embs \
     census_transcriptformer.wdl \

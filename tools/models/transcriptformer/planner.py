@@ -1,3 +1,4 @@
+# mypy: ignore-errors
 """census_transcriptformer planning script.
 
 1. Query Census for all obs soma_joinid's matching specified criteria.

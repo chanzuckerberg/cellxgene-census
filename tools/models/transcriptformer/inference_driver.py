@@ -1,3 +1,4 @@
+# mypy: ignore-errors
 """driver for `transcriptformer inference`.
 
 - Reads planner's JSON file with obs (cell) soma_joinid's to process.
