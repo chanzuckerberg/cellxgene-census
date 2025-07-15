@@ -144,12 +144,12 @@ These data need to be normalized by gene length for downstream analysis.
 
 ##### Spatial Assays
 
-Only observations from Visium Spatial Gene Expression ("EFO:0010961") and Slide-seqV2 ("EFO:0030062") assays MUST be included in Census, as indicated in the list of [accepted assays](./census_accepted_assays.csv).  Per the CELLxGENE dataset schema, datasets with spatial observations can be identified with the presence of the slot `uns["spatial"]`. For these assays, only observations from datasets that contain "one Space Ranger output for a single tissue section" MUST be included in Census.
+Only observations from Visium and Slide-seq assays MUST be included in Census, as indicated in the list of [accepted assays](https://github.com/chanzuckerberg/cellxgene-census/pull/1387/census_accepted_assays.csv). Per the CELLxGENE dataset schema, datasets with spatial observations can be identified with the presence of the slot uns["spatial"]. For these assays, observations from datasets that contain more than one tissue section MUST NOT be included in Census.
 
 The full logic above can be asserted as follows:
 
-* If a dataset has the slot `uns["spatial"]` and `True` in `uns["spatial"]["is_single"]`, then all observations MUST be included.
-* If a dataset has the slot `uns["spatial"]` and `False` in `uns["spatial"]["is_single"]`, then all observations MUST be excluded.
+    if assay_ontology_term_id is ["EFO:0010961"](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0010961) for Visium Spatial Gene Expression and the dataset represents one Space Ranger output for a single tissue section (e.g.the dataset has True in uns["spatial"]["is_single"])
+    if assay_ontology_term_id is ["EFO:0030062"](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0030062) for Slide-seqV2 and the dataset represents the output for a single array on a puck (e.g. the dataset has True in uns["spatial"]["is_single"])
 
 #### Data matrix types
 
@@ -1037,7 +1037,7 @@ The location dataframe MUST have the metadata fields:
   </tr>
     <td>soma_geometry</td>
     <td>float</td>
-    <td>Radius of points: <code>dimeter/2</code>. If Visium ("EFO:0010961") <code>diameter</code> MUST be <code>.uns["spatial"][library_id]['spot_diameter_fullres']</code>.  As defined in the CELLxGENE dataset schema. Otherwise TBD-TODO (else for Slide-seq it should be  0.003% of the radius occupied by the full cloud of points).</td>
+    <td>Radius of points: <code>diameter/2</code>. If Visium Spatial Gene Expression ("EFO:0010961") <code>diameter</code> MUST be <code>.uns["spatial"][library_id]['spot_diameter_fullres']</code>, as defined in the CELLxGENE dataset schema. For Slide-seqV2 ("EFO:0030062") the radius is a small constant.</td>
   </tr>
  </tbody>
 </table>
