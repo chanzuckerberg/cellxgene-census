@@ -148,8 +148,8 @@ Only observations from Visium and Slide-seq assays MUST be included in Census, a
 
 The full logic above can be asserted as follows:
 
-    if assay_ontology_term_id is ["EFO:0010961"](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0010961) for Visium Spatial Gene Expression and the dataset represents one Space Ranger output for a single tissue section (e.g.the dataset has True in uns["spatial"]["is_single"])
-    if assay_ontology_term_id is ["EFO:0030062"](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0030062) for Slide-seqV2 and the dataset represents the output for a single array on a puck (e.g. the dataset has True in uns["spatial"]["is_single"])
+* if `assay_ontology_term_id` is ["EFO:0010961"](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0010961) for Visium Spatial Gene Expression and the dataset represents one Space Ranger output for a single tissue section (e.g.the dataset has `True` in `uns["spatial"]["is_single"]`)
+* if `assay_ontology_term_id` is ["EFO:0030062"](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0030062) for Slide-seqV2 and the dataset represents the output for a single array on a puck (e.g. the dataset has `True` in `uns["spatial"]["is_single"]`)
 
 #### Data matrix types
 
