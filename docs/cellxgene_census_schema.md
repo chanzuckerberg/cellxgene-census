@@ -144,7 +144,7 @@ These data need to be normalized by gene length for downstream analysis.
 
 ##### Spatial Assays
 
-Only observations from Visium and Slide-seq assays MUST be included in Census, as indicated in the list of [accepted assays](https://github.com/chanzuckerberg/cellxgene-census/pull/1387/census_accepted_assays.csv). Per the CELLxGENE dataset schema, datasets with spatial observations can be identified with the presence of the slot uns["spatial"]. For these assays, observations from datasets that contain more than one tissue section MUST NOT be included in Census.
+Only observations from Visium and Slide-seq assays MUST be included in Census, as indicated in the list of [accepted assays](https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/census_accepted_assays.csv). Per the CELLxGENE dataset schema, datasets with spatial observations can be identified with the presence of the slot uns["spatial"]. For these assays, observations from datasets that contain more than one tissue section MUST NOT be included in Census.
 
 The full logic above can be asserted as follows:
 
