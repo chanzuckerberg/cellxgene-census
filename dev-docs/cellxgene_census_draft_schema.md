@@ -8,17 +8,18 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 
 ## Census overview
 
-The CZ CELLxGENE Discover Census, hereafter referred as Census, is a versioned data object and API for most of the single-cell data hosted at [CZ CELLxGENE Discover](https://cellxgene.cziscience.com/). To learn more about the Census visit the `chanzuckerberg/cellxgene-census` [github repository](https://github.com/chanzuckerberg/cellxgene-census)
+The [CZ CELLxGENE Discover Census](https://chanzuckerberg.github.io/cellxgene-census/) is a versioned data object and API for most of the single-cell data hosted at [CZ CELLxGENE Discover](https://cellxgene.cziscience.com/). It is referred to throughout this document as the Census. 
 
-To better understand this document the reader should be familiar with the [CELLxGENE dataset schema](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.2.0/schema.md) and [SOMA](https://github.com/single-cell-data/SOMA/blob/main/abstract_specification.md).
+The reader should be familiar with the [CELLxGENE Discover dataset schema](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/7.0.0/schema.md) and the [SOMA (“stack of matrices, annotated”)](https://github.com/single-cell-data/SOMA/blob/main/abstract_specification.md) specification. 
 
 ## Definitions
 
 The following terms are used throughout this document:
 
+**EDITORIAL NOTE: Review and remove as needed.**
 * adata – generic variable name that refers to an [`AnnData`](https://anndata.readthedocs.io/) object.
-* CELLxGENE dataset schema – the data schema for h5ad files served by CELLxGENE Discover, for this Census schema: [CELLxGENE dataset schema version is 5.2.0](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.2.0/schema.md)
-* census\_obj – the Census root object, a SOMACollection.
+* CELLxGENE Discover dataset schema – the data schema for h5ad files served by CELLxGENE Discover, for this Census schema: [CELLxGENE dataset schema version is 7.0.0](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/7.0.0/schema.md)
+* census\_obj – the Census root object, a [SOMACollection](https://github.com/single-cell-data/SOMA/blob/main/abstract_specification.md#somacollection).
 * Census data release – a versioned Census object deposited in a public bucket and accessible by APIs.
 * tissue – original tissue annotation.
 * tissue\_general – high-level mapping of a tissue, e.g. "Heart" is the tissue_general of "Heart left ventricle" .
@@ -45,77 +46,177 @@ Census data releases are versioned separately from the schema.
 
 ### Data included
 
-All datasets included in the Census MUST be of [CELLxGENE dataset schema version 5.2.0](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.2.0/schema.md). The following data constraints are imposed on top of the CELLxGENE dataset schema.
+All datasets included in the Census MUST be of [CELLxGENE Discover dataset schema version 7.0.0](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/7.0.0/schema.md). The following data constraints are imposed on top of the CELLxGENE Discover dataset schema.
 
-#### Species
+#### Organisms
 
-The Census MUST only contain observations (cells) with an  [`organism_ontology_term_id`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.2.0/schema.md#organism_ontology_term_id) value of either "NCBITaxon:10090" for *Mus musculus* or "NCBITaxon:9606" for *Homo sapiens* MUST be included.
+The CELLxGENE Discover dataset schema requires one [`organism_ontology_term_id`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/7.0.0/schema.md#organism_ontology_term_id) per dataset. Each [`feature_reference`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/7.0.0/schema.md#feature_reference) MUST contain a matching value or:
+<ul>
+  <li>
+    <a href="https://www.ebi.ac.uk/ols4/ontologies/ncbitaxon/classes?obo_id=NCBITaxon%3A2697049"><code>"NCBITaxon:2697049"</code></a> for <i>SARS-CoV-2</i>
+  </li>
 
-The Census MUST only contain features (genes) with a [`feature_reference`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.2.0/schema.md#feature_reference) value of either "NCBITaxon:10090" for *Mus musculus* or "NCBITaxon:9606" for *Homo sapiens* MUST be included
+  <li>
+    <a href="https://www.ebi.ac.uk/ols4/ontologies/ncbitaxon/classes?obo_id=NCBITaxon%3A32630"><code>"NCBITaxon:32630"</code></a> for <i>ERCC Spike-Ins</i>
+  </li>
+</ul><br>
 
-#### Multi-species data constraints
-
-Per the CELLxGENE dataset schema, [multi-species datasets MAY contain observations (cells) of a given organism and features (genes) of a different one](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.2.0/schema.md#general-requirements), as defined in [`organism_ontology_term_id`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.2.0/schema.md#organism_ontology_term_id) and [`feature_reference`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.2.0/schema.md#feature_reference) respectively.
-
-For any given multi-species dataset, observation and features from the dataset are included in the Census as defined by the following:
-
-* Where a dataset includes observations and features from a single species, all observations and features from the dataset are included in the Census.
-* Where a dataset includes observations from a single species `S`, and includes features from multiple species *including* the species `S`, all dataset observations and all features from `S` will be included in the Census.
-* Where a dataset includes features from a single species `S`, and observations from multiple species *including* the species `S`, all dataset features and all observations from species `S` are included in the Census.
-* Where a species has observations *AND* features from multiple species, the dataset will be excluded from the Census.
-
-The table below shows all possible combinations of organisms for both observations and features, assuming a Census comprised of Homo sapiens and Mus musculus. For each combination, inclusion criteria for the Census is provided.
+The Census MUST only include observations (cells) corresponding to the following values for [`organism_ontology_term_id`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/7.0.0/schema.md#organism_ontology_term_id) and MUST only include features corresponding to the following values for [`feature_reference`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/7.0.0/schema.md#feature_reference):
 
 <table>
-<thead>
-  <tr>
-    <th>Observations (cells) from</th>
-    <th>Features (genes) from</th>
-    <th>Inclusion criteria</th>
-  </tr>
-</thead>
-<tbody>
-  <tr>
-    <td>"NCBITaxon:9606" for <i>Homo sapiens</i></td>
-    <td>"NCBITaxon:9606" for <i>Homo sapiens</i></td>
-    <td>All observations and all features are included.</td>
-  </tr>
-  <tr>
-    <td>"NCBITaxon:10090" for <i>Mus musculus</i></td>
-    <td>"NCBITaxon:10090" for <i>Mus musculus</i></td>
-    <td>All observations and all features are included.</td>
-  </tr>
-  <tr>
-    <td>"NCBITaxon:9606" for <i>Homo sapiens</i> <b>AND</b> "NCBITaxon:10090" for <i>Mus musculus</i></td>
-    <td>"NCBITaxon:9606" for Homo sapiens</td>
-    <td>The Census MUST only contain observations from "NCBITaxon:9606" for <i>Homo sapiens</i>. All features MUST be included.</td>
-  </tr>
-  <tr>
-    <td>"NCBITaxon:9606" for <i>Homo sapiens</i> <b>AND</b> "NCBITaxon:10090" for <i>Mus musculus</i></td>
-    <td>"NCBITaxon:10090" for <i>Mus musculus</i></td>
-    <td>The Census MUST only contain observations from "NCBITaxon:10090" for <i>Mus musculus</i>. All features MUST be included.</td>
-  </tr>
-  <tr>
-    <td>"NCBITaxon:9606" for <i>Homo sapiens</i></td>
-    <td>"NCBITaxon:9606" for <i>Homo sapiens</i> <b>AND</b> "NCBITaxon:10090" for <i>Mus musculus</i></td>
-    <td>All observations MUST be included. The Census MUST only contain features from "NCBITaxon:9606" for <i>Homo sapiens</i>.</td>
-  </tr>
-  <tr>
-    <td>"NCBITaxon:10090" for <i>Mus musculus</i></td>
-    <td>"NCBITaxon:9606" for <i>Homo sapiens</i> <b>AND</b> "NCBITaxon:10090" for <i>Mus musculus</i></td>
-    <td>All observations MUST be included. The Census MUST only contain features from "NCBITaxon:10090" for <i>Mus musculus</i>.</td>
-  </tr>
-  <tr>
-    <td>"NCBITaxon:9606" for <i>Homo sapiens</i> <b>AND</b> "NCBITaxon:10090" for <i>Mus musculus</i></td>
-    <td>"NCBITaxon:9606" for <i>Homo sapiens</i> <b>AND</b> "NCBITaxon:10090" for <i>Mus musculus</i></td>
-    <td>All observations and features MUST NOT be included.</td>
-  </tr>
-</tbody>
+  <thead>
+    <tr>
+      <th>Value</th>
+      <th>for Organism</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <a href="https://www.ebi.ac.uk/ols4/ontologies/ncbitaxon/classes?obo_id=NCBITaxon%3A9483"><code>"NCBITaxon:9483"</code></a>
+      </td>
+      <td><i>Callithrix jacchus</i></td>
+    </tr>
+    <tr>
+      <td>
+        <a href="https://www.ebi.ac.uk/ols4/ontologies/ncbitaxon/classes?obo_id=NCBITaxon%3A9595"><code>"NCBITaxon:9595"</code></a>
+      </td>
+      <td><i>Gorilla gorilla gorilla</i></td>
+    </tr>
+    <tr>
+      <td>
+        <a href="https://www.ebi.ac.uk/ols4/ontologies/ncbitaxon/classes?obo_id=NCBITaxon%3A9606"><code>"NCBITaxon:9606"</code></a>
+      </td>
+      <td><i>Homo sapiens</i></td>
+    </tr>
+    <tr>
+      <td>
+        <a href="https://www.ebi.ac.uk/ols4/ontologies/ncbitaxon/classes?obo_id=NCBITaxon%3A9541"><code>"NCBITaxon:9541"</code></a><br>or one of its descendants
+      </td>
+      <td><i>Macaca fascicularis<br>and its descendants</i></td>
+    </tr>
+    <tr>
+      <td>
+        <a href="https://www.ebi.ac.uk/ols4/ontologies/ncbitaxon/classes?obo_id=NCBITaxon%3A9544"><code>"NCBITaxon:9544"</code></a><br>or one of its descendants
+        </td>
+      <td><i>Macaca mulatta<br>and its descendants</i></td>
+    </tr>
+    <tr>
+      <td>
+        <a href="https://www.ebi.ac.uk/ols4/ontologies/ncbitaxon/classes?obo_id=NCBITaxon%3A30608"><code>"NCBITaxon:30608"</code></a>
+      </td>
+      <td><i>Microcebus murinus</i></td>
+    </tr>
+    <tr>
+      <td>
+        <a href="https://www.ebi.ac.uk/ols4/ontologies/ncbitaxon/classes?obo_id=NCBITaxon%3A10090"><code>"NCBITaxon:10090"</code></a><br>or one of its descendants
+      </td>
+      <td><i>Mus musculus<br>and its descendants</i></td>
+    </tr>
+    <tr>
+      <td>
+        <a href="https://www.ebi.ac.uk/ols4/ontologies/ncbitaxon/classes?obo_id=NCBITaxon%3A9986"><code>"NCBITaxon:9986"</code></a><br>or one of its descendants
+      </td>
+      <td><i>Oryctolagus cuniculus<br>and its descendants</i></td>
+    </tr>
+    <tr>
+      <td>
+          <a href="https://www.ebi.ac.uk/ols4/ontologies/ncbitaxon/classes?obo_id=NCBITaxon%3A9598"><code>"NCBITaxon:9598"</code></a><br>or one of its descendants
+      </td>
+      <td><i>Pan troglodytes<br>and its descendants</i></td>
+    </tr>
+    <tr>
+      <td>
+        <a href="https://www.ebi.ac.uk/ols4/ontologies/ncbitaxon/classes?obo_id=NCBITaxon%3A10116"><code>"NCBITaxon:10116"</code></a><br>or one of its descendants
+      </td>
+      <td><i>Rattus norvegicus<br>and its descendants</i></td>
+    </tr>
+    <tr>
+      <td>
+        <a href="https://www.ebi.ac.uk/ols4/ontologies/ncbitaxon/classes?obo_id=NCBITaxon%3A9823"><code>"NCBITaxon:9823"</code></a><br>or one of its descendants
+      </td>
+      <td><i>Sus scrofa<br>and its descendants</i></td>
+    </tr>
+  </tbody>
+</table><br>
+
+The following values for [`organism_ontology_term_id`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/7.0.0/schema.md#organism_ontology_term_id) MUST NOT be included:
+
+<table>
+  <thead>
+    <tr>
+      <th>Value</th>
+      <th>for Organism</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <a href="https://www.ebi.ac.uk/ols4/ontologies/ncbitaxon/classes?obo_id=NCBITaxon%3A6239"><code>"NCBITaxon:6293"</code></a>
+      </td>
+      <td><i>Caenorhabditis elegans</i></td>
+    </tr>
+    <tr>
+      <td>
+        <a href="https://www.ebi.ac.uk/ols4/ontologies/ncbitaxon/classes?obo_id=NCBITaxon%3A7955"><code>"NCBITaxon:7955"</code></a>
+      </td>
+      <td><i>Danio rerio</i></td>
+    </tr>
+    <tr>
+      <td>
+        <a href="https://www.ebi.ac.uk/ols4/ontologies/ncbitaxon/classes?obo_id=NCBITaxon%3A7227"><code>"NCBITaxon:7227"</code></a>
+      </td>
+      <td><i>Drosophila melanogaster</i></td>
+    </tr>
+  </tbody>
+</table><br>
+
+The following values for [`feature_reference`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/7.0.0/schema.md#feature_reference) MUST NOT be included:
+
+<table>
+  <thead>
+    <tr>
+      <th>Value</th>
+      <th>for Organism</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <a href="https://www.ebi.ac.uk/ols4/ontologies/ncbitaxon/classes?obo_id=NCBITaxon%3A6239"><code>"NCBITaxon:6293"</code></a>
+      </td>
+      <td><i>Caenorhabditis elegans</i></td>
+    </tr>
+    <tr>
+      <td>
+        <a href="https://www.ebi.ac.uk/ols4/ontologies/ncbitaxon/classes?obo_id=NCBITaxon%3A7955"><code>"NCBITaxon:7955"</code></a>
+      </td>
+      <td><i>Danio rerio</i></td>
+    </tr>
+    <tr>
+      <td>
+        <a href="https://www.ebi.ac.uk/ols4/ontologies/ncbitaxon/classes?obo_id=NCBITaxon%3A7227"><code>"NCBITaxon:7227"</code></a>
+      </td>
+      <td><i>Drosophila melanogaster</i></td>
+    </tr>
+    <tr>
+      <td>
+        <a href="https://www.ebi.ac.uk/ols4/ontologies/ncbitaxon/classes?obo_id=NCBITaxon%3A2697049"><code>"NCBITaxon:2697049"</code></a>
+      </td>
+      <td><i>SARS-CoV-2</i></td>
+    </tr>
+    <tr>
+      <td>
+        <a href="https://www.ebi.ac.uk/ols4/ontologies/ncbitaxon/classes?obo_id=NCBITaxon%3A32630"><code>"NCBITaxon:32630"</code></a>
+      </td>
+      <td><i>ERCC Spike-Ins</i></td>
+    </tr>
+  </tbody>
 </table>
 
 #### Assays
 
-Assays are defined in the CELLxGENE dataset schema in [`assay_ontology_term_id`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.2.0/schema.md#assay_ontology_term_id).
+Assays are defined in the CELLxGENE Discover dataset schema in [`assay_ontology_term_id`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/7.0.0/schema.md#assay_ontology_term_id).
 
 The Census MUST include all cells from the list of [accepted assays](./census_accepted_assays.csv).
 
@@ -153,19 +254,19 @@ The full logic above can be asserted as follows:
 
 #### Data matrix types
 
-Per the CELLxGENE dataset schema, [all RNA assays MUST include UMI or read counts](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.2.0/schema.md#x-matrix-layers). Author-normalized data layers [as defined in the CELLxGENE dataset schema](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.2.0/schema.md#x-matrix-layers) MUST NOT be included in the Census.
+Per the CELLxGENE dataset schema, [all RNA assays MUST include UMI or read counts](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/7.0.0/schema.md#x-matrix-layers). Author-normalized data layers [as defined in the CELLxGENE dataset schema](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/7.0.0/schema.md#x-matrix-layers) MUST NOT be included in the Census.
 
 #### Sample types
 
-Observations (cells) with a [`tissue_type`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.2.0/schema.md#tissue_type) value equal to "tissue" or "organoid" MUST be included in the Census. Observations with all other values of `tissue_type` such as "cell culture" MUST NOT be included.
+Observations (cells) with a [`tissue_type`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/7.0.0/schema.md#tissue_type) value equal to "tissue" or "organoid" MUST be included in the Census. Observations with all other values of `tissue_type` such as "cell culture" MUST NOT be included.
 
 #### Repeated data
 
-When a cell is represented multiple times in CELLxGENE Discover, only one is marked as the primary cell. This is defined in the CELLxGENE dataset schema under [`is_primary_data`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.2.0/schema.md#is_primary_data). This information MUST be included in the Census cell metadata to enable queries that retrieve datasets (see cell metadata below), and all cells MUST be included in the Census.
+When a cell is represented multiple times in CELLxGENE Discover, only one is marked as the primary cell. This is defined in the CELLxGENE dataset schema under [`is_primary_data`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/7.0.0/schema.md#is_primary_data). This information MUST be included in the Census cell metadata to enable queries that retrieve datasets (see cell metadata below), and all cells MUST be included in the Census.
 
 ### Data encoding and organization
 
-The Census MUST be encoded as a `SOMACollection` which will be referenced  as `census_obj` in the following sections. `census_obj`  MUST have two keys `"census_info"` and `"census_data"` whose contents are defined in the sections below.
+The Census MUST be encoded as a `SOMACollection` which is referenced as `census_obj` in the following sections. `census_obj` MUST have two keys `"census_info"` and `"census_data"` whose contents are defined in the sections below.
 
 #### Census information `census_obj["census_info"]` - `SOMACollection`
 
@@ -325,7 +426,7 @@ All datasets used to build the Census MUST be included in a table modeled as a `
 
 #### Census summary cell counts  – `census_obj["census_info"]["summary_cell_counts"]` – `SOMADataframe`
 
-Summary cell counts grouped by organism and relevant cell metadata MUST be modeled as a `SOMADataFrame` in `census_obj["census_info"]["summary_cell_counts"]`. Each row of MUST correspond to a combination of organism and metadata variables with the following columns:
+Summary cell counts grouped by organism and relevant cell metadata MUST be modeled as a `SOMADataFrame` in `census_obj["census_info"]["summary_cell_counts"]`. Each row MUST correspond to a combination of organism and metadata variables with the following columns:
 
 <table>
 <thead>
@@ -339,7 +440,7 @@ Summary cell counts grouped by organism and relevant cell metadata MUST be model
   <tr>
     <td>organism</td>
     <td>string</td>
-    <td>Organism label as shown in NCBITaxon  <code>"Homo sapiens"</code> or <code>"Mus musculus"</code></td>
+    <td>Organism label as shown in NCBITaxon <code>"Homo sapiens"</code> or <code>"Mus musculus"</code></td>
   </tr>
   <tr>
     <td>category</td>
@@ -360,12 +461,12 @@ Summary cell counts grouped by organism and relevant cell metadata MUST be model
   <tr>
     <td>label</td>
     <td>string</td>
-    <td>Label associated to instance of metadata (e.g. <code>"lung"</code> if <code>category</code> is <code>"tissue"</code>). <code>"na"</code> if none.</td>
+    <td>Label associated with an instance of metadata (e.g. <code>"lung"</code> if <code>category</code> is <code>"tissue"</code>). <code>"na"</code> if none.</td>
   </tr>
   <tr>
     <td>ontology_term_id</td>
     <td>string</td>
-    <td>ID associated to instance of metadata (e.g. <code>"UBERON:0002048"</code> if category is <code>"tissue"</code>). <code>"na"</code> if none.</td>
+    <td>ID associated with an instance of metadata (e.g. <code>"UBERON:0002048"</code> if category is <code>"tissue"</code>). <code>"na"</code> if none.</td>
   </tr>
   <tr>
     <td>total_cell_count</td>
@@ -618,17 +719,21 @@ Information about organisms whose cells are included in the Census MUST be inclu
   <tr>
     <td>organism_label</td>
     <td>string</td>
-    <td>Human-readable label as given by the ontology.</td>
+    <td>As defined in the CELLxGENE dataset schema.</td>
   </tr>
   <tr>
     <td>organism</td>
     <td>string</td>
-    <td>Machine-friendly label used to name the SOMA Experiments, see below  <a href="#census-data--census_objcensus_dataorganism--somaexperiment">Census Data section.</a></td>
+    <td>Machine-friendly name for <a href="#census-data--census_objcensus_dataorganism--somaexperiment">Single Cell Census Data – `census_obj["census_data"][organism]` – `SOMAExperiment`</a>. Its value MUST be the result of:
+    <ul>
+      <li>Converting the <code>organism_label</code> to lowercase </li>
+      <li>Replacing one or more consecutive spaces in the <code>organism_label</code> with a single underscore</li> 
+    </ul>
   </tr>
 </tbody>
 </table>
 
-An example of this `SOMADataFrame` is shown below:
+An example of this `SOMADataFrame`:
 
 <table>
 <thead>
@@ -639,6 +744,11 @@ An example of this `SOMADataFrame` is shown below:
   </tr>
 </thead>
 <tbody>
+  <tr>
+    <td>NCBITaxon:9483</td>
+    <td>Callithrix jacchus</td>
+    <td>callithrix_jacchus</td>
+  </tr>
   <tr>
     <td>NCBITaxon:9606</td>
     <td>Homo sapiens</td>
@@ -652,13 +762,14 @@ An example of this `SOMADataFrame` is shown below:
 </tbody>
 </table>
 
+
 ### Single Cell Census Data – `census_obj["census_data"][organism]` – `SOMAExperiment`
 
-Non-spatial data for *Homo sapiens* MUST be stored as a `SOMAExperiment` in `census_obj["census_data"]["homo_sapiens"]`.
+Non-spatial data for organisms MUST be stored as a `SOMAExperiment` in `census_obj["census_data"][organism]` where the value of <code>organism</code> matches the <code>organism</code> defined in <a href="#census-table-of-organisms---census_objcensus_infoorganisms--somadataframe">Census table of organisms  – `census_obj["census_info"]["organisms"]` – `SOMADataframe`</a>.
 
-Non-spatial data for *Mus musculus* MUST be stored as a `SOMAExperiment` in `census_obj["census_data"]["mus_musculus"]`.
+For example, non-spatial data for *Homo sapiens* MUST be stored as a `SOMAExperiment` in `census_obj["census_data"]["homo_sapiens"]`.
 
-For each organism the `SOMAExperiment` MUST contain the following:
+For each organism with qualifying data, the `SOMAExperiment` MUST contain the following:
 
 * Cell metadata – `census_obj["census_data"][organism].obs` – `SOMADataFrame`
 * Data  –  `census_obj["census_data"][organism].ms` – `SOMACollection`. This `SOMACollection` MUST only contain one `SOMAMeasurement` in `census_obj["census_data"][organism].ms["RNA"]` with the following:
@@ -670,7 +781,7 @@ For each organism the `SOMAExperiment` MUST contain the following:
 
 #### Matrix Data, count (raw) matrix – `census_obj["census_data"][organism].ms["RNA"].X["raw"]` – `SOMASparseNDArray`
 
-Per the CELLxGENE dataset schema, [all RNA assays MUST include UMI or read counts](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.2.0/schema.md#x-matrix-layers). These counts MUST be encoded as `float32` in this `SOMASparseNDArray` with a fill value of zero (0), and no explicitly stored zero values.
+Per the CELLxGENE dataset schema, [all RNA assays MUST include UMI or read counts](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/7.0.0/schema.md#x-matrix-layers). These counts MUST be encoded as `float32` in this `SOMASparseNDArray` with a fill value of zero (0), and no explicitly stored zero values.
 
 #### Matrix Data, normalized count matrix – `census_obj["census_data"][organism].ms["RNA"].X["normalized"]` – `SOMASparseNDArray`
 
@@ -684,9 +795,9 @@ as `normalized[i,j] = X[i,j] / sum(X[i, ])`.
 
 #### Feature metadata – `census_obj["census_data"][organism].ms["RNA"].var` – `SOMADataFrame`
 
-The Census MUST only contain features with a [`feature_biotype`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.2.0/schema.md#feature_biotype) value of "gene".
+The Census MUST only contain features with a [`feature_biotype`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/7.0.0/schema.md#feature_biotype) value of "gene".
 
-The [gene references are pinned](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.2.0/schema.md#required-gene-annotations) as defined in the CELLxGENE dataset schema.
+The [gene references are pinned](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/7.0.0/schema.md#required-gene-annotations) as defined in the CELLxGENE dataset schema.
 
 The following columns MUST be included:
 
@@ -789,12 +900,12 @@ Cell metadata MUST be encoded as a `SOMADataFrame` with the following columns:
   <tr>
     <td>tissue_general_ontology_term_id</td>
     <td>string</td>
-    <td>High-level tissue UBERON ID as implemented <a href="https://github.com/chanzuckerberg/single-cell-data-portal/blob/9b94ccb0a2e0a8f6182b213aa4852c491f6f6aff/backend/wmg/data/tissue_mapper.py">here</a></td>
+    <td>UBERON ontology term identifier for the <i>high-level tissue mapping</i> assigned by the <a href="https://github.com/chanzuckerberg/cellxgene-census/blob/main/tools/cellxgene_census_builder/src/cellxgene_census_builder/build_soma/tissue_mapper.py"><code>TissueMapper</code></a>.</td>
   </tr>
   <tr>
     <td>tissue_general</td>
     <td>string</td>
-    <td>High-level tissue label as implemented <a href="https://github.com/chanzuckerberg/single-cell-data-portal/blob/9b94ccb0a2e0a8f6182b213aa4852c491f6f6aff/backend/wmg/data/tissue_mapper.py">here</a></td>
+    <td>UBERON ontology label for the <i>high-level tissue mapping</i> assigned by the <a href="https://github.com/chanzuckerberg/cellxgene-census/blob/main/tools/cellxgene_census_builder/src/cellxgene_census_builder/build_soma/tissue_mapper.py"><code>TissueMapper</code></a>.</td>
   </tr>
   <tr>
     <td>assay_ontology_term_id</td>
@@ -901,7 +1012,7 @@ For each organism the `SOMAExperiment` MUST contain the following:
 * Obs to spatial data mapping:
   * Obs to spatial data – `census_obj["census_spatial_sequencing"][organism].obs_spatial_presence` – `SOMADataFrame`
 * Spatial data  –  `census_obj["census_spatial_sequencing"][organism].spatial` – `SOMACollection`.
-  * Spatial Scenes with spatial data  –  `census_obj["census_spatial_sequencing"][organism].spatial[scene_id]`  – `SOMAScene`.  There will be as many as Spatial Scenes as  spatial datasets. Each`SOMAScene` MUST contain the following:
+  * Spatial Scenes with spatial data  –  `census_obj["census_spatial_sequencing"][organism].spatial[scene_id]`  – `SOMAScene`.  There will be as many Spatial Scenes as  spatial datasets. Each`SOMAScene` MUST contain the following:
     * Positions array – `census_obj["census_spatial_sequencing"][organism].spatial[scene_id].obsl["loc"]` – `SOMAPointCloudDataFrame`.
     * High resolution image  – `census_obj["census_spatial_sequencing"][organism].spatial[scene_id].img[library_id]["highres_image"]` – `MultiscaleImage`.
 
@@ -972,7 +1083,7 @@ It indicates the link between an observation and a scene.  Each row corresponds 
   <tr>
     <td>data</td>
     <td>bool</td>
-    <td>It MUST be <code>True</code> if the scene contains spatial information about the oberservation, otherwise it MUST be <code>False</code>.</td>
+    <td>It MUST be <code>True</code> if the scene contains spatial information about the observation, otherwise it MUST be <code>False</code>.</td>
   </tr>
   </tbody>
 </table>
@@ -1058,7 +1169,26 @@ The high resolution image of a Visium Spatial Gene Expression ("EFO:0010961") sc
 ## Changelog
 
 ### Version N.N.N
-* 
+* Updated all CELLxGENE Discover dataset schema references from 5.2.0 to 7.0.0
+* Species
+  * Renamed section from _Species_ to _Organisms_ for consistency
+  * Added *Callithrix jacchus* 
+  * Added *Gorilla gorilla gorilla*
+  * Added *Macaca fascicularis*
+  * Added *Macaca mulatta*
+  * Added *Microcebus murinus*
+  * Added *Oryctolagus cuniculus*
+  * Added *Pan troglodytes*
+  * Added *Rattus norvegicus*
+  * Added *Sus scrofa*
+* Multi-species data constraints
+    * Deleted section due to deprecated requirements for datasets containing multiple species or orthologous gene references
+* Assays
+  * PENDING
+* Census table of organisms – census_obj["census_info"]["organisms"]
+  * Replaced the code reference that documented the value of <code>organism</code> with its requirements
+* Cell metadata – census_obj["census_data"][organism].obs
+  * Corrected code references for <code>tissue_general_ontology_term_id</code> and <code>tissue_general</code>
 
 ### Version 2.3.0
 
