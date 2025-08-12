@@ -2,7 +2,7 @@
 
 Document Status: _Drafting_
 
-**Version**: N.N.N
+**Version**: 2.4.0
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED" "MAY", and "OPTIONAL" in this document are to be interpreted as described in [BCP 14](https://tools.ietf.org/html/bcp14), [RFC2119](https://www.rfc-editor.org/rfc/rfc2119.txt), and [RFC8174](https://www.rfc-editor.org/rfc/rfc8174.txt) when, and only when, they appear in all capitals, as shown here.
 
@@ -249,7 +249,7 @@ Only observations from Visium and Slide-seq assays MUST be included in Census, a
 
 The full logic above can be asserted as follows:
 
-* if `assay_ontology_term_id` is ["EFO:0010961"](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0010961) for Visium Spatial Gene Expression and the dataset represents one Space Ranger output for a single tissue section (e.g.the dataset has `True` in `uns["spatial"]["is_single"]`)
+* if `assay_ontology_term_id` is ["EFO:0010961"](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0022857) for Visium Spatial Gene Expression V1 and the dataset represents one Space Ranger output for a single tissue section (e.g.the dataset has `True` in `uns["spatial"]["is_single"]`)
 * if `assay_ontology_term_id` is ["EFO:0030062"](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0030062) for Slide-seqV2 and the dataset represents the output for a single array on a puck (e.g. the dataset has `True` in `uns["spatial"]["is_single"]`)
 
 #### Data matrix types
@@ -440,7 +440,7 @@ Summary cell counts grouped by organism and relevant cell metadata MUST be model
   <tr>
     <td>organism</td>
     <td>string</td>
-    <td>Organism label as shown in NCBITaxon <code>"Homo sapiens"</code> or <code>"Mus musculus"</code></td>
+    <td>The value of an <code>organism_label</code> defined in <a href="#census-table-of-organisms---census_objcensus_infoorganisms--somadataframe">Census table of organisms  – `census_obj["census_info"]["organisms"]` – `SOMADataframe`</a></td>
   </tr>
   <tr>
     <td>category</td>
@@ -496,7 +496,7 @@ Example of this `SOMADataFrame`:
 </thead>
 <tbody>
   <tr>
-    <td>[Homo sapiens|Mus musculus]</td>
+    <td>Homo sapiens</td>
     <td>all</td>
     <td>na</td>
     <td>na</td>
@@ -504,7 +504,7 @@ Example of this `SOMADataFrame`:
     <td>x</td>
   </tr>
   <tr>
-    <td>[Homo sapiens|Mus musculus]</td>
+    <td>Homo sapiens</td>
     <td>cell_type</td>
     <td>cell_type_a</td>
     <td>CL:XXXXX</td>
@@ -512,7 +512,7 @@ Example of this `SOMADataFrame`:
     <td>x</td>
   </tr>
   <tr>
-    <td>[Homo sapiens|Mus musculus]</td>
+    <td>Homo sapiens</td>
     <td>cell_type</td>
     <td>…</td>
     <td>…</td>
@@ -520,7 +520,7 @@ Example of this `SOMADataFrame`:
     <td>x</td>
   </tr>
   <tr>
-    <td>[Homo sapiens|Mus musculus]</td>
+    <td>Homo sapiens</td>
     <td>cell_type</td>
     <td>cell_type_N</td>
     <td>CL:XXXXX</td>
@@ -528,7 +528,7 @@ Example of this `SOMADataFrame`:
     <td>x</td>
   </tr>
   <tr>
-    <td>[Homo sapiens|Mus musculus]</td>
+    <td>Homo sapiens</td>
     <td>assay</td>
     <td>assay_a</td>
     <td>EFO:XXXXX</td>
@@ -536,7 +536,7 @@ Example of this `SOMADataFrame`:
     <td>x</td>
   </tr>
   <tr>
-    <td>[Homo sapiens|Mus musculus]</td>
+    <td>Homo sapiens</td>
     <td>assay</td>
     <td>…</td>
     <td>…</td>
@@ -544,7 +544,7 @@ Example of this `SOMADataFrame`:
     <td>x</td>
   </tr>
   <tr>
-    <td>[Homo sapiens|Mus musculus]</td>
+    <td>Homo sapiens</td>
     <td>assay</td>
     <td>assay_N</td>
     <td>EFO:XXXXX</td>
@@ -552,7 +552,7 @@ Example of this `SOMADataFrame`:
     <td>x</td>
   </tr>
   <tr>
-    <td>[Homo sapiens|Mus musculus]</td>
+    <td>Homo sapiens</td>
     <td>tissue</td>
     <td>tissue_a</td>
     <td>UBERON:XXXXX</td>
@@ -560,7 +560,7 @@ Example of this `SOMADataFrame`:
     <td>x</td>
   </tr>
   <tr>
-    <td>[Homo sapiens|Mus musculus]</td>
+    <td>Homo sapiens</td>
     <td>tissue</td>
     <td>…</td>
     <td>…</td>
@@ -568,7 +568,7 @@ Example of this `SOMADataFrame`:
     <td>x</td>
   </tr>
   <tr>
-    <td>[Homo sapiens|Mus musculus]</td>
+    <td>Homo sapiens</td>
     <td>tissue</td>
     <td>tissue_N</td>
     <td>UBERON:XXXXX</td>
@@ -576,7 +576,7 @@ Example of this `SOMADataFrame`:
     <td>x</td>
   </tr>
   <tr>
-    <td>[Homo sapiens|Mus musculus]</td>
+    <td>Homo sapiens</td>
     <td>tissue_general</td>
     <td>tissue_general_a</td>
     <td>UBERON:XXXXX</td>
@@ -584,7 +584,7 @@ Example of this `SOMADataFrame`:
     <td>x</td>
   </tr>
   <tr>
-    <td>[Homo sapiens|Mus musculus]</td>
+    <td>Homo sapiens</td>
     <td>tissue_general</td>
     <td>…</td>
     <td>…</td>
@@ -592,7 +592,7 @@ Example of this `SOMADataFrame`:
     <td>x</td>
   </tr>
   <tr>
-    <td>[Homo sapiens|Mus musculus]</td>
+    <td>Homo sapiens</td>
     <td>tissue_general</td>
     <td>tissue_general_N</td>
     <td>UBERON:XXXXX</td>
@@ -600,7 +600,7 @@ Example of this `SOMADataFrame`:
     <td>x</td>
   </tr>
   <tr>
-    <td>[Homo sapiens|Mus musculus]</td>
+    <td>Homo sapiens</td>
     <td>disease</td>
     <td>disease_a</td>
     <td>MONDO:XXXXX</td>
@@ -608,7 +608,7 @@ Example of this `SOMADataFrame`:
     <td>x</td>
   </tr>
   <tr>
-    <td>[Homo sapiens|Mus musculus]</td>
+    <td>Homo sapiens</td>
     <td>disease</td>
     <td>…</td>
     <td>…</td>
@@ -616,7 +616,7 @@ Example of this `SOMADataFrame`:
     <td>x</td>
   </tr>
   <tr>
-    <td>[Homo sapiens|Mus musculus]</td>
+    <td>Homo sapiens</td>
     <td>disease</td>
     <td>disease_N</td>
     <td>MONDO:XXXXX</td>
@@ -624,7 +624,7 @@ Example of this `SOMADataFrame`:
     <td>x</td>
   </tr>
   <tr>
-    <td>[Homo sapiens|Mus musculus]</td>
+    <td>Homo sapiens</td>
     <td>self_reported_ethnicity</td>
     <td>self_reported_ethnicity_a</td>
     <td>HANCESTRO:XXXXX</td>
@@ -632,7 +632,7 @@ Example of this `SOMADataFrame`:
     <td>x</td>
   </tr>
   <tr>
-    <td>[Homo sapiens|Mus musculus]</td>
+    <td>Homo sapiens</td>
     <td>self_reported_ethnicity</td>
     <td>…</td>
     <td>…</td>
@@ -640,7 +640,7 @@ Example of this `SOMADataFrame`:
     <td>x</td>
   </tr>
   <tr>
-    <td>[Homo sapiens|Mus musculus]</td>
+    <td>Homo sapiens</td>
     <td>self_reported_ethnicity</td>
     <td>self_reported_ethnicity_N</td>
     <td>HANCESTRO:XXXXX</td>
@@ -648,7 +648,7 @@ Example of this `SOMADataFrame`:
     <td>x</td>
   </tr>
   <tr>
-    <td>[Homo sapiens|Mus musculus]</td>
+    <td>Homo sapiens</td>
     <td>sex</td>
     <td>sex_a</td>
     <td>PATO:XXXXX</td>
@@ -656,7 +656,7 @@ Example of this `SOMADataFrame`:
     <td>x</td>
   </tr>
   <tr>
-    <td>[Homo sapiens|Mus musculus]</td>
+    <td>Homo sapiens</td>
     <td>sex</td>
     <td>…</td>
     <td>…</td>
@@ -664,7 +664,7 @@ Example of this `SOMADataFrame`:
     <td>x</td>
   </tr>
   <tr>
-    <td>[Homo sapiens|Mus musculus]</td>
+    <td>Homo sapiens</td>
     <td>sex</td>
     <td>sex_N</td>
     <td>PATO:XXXXX</td>
@@ -672,7 +672,7 @@ Example of this `SOMADataFrame`:
     <td>x</td>
   </tr>
   <tr>
-    <td>[Homo sapiens|Mus musculus]</td>
+    <td>Homo sapiens</td>
     <td>suspension_type</td>
     <td>suspension_type_a</td>
     <td>na</td>
@@ -680,7 +680,7 @@ Example of this `SOMADataFrame`:
     <td>x</td>
   </tr>
   <tr>
-    <td>[Homo sapiens|Mus musculus]</td>
+    <td>Homo sapiens</td>
     <td>suspension_type</td>
     <td>…</td>
     <td>…</td>
@@ -688,7 +688,7 @@ Example of this `SOMADataFrame`:
     <td>x</td>
   </tr>
   <tr>
-    <td>[Homo sapiens|Mus musculus]</td>
+    <td>Homo sapiens</td>
     <td>suspension_type</td>
     <td>suspension_type_N</td>
     <td>na</td>
@@ -765,7 +765,7 @@ An example of this `SOMADataFrame`:
 
 ### Single Cell Census Data – `census_obj["census_data"][organism]` – `SOMAExperiment`
 
-Non-spatial data for organisms MUST be stored as a `SOMAExperiment` in `census_obj["census_data"][organism]` where the value of <code>organism</code> matches the <code>organism</code> defined in <a href="#census-table-of-organisms---census_objcensus_infoorganisms--somadataframe">Census table of organisms  – `census_obj["census_info"]["organisms"]` – `SOMADataframe`</a>.
+Non-spatial data for organisms MUST be stored as a `SOMAExperiment` in `census_obj["census_data"][organism]` where the value of <code>organism</code> matches an <code>organism</code> defined in <a href="#census-table-of-organisms---census_objcensus_infoorganisms--somadataframe">Census table of organisms  – `census_obj["census_info"]["organisms"]` – `SOMADataframe`</a>.
 
 For example, non-spatial data for *Homo sapiens* MUST be stored as a `SOMAExperiment` in `census_obj["census_data"]["homo_sapiens"]`.
 
@@ -995,11 +995,11 @@ Cell metadata MUST be encoded as a `SOMADataFrame` with the following columns:
 
 ### Census Spatial Sequencing Data – `census_obj["census_spatial_sequencing"][organism]` – `SOMAExperiment`
 
-Only Visium Spatial Gene Expression ("EFO:0010961") and Slide-seqV2 ("EFO:0030062") are supported for spatial data. [See the "assays included" section above](assays).
+Spatial data for organisms MUST be stored as a `SOMAExperiment` in `census_obj["census_data"][organism]` where the value of <code>organism</code> matches an <code>organism</code> defined in <a href="#census-table-of-organisms---census_objcensus_infoorganisms--somadataframe">Census table of organisms  – `census_obj["census_info"]["organisms"]` – `SOMADataframe`</a>.
 
-Spatial data for *Homo sapiens* MUST be stored as a `SOMAExperiment` in `census_obj["census_spatial_sequencing"]["homo_sapiens"]`.
+For example, spatial data for *Homo sapiens* MUST be stored as a `SOMAExperiment` in `census_obj["census_spatial_sequencing"]["homo_sapiens"]`.
 
-Spatial data for *Mus musculus* MUST be stored as a `SOMAExperiment` in `census_obj["census_spatial_sequencing"]["mus_musculus"]`.
+Only Visium Spatial Gene Expression V1 ("EFO:0022857") and Slide-seqV2 ("EFO:0030062") are supported for spatial data. [See the "assays included" section above](assays).
 
 For each organism the `SOMAExperiment` MUST contain the following:
 
@@ -1126,7 +1126,7 @@ For each observation in each Scene, spatial array positions and additional posit
 </table>
 <!-- markdownlint-enable reference-links-images -->
 
-If Visium Spatial Gene Expression ("EFO:0010961") the units for the spatial array positions are pixels from the full-resolution image.
+If Visium Spatial Gene Expression V1 ("EFO:0022857"), the units for the spatial array positions are pixels from the full-resolution image.
 
 The location dataframe MUST have the metadata fields:
 
@@ -1148,7 +1148,7 @@ The location dataframe MUST have the metadata fields:
   </tr>
     <td>soma_geometry</td>
     <td>float</td>
-    <td>Radius of points: <code>diameter/2</code>. If Visium Spatial Gene Expression ("EFO:0010961") <code>diameter</code> MUST be <code>.uns["spatial"][library_id]['spot_diameter_fullres']</code>, as defined in the CELLxGENE dataset schema. For Slide-seqV2 ("EFO:0030062") the radius is a small constant.</td>
+    <td>Radius of points: <code>diameter/2</code>. If Visium Spatial Gene Expression V1 ("EFO:0022857") <code>diameter</code> MUST be <code>.uns["spatial"][library_id]['spot_diameter_fullres']</code>, as defined in the CELLxGENE dataset schema. For Slide-seqV2 ("EFO:0030062") the radius is a small constant.</td>
   </tr>
  </tbody>
 </table>
@@ -1156,20 +1156,21 @@ The location dataframe MUST have the metadata fields:
 
 #### Images of a Scene - `census_obj["census_spatial_sequencing"][organism].spatial[scene_soma_joinid].img[library_id]` – `Collection` of `MultiscaleImage`
 
-Images of a Visium Spatial Gene Expression ("EFO:0010961") scene MUST adhere to the following specifications. Other assays MUST NOT have images, and MUST NOT include the `img` collection.
+Images of a Visium Spatial Gene Expression V1 ("EFO:0022857") scene MUST adhere to the following specifications. Other assays MUST NOT have images, and MUST NOT include the `img` collection.
 
 `library_id` MUST be the corresponding value in the source H5AD slot `.uns["spatial"][library_id]`, as defined in the CELLxGENE dataset schema.
 
 ##### High resolution image of a Scene  – `census_obj["census_spatial_sequencing"][organism].spatial[scene_soma_joinid].img[library_id]["highres_image"]` – `MultiscaleImage`
 
-The high resolution image of a Visium Spatial Gene Expression ("EFO:0010961") scene MUST be included and MUST be encoded as a `SOMAImageNDArray`.
+The high resolution image of a Visium Spatial Gene Expression V1("EFO:0022857") scene MUST be included and MUST be encoded as a `SOMAImageNDArray`.
 
 **Value:** the image from `uns["spatial"][library_id]['images']['hires']` as defined in the CELLxGENE dataset schema.
 
 ## Changelog
 
-### Version N.N.N
+### Version 2.4.0
 * Updated all CELLxGENE Discover dataset schema references from 5.2.0 to 7.0.0
+* Updated all *Visium Spatial Gene Expression* references to *Visium Spatial Gene Expression V1* 
 * Species
   * Renamed section from _Species_ to _Organisms_ for consistency
   * Added *Callithrix jacchus* 
