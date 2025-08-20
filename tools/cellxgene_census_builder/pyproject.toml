@@ -50,10 +50,10 @@ dependencies= [
     "dask==2024.11.2",
     "distributed==2024.11.2",
     "tiledb==0.33.4",
-    "xarray==2025.7.1", # pinned due to dep conflicts introduced in 2025.8.0
     # Spatial testing
     "filelock==3.17.0",
     "spatialdata>=0.3.0",
+    "xarray==2024.11.0", # pinned due to dep conflicts possibly involving spatialdata 0.5.0
     "pooch==1.8.2",
     "pytest-xdist==3.6.1",
 ]
