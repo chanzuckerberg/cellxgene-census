@@ -28,3 +28,4 @@ RUN python3.11 -m pip install /tools/cellxgene_census_builder/*.whl
 WORKDIR /census-build
 
 ENTRYPOINT ["/bin/bash", "/entrypoint.sh"]
+
