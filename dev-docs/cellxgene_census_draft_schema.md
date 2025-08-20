@@ -1187,9 +1187,9 @@ The high resolution image of a Visium Spatial Gene Expression V1("EFO:0022857") 
   * Deleted section due to deprecated requirements for datasets containing multiple species or orthologous gene references
 * Assays
   * PENDING
-* Census table of organisms – census_obj["census_info"]["organisms"]
+* Census table of organisms – `census_obj["census_info"]["organisms"]`
   * Replaced the code reference that documented the value of <code>organism</code> with its requirements
-* Cell metadata – census_obj["census_data"][organism].obs
+* Cell metadata – `census_obj["census_data"][organism].obs`
   * Corrected code references for <code>tissue_general_ontology_term_id</code> and <code>tissue_general</code>
 
 ### Version 2.3.0
