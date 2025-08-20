@@ -8,15 +8,16 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 
 ## Census overview
 
-The [CZ CELLxGENE Discover Census](https://chanzuckerberg.github.io/cellxgene-census/) is a versioned data object and API for most of the single-cell data hosted at [CZ CELLxGENE Discover](https://cellxgene.cziscience.com/). It is referred to throughout this document as the Census. 
+The [CZ CELLxGENE Discover Census](https://chanzuckerberg.github.io/cellxgene-census/) is a versioned data object and API for most of the single-cell data hosted at [CZ CELLxGENE Discover](https://cellxgene.cziscience.com/). It is referred to throughout this document as the Census.
 
-The reader should be familiar with the [CELLxGENE Discover dataset schema](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/7.0.0/schema.md) and the [SOMA (“stack of matrices, annotated”)](https://github.com/single-cell-data/SOMA/blob/main/abstract_specification.md) specification. 
+The reader should be familiar with the [CELLxGENE Discover dataset schema](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/7.0.0/schema.md) and the [SOMA (“stack of matrices, annotated”)](https://github.com/single-cell-data/SOMA/blob/main/abstract_specification.md) specification.
 
 ## Definitions
 
 The following terms are used throughout this document:
 
 **EDITORIAL NOTE: Review and remove as needed.**
+
 * adata – generic variable name that refers to an [`AnnData`](https://anndata.readthedocs.io/) object.
 * CELLxGENE Discover dataset schema – the data schema for h5ad files served by CELLxGENE Discover, for this Census schema: [CELLxGENE dataset schema version is 7.0.0](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/7.0.0/schema.md)
 * census\_obj – the Census root object, a [SOMACollection](https://github.com/single-cell-data/SOMA/blob/main/abstract_specification.md#somacollection).
@@ -727,7 +728,7 @@ Information about organisms whose cells are included in the Census MUST be inclu
     <td>Machine-friendly name for <a href="#census-data--census_objcensus_dataorganism--somaexperiment">Single Cell Census Data – `census_obj["census_data"][organism]` – `SOMAExperiment`</a>. Its value MUST be the result of:
     <ul>
       <li>Converting the <code>organism_label</code> to lowercase </li>
-      <li>Replacing one or more consecutive spaces in the <code>organism_label</code> with a single underscore</li> 
+      <li>Replacing one or more consecutive spaces in the <code>organism_label</code> with a single underscore</li>
     </ul>
   </tr>
 </tbody>
@@ -762,12 +763,11 @@ An example of this `SOMADataFrame`:
 </tbody>
 </table>
 
-
 ### Single Cell Census Data – `census_obj["census_data"][organism]` – `SOMAExperiment`
 
 Non-spatial data for organisms MUST be stored as a `SOMAExperiment` in `census_obj["census_data"][organism]` where the value of <code>organism</code> matches an <code>organism</code> defined in <a href="#census-table-of-organisms---census_objcensus_infoorganisms--somadataframe">Census table of organisms  – `census_obj["census_info"]["organisms"]` – `SOMADataframe`</a>.
 
-For example, non-spatial data for *Homo sapiens* MUST be stored as a `SOMAExperiment` in `census_obj["census_data"]["homo_sapiens"]`.
+For example, non-spatial data for _Homo sapiens_ MUST be stored as a `SOMAExperiment` in `census_obj["census_data"]["homo_sapiens"]`.
 
 For each organism with qualifying data, the `SOMAExperiment` MUST contain the following:
 
@@ -997,7 +997,7 @@ Cell metadata MUST be encoded as a `SOMADataFrame` with the following columns:
 
 Spatial data for organisms MUST be stored as a `SOMAExperiment` in `census_obj["census_data"][organism]` where the value of <code>organism</code> matches an <code>organism</code> defined in <a href="#census-table-of-organisms---census_objcensus_infoorganisms--somadataframe">Census table of organisms  – `census_obj["census_info"]["organisms"]` – `SOMADataframe`</a>.
 
-For example, spatial data for *Homo sapiens* MUST be stored as a `SOMAExperiment` in `census_obj["census_spatial_sequencing"]["homo_sapiens"]`.
+For example, spatial data for _Homo sapiens_ MUST be stored as a `SOMAExperiment` in `census_obj["census_spatial_sequencing"]["homo_sapiens"]`.
 
 Only Visium Spatial Gene Expression V1 ("EFO:0022857") and Slide-seqV2 ("EFO:0030062") are supported for spatial data. [See the "assays included" section above](assays).
 
@@ -1169,21 +1169,22 @@ The high resolution image of a Visium Spatial Gene Expression V1("EFO:0022857") 
 ## Changelog
 
 ### Version 2.4.0
+
 * Updated all CELLxGENE Discover dataset schema references from 5.2.0 to 7.0.0
-* Updated all *Visium Spatial Gene Expression* references to *Visium Spatial Gene Expression V1* 
+* Updated all _Visium Spatial Gene Expression_ references to _Visium Spatial Gene Expression V1_
 * Species
   * Renamed section from _Species_ to _Organisms_ for consistency
-  * Added *Callithrix jacchus* 
-  * Added *Gorilla gorilla gorilla*
-  * Added *Macaca fascicularis*
-  * Added *Macaca mulatta*
-  * Added *Microcebus murinus*
-  * Added *Oryctolagus cuniculus*
-  * Added *Pan troglodytes*
-  * Added *Rattus norvegicus*
-  * Added *Sus scrofa*
+  * Added _Callithrix jacchus_
+  * Added _Gorilla gorilla gorilla_
+  * Added _Macaca fascicularis_
+  * Added _Macaca mulatta_
+  * Added _Microcebus murinus_
+  * Added _Oryctolagus cuniculus_
+  * Added _Pan troglodytes_
+  * Added _Rattus norvegicus_
+  * Added _Sus scrofa_
 * Multi-species data constraints
-    * Deleted section due to deprecated requirements for datasets containing multiple species or orthologous gene references
+  * Deleted section due to deprecated requirements for datasets containing multiple species or orthologous gene references
 * Assays
   * PENDING
 * Census table of organisms – census_obj["census_info"]["organisms"]
