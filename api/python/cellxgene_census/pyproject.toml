@@ -27,6 +27,10 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
 ]
 dependencies= [
+    # Aug-2025: temporarily blocking pyarrow>=21 due to API change, see
+    #.  https://github.com/apache/arrow/pull/46423
+    #   https://github.com/chanzuckerberg/cellxgene-census/pull/1417#pullrequestreview-3145471914
+    "pyarrow<21",
     # NOTE: the tiledbsoma version must be >= to the version used in the Census builder, to
     # ensure that the assets are readable (tiledbsoma supports backward compatible reading).
     # Make sure this version does not fall behind the builder's tiledbsoma version.
