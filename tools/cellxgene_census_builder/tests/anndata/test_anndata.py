@@ -126,7 +126,8 @@ def test_make_anndata_cell_filter_organism(tmp_path: pathlib.Path, h5ad_with_org
     filtered_adata_with_organism = func(adata_with_organism)
 
     assert adata_with_organism.var.equals(filtered_adata_with_organism.var)
-    assert filtered_adata_with_organism.obs.shape[0] == 3
+    # Schema >= 6.0.0: file organism lives in uns; mismatch drops all cells
+    assert filtered_adata_with_organism.obs.shape[0] == 0
 
 
 def test_make_anndata_cell_filter_feature_biotype_gene(tmp_path: pathlib.Path, h5ad_with_feature_biotype: str) -> None:
@@ -267,7 +268,7 @@ def test_empty_estimated_density(tmp_path: pathlib.Path) -> None:
     adata = anndata.AnnData(
         obs=pd.DataFrame(), var=pd.DataFrame({"feature_id": [0, 1, 2]}), X=sparse.csr_matrix((0, 3), dtype=np.float32)
     )
-    adata.uns["schema_version"] = "5.2.0"
+    adata.uns["schema_version"] = "6.0.0"
     adata.write_h5ad(path)
 
     with open_anndata(path) as ad:
@@ -289,7 +290,6 @@ def test_open_anndata_column_names(tmp_path: pathlib.Path, h5ad_simple: str) -> 
     with open_anndata(path, include_filter_columns=True, obs_column_names=("cell_type",), var_column_names=()) as ad:
         assert set(ad.obs.keys()) == {
             "assay_ontology_term_id",
-            "organism_ontology_term_id",
             "tissue_type",
             "cell_type",
             "is_primary_data",
@@ -305,7 +305,7 @@ def test_open_anndata_raw_X(tmp_path: pathlib.Path) -> None:
         var=pd.DataFrame({"feature_id": [0, 1, 2]}),
         X=sparse.csr_matrix((2, 3), dtype=np.float32),
         raw={"X": sparse.csr_matrix((2, 4), dtype=np.float32)},
-        uns={"schema_version": "5.2.0"},
+    uns={"schema_version": "6.0.0"},
     )
     adata.write_h5ad(path)
 
@@ -317,115 +317,46 @@ HUMAN_FILTER_SPEC: AnnDataFilterSpec = {"organism_ontology_term_id": "NCBITaxon:
 MOUSE_FILTER_SPEC: AnnDataFilterSpec = {"organism_ontology_term_id": "NCBITaxon:10090", "assay_ontology_term_ids": []}
 
 
-@pytest.mark.parametrize(
-    "organism_ontology_term_id,feature_reference,filter_spec,expected_shape",
-    [
-        (  # all human
-            ["NCBITaxon:9606"] * 3,
-            ["NCBITaxon:9606"] * 2,
-            HUMAN_FILTER_SPEC,
-            (3, 2),
-        ),
-        (  # all human
-            ["NCBITaxon:9606"] * 3,
-            ["NCBITaxon:9606"] * 2,
-            MOUSE_FILTER_SPEC,
-            (0, 2),
-        ),
-        (  # transgenic mouse
-            ["NCBITaxon:10090"] * 5,
-            ["NCBITaxon:9606", "NCBITaxon:10090", "NCBITaxon:10090"],
-            HUMAN_FILTER_SPEC,
-            (0, 3),
-        ),
-        (  # transgenic mouse
-            ["NCBITaxon:10090"] * 5,
-            ["NCBITaxon:9606", "NCBITaxon:10090", "NCBITaxon:10090"],
-            MOUSE_FILTER_SPEC,
-            (5, 2),
-        ),
-        (  # human with SARS
-            ["NCBITaxon:9606"] * 7,
-            ["NCBITaxon:9606"] * 2 + ["NCBITaxon:2697049"],
-            HUMAN_FILTER_SPEC,
-            (7, 2),
-        ),
-        (  # human with SARS
-            ["NCBITaxon:9606"] * 7,
-            ["NCBITaxon:9606"] * 2 + ["NCBITaxon:2697049"],
-            MOUSE_FILTER_SPEC,
-            (0, 3),
-        ),
-        (  # multi-species experiment,
-            ["NCBITaxon:9606"] * 3 + ["NCBITaxon:10090"] * 5,
-            ["NCBITaxon:9606"] * 2,
-            HUMAN_FILTER_SPEC,
-            (3, 2),
-        ),
-        (  # multi-species experiment,
-            ["NCBITaxon:9606"] * 3 + ["NCBITaxon:10090"] * 5,
-            ["NCBITaxon:9606"] * 2,
-            MOUSE_FILTER_SPEC,
-            (0, 2),
-        ),
-        (  # multi-species on both axes
-            ["NCBITaxon:9606"] * 4 + ["NCBITaxon:10090"],
-            ["NCBITaxon:9606"] * 2 + ["NCBITaxon:2697049"],
-            HUMAN_FILTER_SPEC,
-            (0, 3),
-        ),
-        (  # multi-species on both axes
-            ["NCBITaxon:9606"] * 4 + ["NCBITaxon:10090"],
-            ["NCBITaxon:9606"] * 2 + ["NCBITaxon:2697049"],
-            MOUSE_FILTER_SPEC,
-            (0, 3),
-        ),
-    ],
-)
-def test_multi_species_filter(
-    tmp_path: pathlib.Path,
-    organism_ontology_term_id: list[str],
-    feature_reference: list[str],
-    filter_spec: AnnDataFilterSpec,
-    expected_shape: tuple[int, int],
-) -> None:
-    """Test all variations of multi-species filtering. Cell specifies defined by
-    obs.organism_ontology_term_id, gene by var.feature_reference, both of which use
-    UBERON ontology terms.
-
-    Conditions:
-    * the filter has a target species (e.g., NCBITaxon:9606, NCBITaxon:10090, etc)
-    * the obs and var axis species may have no matches, partial matches or all matches with the filter target
-
-    Expected results:
-    * when both axes are multi-species, return empty result
-    * when one or both axes are single-species, return slice that matches the filter
-
-    IMPORTANT: if the filter results in no cells (obs) matching, the result is empty on the
-    obs axes, and the var axis IS NOT FILTERED (as there is no point to doing so). So test
-    the obs length before asserting anything about var.
-    """
-
-    n_obs = len(organism_ontology_term_id)
+def test_filter_uns_organism_match_filters_var_only(tmp_path: pathlib.Path) -> None:
+    # File organism matches filter; obs unchanged; var filtered to match organism
+    n_obs = 7
+    feature_reference = ["NCBITaxon:9606", "NCBITaxon:9606", "NCBITaxon:2697049"]
     n_vars = len(feature_reference)
     adata = anndata.AnnData(
-        obs=pd.DataFrame(
-            {"organism_ontology_term_id": organism_ontology_term_id, "tissue_type": "tissue"},
-            index=[str(i) for i in range(n_obs)],
-        ),
+        obs=pd.DataFrame({"tissue_type": "tissue"}, index=[str(i) for i in range(n_obs)]),
         var=pd.DataFrame(
             {"feature_reference": feature_reference, "feature_biotype": "gene"},
             index=[f"feature_{i}" for i in range(n_vars)],
         ),
         X=sparse.random(n_obs, n_vars, format="csr", dtype=np.float32),
-        uns={"schema_version": "5.2.0"},
+        uns={"schema_version": "6.0.0", "organism_ontology_term_id": "NCBITaxon:9606"},
     )
-    path = (tmp_path / "species.h5ad").as_posix()
+    path = (tmp_path / "species_match.h5ad").as_posix()
     adata.write_h5ad(path)
 
-    with open_anndata(path, filter_spec=filter_spec) as ad:
-        assert ad.shape[0] == expected_shape[0] == ad.n_obs
-        if ad.n_obs > 0:
-            assert ad.shape == expected_shape == (ad.n_obs, ad.n_vars)
-            assert (ad.obs.organism_ontology_term_id == filter_spec["organism_ontology_term_id"]).all()
-            assert (ad.var.feature_reference == filter_spec["organism_ontology_term_id"]).all()
+    with open_anndata(path, filter_spec=HUMAN_FILTER_SPEC) as ad:
+        assert ad.n_obs == n_obs
+        assert ad.n_vars == 2
+        assert (ad.var.feature_reference == "NCBITaxon:9606").all()
+
+
+def test_filter_uns_organism_mismatch_returns_empty(tmp_path: pathlib.Path) -> None:
+    # File organism mismatches filter; result is empty slice
+    n_obs = 5
+    feature_reference = ["NCBITaxon:9606", "NCBITaxon:10090", "NCBITaxon:10090"]
+    n_vars = len(feature_reference)
+    adata = anndata.AnnData(
+        obs=pd.DataFrame({"tissue_type": "tissue"}, index=[str(i) for i in range(n_obs)]),
+        var=pd.DataFrame(
+            {"feature_reference": feature_reference, "feature_biotype": "gene"},
+            index=[f"feature_{i}" for i in range(n_vars)],
+        ),
+        X=sparse.random(n_obs, n_vars, format="csr", dtype=np.float32),
+        uns={"schema_version": "6.0.0", "organism_ontology_term_id": "NCBITaxon:9606"},
+    )
+    path = (tmp_path / "species_mismatch.h5ad").as_posix()
+    adata.write_h5ad(path)
+
+    with open_anndata(path, filter_spec=MOUSE_FILTER_SPEC) as ad:
+        assert ad.n_obs == 0
+        assert ad.n_vars == n_vars  # unchanged when obs empty

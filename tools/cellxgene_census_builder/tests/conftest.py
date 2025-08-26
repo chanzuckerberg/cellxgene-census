@@ -80,7 +80,6 @@ def get_anndata(
             "cell_type_ontology_term_id": "CL:0000192",
             "assay_ontology_term_id": assay_ontology_term_id,
             "disease_ontology_term_id": "PATO:0000461",
-            "organism_ontology_term_id": organism.organism_ontology_term_id,
             "sex_ontology_term_id": "unknown",
             "tissue_ontology_term_id": "CL:0000192",
             "is_primary_data": False,
@@ -95,7 +94,6 @@ def get_anndata(
             "self_reported_ethnicity": "test",
             "sex": "test",
             "tissue": "test",
-            "organism": "test",
             "tissue_type": "tissue",
             "observation_joinid": "test",
         },
@@ -127,8 +125,10 @@ def get_anndata(
     uns = {}
     uns["batch_condition"] = np.array(["a", "b"], dtype="object")
 
-    # Need to carefully set the corpora schema versions in order for tests to pass.
-    uns["schema_version"] = "5.2.0"  # type: ignore
+    # Set CxG schema fields (schema 6.0.0: organism fields moved to uns)
+    uns["schema_version"] = "6.0.0"  # type: ignore
+    uns["organism_ontology_term_id"] = organism.organism_ontology_term_id
+    uns["organism"] = organism.name
 
     return anndata.AnnData(X=X, obs=obs, var=var, obsm=obsm, uns=uns)
 
