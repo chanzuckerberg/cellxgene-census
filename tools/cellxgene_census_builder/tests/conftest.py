@@ -1,7 +1,7 @@
 import pathlib
 from functools import partial
 from textwrap import dedent
-from typing import Literal
+from typing import Any, Literal
 
 import anndata
 import attrs
@@ -122,11 +122,11 @@ def get_anndata(
     obsm = {"X_awesome_embedding": random_embedding}
 
     # Create uns corpora metadata
-    uns = {}
+    uns: dict[str, Any] = {}
     uns["batch_condition"] = np.array(["a", "b"], dtype="object")
 
     # Set CxG schema fields (schema 6.0.0: organism fields moved to uns)
-    uns["schema_version"] = "6.0.0"  # type: ignore
+    uns["schema_version"] = "6.0.0"
     uns["organism_ontology_term_id"] = organism.organism_ontology_term_id
     uns["organism"] = organism.name
 
