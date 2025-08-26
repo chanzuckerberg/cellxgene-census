@@ -147,7 +147,6 @@ class AnnDataProxy(AbstractContextManager["AnnDataProxy"]):
     def var(self) -> pd.DataFrame:
         return self._var.iloc[self._var_idx]
 
-
     @property
     def n_obs(self) -> int:
         if isinstance(self._obs_idx, slice):
@@ -203,9 +202,9 @@ class AnnDataProxy(AbstractContextManager["AnnDataProxy"]):
         # else read each user-specified column/index separately, taking care to preserve the
         # original dataframe column ordering
         assert len(column_names) > 0
-        assert (
-            elem.attrs["encoding-type"] == "dataframe" and elem.attrs["encoding-version"] == "0.2.0"
-        ), "Unsupported AnnData encoding-type or encoding-version - likely indicates file was created with an unsupported AnnData version"
+        assert elem.attrs["encoding-type"] == "dataframe" and elem.attrs["encoding-version"] == "0.2.0", (
+            "Unsupported AnnData encoding-type or encoding-version - likely indicates file was created with an unsupported AnnData version"
+        )
         column_order = elem.attrs["column-order"]
         column_names_ordered = [c for c in column_order if c in column_names and c != "_index"]
         index: npt.NDArray[Any] | None = None
@@ -238,9 +237,9 @@ class AnnDataProxy(AbstractContextManager["AnnDataProxy"]):
         assert isinstance(self._file, h5py.File)
 
         # Known to be compatible with this AnnData file encoding
-        assert (
-            self._file.attrs["encoding-type"] == "anndata" and self._file.attrs["encoding-version"] == "0.1.0"
-        ), "Unsupported AnnData encoding-type or encoding-version - likely indicates file was created with an unsupported AnnData version"
+        assert self._file.attrs["encoding-type"] == "anndata" and self._file.attrs["encoding-version"] == "0.1.0", (
+            "Unsupported AnnData encoding-type or encoding-version - likely indicates file was created with an unsupported AnnData version"
+        )
 
         # Verify we are reading the expected CxG schema version.
         if "schema_version" in self._file["uns"]:
@@ -338,9 +337,9 @@ def make_anndata_cell_filter(filter_spec: AnnDataFilterSpec) -> AnnDataFilterFun
         obs_mask = ad.obs.tissue_type.isin(["tissue", "organoid"])
 
         assert ad._file is not None, "Internal error: filter expects a root AnnDataProxy with an open file handle"
-        assert (
-            ("uns" in ad._file) and ("organism_ontology_term_id" in ad._file["uns"])
-        ), f"{ad.filename} -- missing 'uns/organism_ontology_term_id'; expected per CxG schema {CXG_SCHEMA_VERSION}"
+        assert ("uns" in ad._file) and ("organism_ontology_term_id" in ad._file["uns"]), (
+            f"{ad.filename} -- missing 'uns/organism_ontology_term_id'; expected per CxG schema {CXG_SCHEMA_VERSION}"
+        )
         uns_organism = read_elem(ad._file["uns/organism_ontology_term_id"])
         if uns_organism != organism_ontology_term_id:
             # File's organism does not match requested organism – drop all

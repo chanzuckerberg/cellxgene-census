@@ -305,7 +305,7 @@ def test_open_anndata_raw_X(tmp_path: pathlib.Path) -> None:
         var=pd.DataFrame({"feature_id": [0, 1, 2]}),
         X=sparse.csr_matrix((2, 3), dtype=np.float32),
         raw={"X": sparse.csr_matrix((2, 4), dtype=np.float32)},
-    uns={"schema_version": "6.0.0"},
+        uns={"schema_version": "6.0.0"},
     )
     adata.write_h5ad(path)
 
