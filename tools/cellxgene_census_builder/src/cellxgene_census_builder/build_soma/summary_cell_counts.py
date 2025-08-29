@@ -49,7 +49,7 @@ def init_summary_counts_accumulator() -> pd.DataFrame:
     )
 
 
-def accumulate_summary_counts(current: pd.DataFrame, obs_df: pd.DataFrame) -> pd.DataFrame:
+def accumulate_summary_counts(current: pd.DataFrame, obs_df: pd.DataFrame, organism: str) -> pd.DataFrame:
     """Add summary counts to the census_summary_cell_counts dataframe."""
     assert "dataset_id" in obs_df
 
@@ -83,7 +83,9 @@ def accumulate_summary_counts(current: pd.DataFrame, obs_df: pd.DataFrame) -> pd
             columns.update({term_label: "label"})
         assert len(cats) > 0 and len(columns) > 0  # i.e., one or both of term or label are specified
 
-        df = obs_df[["dataset_id", "organism", *cats, "is_primary_data"]].rename(columns=columns)
+        # Build a working dataframe with the required columns, adding organism from the caller
+        df = obs_df[["dataset_id", *cats, "is_primary_data"]].rename(columns=columns)
+        df["organism"] = organism
         if "label" not in df:
             df["label"] = "na"
         if "ontology_term_id" not in df:
@@ -117,7 +119,7 @@ def accumulate_summary_counts(current: pd.DataFrame, obs_df: pd.DataFrame) -> pd
     all = pd.DataFrame(
         data={
             "dataset_id": [dataset_id],
-            "organism": [obs_df.iloc[0].organism],
+            "organism": [organism],
             "ontology_term_id": ["na"],
             "label": ["na"],
             "category": ["all"],
