@@ -49,7 +49,7 @@ def init_summary_counts_accumulator() -> pd.DataFrame:
     )
 
 
-def accumulate_summary_counts(current: pd.DataFrame, obs_df: pd.DataFrame, organism: str) -> pd.DataFrame:
+def accumulate_summary_counts(organism: str, current: pd.DataFrame, obs_df: pd.DataFrame) -> pd.DataFrame:
     """Add summary counts to the census_summary_cell_counts dataframe."""
     assert "dataset_id" in obs_df
 

@@ -433,7 +433,7 @@ def post_acc_axes_processing(accumulated: list[tuple[ExperimentBuilder, tuple[pd
         for _, obs_slice in obs.groupby("dataset_id"):
             assert obs_slice.soma_joinid.max() - obs_slice.soma_joinid.min() + 1 == len(obs_slice)
             eb.census_summary_cell_counts = accumulate_summary_counts(
-                eb.census_summary_cell_counts, obs_slice, eb.specification.name
+                eb.specification.name, eb.census_summary_cell_counts, obs_slice
             )
 
     for eb, (obs, var) in accumulated:
