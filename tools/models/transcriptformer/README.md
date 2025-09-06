@@ -19,7 +19,7 @@ Workflow outline:
     - The array is meant to be postprocessed by [census_contrib](https://github.com/chanzuckerberg/cellxgene-census/tree/main/tools/census_contrib) for eventual publication. We go a little out of our way to write the array using the same version of `tiledbsoma` that `census_contrib` uses (typically older than the version used by `cellxgene_census`), ensuring compatibility.
     - As an optimization, while `transcriptformer inference` is running on one megabatch, in the background we're writing the embeddings from the prior megabatch and preparing the next megabatch h5ad.
 
-The [Dockerfile](Dockerfile) bundles these scripts along with `transcriptformer` and all dependencies. To use from ECR, it's best to build it from AWS in the first place ([buildspec.yaml](buildspec.yaml)), since its size is painful to push from your laptop (>10GiB).
+The [Dockerfile](Dockerfile) bundles these scripts along with `transcriptformer` and all dependencies. Build and push it to ECR using a dev instance or CodeBuild, since it's >10GiB and thus rather painful to push over office/home WiFi.
 
 Example launch invocation using [miniwdl-omics-run](https://github.com/miniwdl-ext/miniwdl-omics-run):
 
