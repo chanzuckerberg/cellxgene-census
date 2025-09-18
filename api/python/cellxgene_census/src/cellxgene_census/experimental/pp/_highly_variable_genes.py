@@ -6,6 +6,7 @@ from concurrent import futures
 from typing import Any, Literal, cast
 
 import numpy as np
+import numpy.typing as npt
 import pandas as pd
 import tiledbsoma as soma
 from somacore.options import SparseDFCoord
@@ -84,10 +85,14 @@ def _highly_variable_genes_seurat_v3(
         raise ImportError("Please install skmisc package via `pip install --user scikit-misc") from e
 
     batch_indexer = None
+    n_samples: npt.NDArray[np.int64]
     if batch_key is not None:
         batch_index = _get_batch_index(query, batch_key, batch_key_func)
         n_batches = len(batch_index.cat.categories)
-        n_samples = batch_index.value_counts().loc[batch_index.cat.categories.to_numpy()].to_numpy()
+        n_samples = cast(
+            npt.NDArray[np.int64],
+            batch_index.value_counts().loc[batch_index.cat.categories.to_numpy()].to_numpy(),
+        )
         if n_batches > 1:
             batch_indexer = soma.IntIndexer(batch_index.index.to_numpy(), context=query.experiment.context).get_indexer
             batch_codes = batch_index.cat.codes.to_numpy().astype(np.int64)
