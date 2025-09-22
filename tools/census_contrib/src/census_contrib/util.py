@@ -48,6 +48,9 @@ def soma_context(tiledb_config: dict[str, Any] | None = None) -> soma.options.SO
         tiledb_config={
             "py.init_buffer_bytes": DEFAULT_READ_BUFFER_SIZE + 10 * 1024,
             "soma.init_buffer_bytes": DEFAULT_READ_BUFFER_SIZE + 10 * 1024,
+            # scalability guidance: https://forum.tiledb.com/t/tips-on-consolidating-sparse-arrays-python/559/2
+            "sm.mem.total_budget": 40 * 2**30,
+            "sm.consolidation.buffer_size": 2**30,
             **tiledb_config,
         }
     )
