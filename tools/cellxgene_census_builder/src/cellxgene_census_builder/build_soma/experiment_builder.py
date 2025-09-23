@@ -34,7 +34,6 @@ from .globals import (
     CENSUS_X_LAYERS,
     CENSUS_X_LAYERS_PLATFORM_CONFIG,
     CXG_VAR_COLUMNS_READ,
-    DONOR_ID_IGNORE,
     FEATURE_DATASET_PRESENCE_MATRIX_NAME,
     FULL_GENE_ASSAY,
     MEASUREMENT_RNA_NAME,
@@ -190,7 +189,6 @@ class ExperimentBuilder:
         self.n_unique_obs: int = 0
         self.n_var: int = 0
         self.n_datasets: int = 0
-        self.n_donors: int = 0  # Caution: defined as (unique dataset_id, donor_id) tuples, *excluding* some values
         self.obs_df: pd.DataFrame | None = None
         self.var_df: pd.DataFrame | None = None
         self.dataset_obs_joinid_start: dict[str, int] = {}  # starting joinid per dataset_id
@@ -458,7 +456,6 @@ def post_acc_axes_processing(accumulated: list[tuple[ExperimentBuilder, tuple[pd
         # compute intermediate values used later in the build
         eb.n_datasets = obs.dataset_id.nunique()
         eb.n_unique_obs = (obs.is_primary_data == True).sum()  # noqa: E712
-        eb.n_donors = obs[~obs.donor_id.isin(DONOR_ID_IGNORE)].groupby("dataset_id").donor_id.nunique().sum()
         eb.global_var_joinids = var[["feature_id", "soma_joinid"]].set_index("feature_id")
 
         grouped_by_id = obs.groupby("dataset_id").soma_joinid.agg(["min", "count"])
@@ -815,14 +812,12 @@ def populate_X_layers(
 class SummaryStats(TypedDict):
     total_cell_count: int
     unique_cell_count: int
-    number_donors: dict[str, int]
 
 
 def get_summary_stats(experiment_builders: Sequence[ExperimentBuilder]) -> SummaryStats:
     return {
         "total_cell_count": sum(e.n_obs for e in experiment_builders),
         "unique_cell_count": sum(e.n_unique_obs for e in experiment_builders),
-        "number_donors": {e.name: e.n_donors for e in experiment_builders},
     }
 
 
