@@ -10,9 +10,9 @@ from .schema_util import FieldSpec, TableSpec
 # DataFrame columns. True is enabled, False is disabled.
 USE_ARROW_DICTIONARY = True
 
-CENSUS_SCHEMA_VERSION = "2.1.0"
+CENSUS_SCHEMA_VERSION = "2.4.0"
 
-CXG_SCHEMA_VERSION = "5.2.0"  # the CELLxGENE schema version supported
+CXG_SCHEMA_VERSION = "6.0.0"  # the CELLxGENE schema version supported
 
 # Columns expected in the census_datasets dataframe
 CENSUS_DATASETS_TABLE_SPEC = TableSpec.create(
@@ -321,7 +321,7 @@ RNA_SEQ = [
 # list of EFO terms that correspond to SPATIAL modality/measurement. These terms
 # define the inclusive filter applied to obs.assay_ontology_term_id. All other
 ALLOWED_SPATIAL_ASSAYS = [
-    "EFO:0010961",  # Visium Spatial Gene Expression
+    "EFO:0022857",  # Visium Spatial Gene Expression
     "EFO:0030062",  # Slide-seqV2
 ]
 
@@ -349,8 +349,6 @@ FULL_GENE_ASSAY = [
     "EFO:0030061",  # mcSCRB-seq
     "EFO:0700016",  # Smart-seq v4
 ]
-
-DONOR_ID_IGNORE = ["pooled", "unknown"]
 
 
 # The default configuration for TileDB contexts used in the builder.

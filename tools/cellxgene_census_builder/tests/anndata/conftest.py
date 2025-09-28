@@ -119,7 +119,9 @@ def h5ad_with_organoids_and_cell_culture(tmp_path: pathlib.Path) -> str:
 @pytest.fixture
 def h5ad_with_organism(tmp_path: pathlib.Path) -> str:
     adata = get_anndata(ORGANISMS[0], no_zero_counts=True)
-    adata.obs.at["1", "organism_ontology_term_id"] = ORGANISMS[1].organism_ontology_term_id
+    # With schema >= 6.0.0, organism is stored in uns and files are single-organism.
+    # Simulate mismatch by setting uns organism to a different species to ensure filter drops all.
+    adata.uns["organism_ontology_term_id"] = ORGANISMS[1].organism_ontology_term_id
 
     path = "with_organism.h5ad"
     adata.write_h5ad(tmp_path / path)

@@ -268,7 +268,7 @@ class AnnDataProxy(AbstractContextManager["AnnDataProxy"]):
 
 
 # The minimum columns required to be able to filter an H5AD.  See `make_anndata_cell_filter` for details.
-CXG_OBS_COLUMNS_MINIMUM_READ = ("assay_ontology_term_id", "organism_ontology_term_id", "tissue_type", "is_primary_data")
+CXG_OBS_COLUMNS_MINIMUM_READ = ("assay_ontology_term_id", "tissue_type", "is_primary_data")
 CXG_VAR_COLUMNS_MINIMUM_READ = ("feature_biotype", "feature_reference")
 
 
@@ -316,7 +316,7 @@ def make_anndata_cell_filter(filter_spec: AnnDataFilterSpec) -> AnnDataFilterFun
     obs filter:
     * not organoid or cell culture
     * Caller-specified assays only
-    * Caller-specified taxa (obs.organism_ontology_term_id == '<user-supplied>')
+    * Caller-specified taxa (uns.organism_ontology_term_id == '<user-supplied>')
     * Organism term ID value not equal to gene feature_reference value
     * Single organism
 
@@ -336,17 +336,18 @@ def make_anndata_cell_filter(filter_spec: AnnDataFilterSpec) -> AnnDataFilterFun
         var_mask = ad.var.feature_biotype == "gene"
         obs_mask = ad.obs.tissue_type.isin(["tissue", "organoid"])
 
-        # Handle multi-species edge case
-        var_organisms = set(ad.var.feature_reference[var_mask].unique())
-        obs_organisms = set(ad.obs.organism_ontology_term_id[obs_mask].unique())
-        if len(var_organisms) > 1 and len(obs_organisms) > 1:
-            # if multi-species on both axis -- drop everything
-            logger.info(f"H5AD ignored - multi-species content on both axes: {ad.filename}")
-            return ad[0:0]  # ie., drop all cells
+        assert ad._file is not None, "Internal error: filter expects a root AnnDataProxy with an open file handle"
+        assert ("uns" in ad._file) and (
+            "organism_ontology_term_id" in ad._file["uns"]
+        ), f"{ad.filename} -- missing 'uns/organism_ontology_term_id'; expected per CxG schema {CXG_SCHEMA_VERSION}"
+        uns_organism = read_elem(ad._file["uns/organism_ontology_term_id"])
+        if uns_organism != organism_ontology_term_id:
+            # File's organism does not match requested organism – drop all
+            return ad[0:0]
 
         # Filter by the species specified in the filter-spec
+        # Always restrict genes to the file/requested organism
         var_mask = var_mask & (ad.var.feature_reference == organism_ontology_term_id)
-        obs_mask = obs_mask & (ad.obs.organism_ontology_term_id == organism_ontology_term_id)
         if assay_ontology_term_ids:
             obs_mask = obs_mask & ad.obs.assay_ontology_term_id.isin(assay_ontology_term_ids)
 
