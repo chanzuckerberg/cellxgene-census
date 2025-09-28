@@ -323,7 +323,7 @@ class ExperimentBuilder:
             # LIL is fast way to create spmatrix
             pm = sparse.lil_matrix((max_dataset_joinid + 1, self.n_var), dtype=bool)
             for dataset_joinid, cols in self.presence.items():
-                pm[dataset_joinid, cols] = 1
+                pm[dataset_joinid, cols.copy()] = 1
 
             pm = pm.tocoo()
             pm.eliminate_zeros()
