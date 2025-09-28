@@ -52,7 +52,8 @@ dependencies= [
     "tiledb==0.33.4",
     # Spatial testing
     "filelock==3.17.0",
-    "spatialdata==0.4.0",
+    "spatialdata==0.4.0", # spatialdata & xarray pinned due to dep conflicts in spatialdata 0.5.0
+    "xarray==2024.11.0",
     "pooch==1.8.2",
     "pytest-xdist==3.6.1",
 ]
