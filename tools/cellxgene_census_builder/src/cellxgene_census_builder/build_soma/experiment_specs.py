@@ -17,6 +17,56 @@ def make_experiment_specs() -> list[ExperimentSpecification]:
     Functionally, this defines per-experiment name, anndata filter, etc.
     It also loads any required per-Experiment assets.
     """
+    return [
+        ExperimentSpecification.create(
+            name="callithrix_jacchus",
+            label="Callithrix jacchus",
+            root_collection="census_data",
+            anndata_cell_filter_spec={
+                "organism_ontology_term_id": "NCBITaxon:9483",
+                "assay_ontology_term_ids": RNA_SEQ,
+            },
+            organism_ontology_term_id="NCBITaxon:9483",
+            obs_term_fields=CXG_OBS_TERM_FIELDS,
+            obs_term_fields_read=CXG_OBS_TERM_FIELDS + CXG_OBS_FIELDS_READ,
+        ),
+        ExperimentSpecification.create(
+            name="macaca_mulatta",
+            label="Macaca mulatta",
+            root_collection="census_data",
+            anndata_cell_filter_spec={
+                "organism_ontology_term_id": "NCBITaxon:9544",
+                "assay_ontology_term_ids": RNA_SEQ,
+            },
+            organism_ontology_term_id="NCBITaxon:9544",
+            obs_term_fields=CXG_OBS_TERM_FIELDS,
+            obs_term_fields_read=CXG_OBS_TERM_FIELDS + CXG_OBS_FIELDS_READ,
+        ),
+        ExperimentSpecification.create(
+            name="pan_troglodytes",
+            label="Pan troglodytes",
+            root_collection="census_data",
+            anndata_cell_filter_spec={
+                "organism_ontology_term_id": "NCBITaxon:9598",
+                "assay_ontology_term_ids": RNA_SEQ,
+            },
+            organism_ontology_term_id="NCBITaxon:9598",
+            obs_term_fields=CXG_OBS_TERM_FIELDS,
+            obs_term_fields_read=CXG_OBS_TERM_FIELDS + CXG_OBS_FIELDS_READ,
+        ),
+        ExperimentSpecification.create(
+            name="sus_scrofa",
+            label="Sus scrofa",
+            root_collection="census_data",
+            anndata_cell_filter_spec={
+                "organism_ontology_term_id": "NCBITaxon:9823",
+                "assay_ontology_term_ids": RNA_SEQ,
+            },
+            organism_ontology_term_id="NCBITaxon:9823",
+            obs_term_fields=CXG_OBS_TERM_FIELDS,
+            obs_term_fields_read=CXG_OBS_TERM_FIELDS + CXG_OBS_FIELDS_READ,
+        ),
+    ]
     return [  # The soma.Experiments we want to build
         ExperimentSpecification.create(
             name="homo_sapiens",
