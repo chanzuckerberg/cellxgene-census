@@ -88,7 +88,7 @@ def build(args: CensusBuildArgs, *, validate: bool = True) -> int:
     n_workers = clamp(cpu_count(), 1, args.config.max_worker_processes)
     with create_dask_client(args, n_workers=n_workers, threads_per_worker=1, memory_limit=0) as client:
         # Step 1 - get all source datasets
-        datasets = build_step1_get_source_datasets(args)
+        datasets = build_step1_get_source_datasets(args, experiment_builders)
 
         # Step 2 - create root collection, and all child objects, but do not populate any dataframes or matrices
         root_collection = build_step2_create_root_collection(args.soma_path.as_posix(), experiment_builders)
@@ -178,11 +178,18 @@ def populate_root_collection(root_collection: soma.Collection) -> soma.Collectio
     return root_collection
 
 
-def build_step1_get_source_datasets(args: CensusBuildArgs) -> list[Dataset]:
+def build_step1_get_source_datasets(
+    args: CensusBuildArgs, experiment_builders: list[ExperimentBuilder]
+) -> list[Dataset]:
     logger.info("Build step 1 - get source assets - started")
 
     # Load manifest defining the datasets
-    all_datasets = load_manifest(args.config.manifest, args.config.dataset_id_blocklist_uri)
+    organism_ontology_term_ids = sorted({eb.specification.organism_ontology_term_id for eb in experiment_builders})
+    all_datasets = load_manifest(
+        args.config.manifest,
+        args.config.dataset_id_blocklist_uri,
+        organism_ontology_term_ids=organism_ontology_term_ids if not args.config.manifest else None,
+    )
     if len(all_datasets) == 0:
         logger.error("No H5AD files in the manifest (or we can't find the files)")
         raise RuntimeError("No H5AD files in the manifest (or we can't find the files)")
