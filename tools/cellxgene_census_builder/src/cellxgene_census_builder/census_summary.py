@@ -63,11 +63,17 @@ def display_diff(
 
     for organism in census[CENSUS_DATA_NAME]:
         curr_count = census[CENSUS_DATA_NAME][organism].obs.count
-        prev_count = previous_census[CENSUS_DATA_NAME][organism].obs.count
-        print(
-            f"Previous {organism} cell count: {prev_count}, current {organism} cell count: {curr_count}, delta {curr_count - prev_count}",
-            file=file,
-        )
+        if organism in previous_census[CENSUS_DATA_NAME]:
+            prev_count = previous_census[CENSUS_DATA_NAME][organism].obs.count
+            print(
+                f"Previous {organism} cell count: {prev_count}, current {organism} cell count: {curr_count}, delta {curr_count - prev_count}",
+                file=file,
+            )
+        else:
+            print(
+                f"New organism {organism} added, cell count: {curr_count}.",
+                file=file,
+            )
         print(file=file)
 
     prev_datasets = previous_census[CENSUS_INFO_NAME]["datasets"].read().concat().to_pandas()
@@ -135,6 +141,15 @@ def display_diff(
     # Genes removed, added
     for organism in census[CENSUS_DATA_NAME]:
         curr_genes = census[CENSUS_DATA_NAME][organism].ms["RNA"].var.read().concat().to_pandas()
+        if organism not in previous_census[CENSUS_DATA_NAME]:
+            # Nothing to diff against for a new organism; report and skip gene diffs
+            print(
+                f"New organism {organism} added with {len(curr_genes)} genes.",
+                file=file,
+            )
+            print(file=file)
+            continue
+
         prev_genes = previous_census[CENSUS_DATA_NAME][organism].ms["RNA"].var.read().concat().to_pandas()
 
         new_genes = set(curr_genes["feature_id"]) - set(prev_genes["feature_id"])
