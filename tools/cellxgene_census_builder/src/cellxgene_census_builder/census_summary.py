@@ -79,6 +79,19 @@ def display_diff(
     prev_datasets = previous_census[CENSUS_INFO_NAME]["datasets"].read().concat().to_pandas()
     curr_datasets = census[CENSUS_INFO_NAME]["datasets"].read().concat().to_pandas()
 
+    # Build dataset_id -> organism mapping for each census so we can report organism for added/removed datasets
+    def _build_dataset_organism_map(census_obj) -> dict[str, str]:
+        mapping: dict[str, set[str]] = {}
+        for org, exp in census_obj[CENSUS_DATA_NAME].items():
+            df = exp.obs.read(column_names=["dataset_id"]).concat().to_pandas()
+            for dsid in df["dataset_id"].unique():
+                mapping.setdefault(dsid, set()).add(org)
+        # Convert sets to a stable, comma-separated string (handles rare multi-organism datasets)
+        return {k: ", ".join(sorted(v)) for k, v in mapping.items()}
+
+    curr_ds_to_org = _build_dataset_organism_map(census)
+    prev_ds_to_org = _build_dataset_organism_map(previous_census)
+
     # Datasets removed, added
     curr_datasets_ids = set(curr_datasets["dataset_id"])
     prev_dataset_ids = set(prev_datasets["dataset_id"])
@@ -87,16 +100,18 @@ def display_diff(
     removed_datasets = prev_dataset_ids - curr_datasets_ids
     if added_datasets:
         print(f"Datasets that were added ({len(added_datasets)})", file=file)
-        added_datasets_df = curr_datasets[curr_datasets["dataset_id"].isin(added_datasets)]
-        print(added_datasets_df[["dataset_id", "dataset_title", "collection_name"]], file=file)
+        added_datasets_df = curr_datasets[curr_datasets["dataset_id"].isin(added_datasets)].copy()
+        added_datasets_df["organism"] = added_datasets_df["dataset_id"].map(curr_ds_to_org).fillna("unknown")
+        print(added_datasets_df[["dataset_id", "organism", "dataset_title", "collection_name"]], file=file)
     else:
         print("No datasets were added", file=file)
     print(file=file)
 
     if removed_datasets:
         print(f"Datasets that were removed ({len(removed_datasets)})", file=file)
-        removed_datasets_df = prev_datasets[prev_datasets["dataset_id"].isin(removed_datasets)]
-        print(removed_datasets_df[["dataset_id", "dataset_title", "collection_name"]], file=file)
+        removed_datasets_df = prev_datasets[prev_datasets["dataset_id"].isin(removed_datasets)].copy()
+        removed_datasets_df["organism"] = removed_datasets_df["dataset_id"].map(prev_ds_to_org).fillna("unknown")
+        print(removed_datasets_df[["dataset_id", "organism", "dataset_title", "collection_name"]], file=file)
     else:
         print("No datasets were removed", file=file)
     print(file=file)
