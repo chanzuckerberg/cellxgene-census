@@ -668,7 +668,6 @@ def dispatch_X_chunk(
         if is_spatial_assay:
             pass
         elif is_full_gene_assay is not None:
-            # Guard ensures feature_length available when is_full_gene_assay is set
             assert feature_length is not None
             is_full_gene_assay_mask = is_full_gene_assay[idx : idx + minor_stride]
             xNormD = np.where(is_full_gene_assay_mask[xI], xD / feature_length[xJ], xD).astype(np.float32)
