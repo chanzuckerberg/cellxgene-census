@@ -591,7 +591,9 @@ def dispatch_X_chunk(
     }
 
     # Index the AnnData var coordinates into SOMA space
-    local_var_joinids = adata.var.join(global_var_joinids).soma_joinid.to_numpy()
+    local_var_joinids: npt.NDArray[np.int64] = adata.var.join(global_var_joinids).soma_joinid.to_numpy(
+        dtype=np.int64, copy=True
+    )
     assert (local_var_joinids >= 0).all(), f"Illegal join id, {dataset_id}"
 
     # spatial and non-spatial assays should not be written to the same Experiment
@@ -602,7 +604,7 @@ def dispatch_X_chunk(
     _is_full_gene_assay = np.isin(adata.obs.assay_ontology_term_id.to_numpy(), FULL_GENE_ASSAY)
     if _is_full_gene_assay.any():
         is_full_gene_assay: npt.NDArray[np.bool_] | None = _is_full_gene_assay
-        feature_length = adata.var.feature_length.to_numpy()
+        feature_length: npt.NDArray[np.float32] | None = adata.var.feature_length.to_numpy(dtype=np.float32, copy=True)
     else:
         is_full_gene_assay = None
         feature_length = None
@@ -666,6 +668,7 @@ def dispatch_X_chunk(
         if is_spatial_assay:
             pass
         elif is_full_gene_assay is not None:
+            # Guard ensures feature_length available when is_full_gene_assay is set
             assert feature_length is not None
             is_full_gene_assay_mask = is_full_gene_assay[idx : idx + minor_stride]
             xNormD = np.where(is_full_gene_assay_mask[xI], xD / feature_length[xJ], xD).astype(np.float32)
