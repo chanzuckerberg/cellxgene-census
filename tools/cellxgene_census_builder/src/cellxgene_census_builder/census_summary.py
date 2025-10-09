@@ -125,8 +125,21 @@ def display_diff(
     ][["dataset_id", "dataset_total_cell_count_prev", "dataset_total_cell_count_curr"]]
 
     if not datasets_with_different_cell_counts.empty:
+        org_series = datasets_with_different_cell_counts["dataset_id"].map(curr_ds_to_org)
+        datasets_with_different_cell_counts.insert(1, "organism", org_series.fillna("???"))
+
         print("Datasets that have a different cell count", file=file)
-        print(datasets_with_different_cell_counts, file=file)
+        print(
+            datasets_with_different_cell_counts[
+                [
+                    "dataset_id",
+                    "organism",
+                    "dataset_total_cell_count_prev",
+                    "dataset_total_cell_count_curr",
+                ]
+            ],
+            file=file,
+        )
         print(file=file)
 
     # Deltas between summary_cell_counts dataframes
@@ -169,18 +182,18 @@ def display_diff(
 
         new_genes = set(curr_genes["feature_id"]) - set(prev_genes["feature_id"])
         if new_genes:
-            print("Genes added", file=file)
+            print(f"Genes added in {organism} ({len(new_genes)}):", file=file)
             print(new_genes, file=file)
         else:
-            print("No genes were added.", file=file)
+            print(f"No genes were added in {organism}.", file=file)
             print(file=file)
 
         removed_genes = set(prev_genes["feature_id"]) - set(curr_genes["feature_id"])
         if removed_genes:
-            print("Genes removed", file=file)
+            print(f"Genes removed in {organism} ({len(removed_genes)}):", file=file)
             print(removed_genes, file=file)
         else:
-            print("No genes were removed.", file=file)
+            print(f"No genes were removed in {organism}.", file=file)
             print(file=file)
 
     return 0
