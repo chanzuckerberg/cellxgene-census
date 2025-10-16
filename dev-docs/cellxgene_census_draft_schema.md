@@ -132,41 +132,78 @@ The following values for [`feature_reference`](https://github.com/chanzuckerberg
 
 #### Assays
 
-Assays are defined in the CELLxGENE Discover dataset schema in [`assay_ontology_term_id`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/7.0.0/schema.md#assay_ontology_term_id).
+CELLxGENE Discover requirements for assays are defined in [`assay_ontology_term_id`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/7.0.0/schema.md#assay_ontology_term_id). 
 
-The Census MUST include all cells from the list of [accepted assays](./census_accepted_assays.csv).
+The Census MUST only include observations (cells) corresponding to the following values for [`assay_ontology_term_id`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/7.0.0/schema.md#assay_ontology_term_id) if present in CELLxGENE Discover. 
 
-These assays were selected with the following criteria:
 
-> Only children "EFO:0002772" or "EFO:0010183" are shown as this is a constraint imposed by the CELLxGENE dataset schema >3.0.0.
->
-> * Must measure gene expression via RNA sequencing.
-> * Can be done at the single-cell level.
-> * May include nascent or elongating RNA data.
-> * May be targeted to specific genes in an assay-specific manner.
-> * May include spatial data exclusively from Visium or Slide-seq.
-> * Doesn't measure other non-RNA molecules concurrently.
-> * Doesn’t require author metadata for correct interpretability (e.g. perturbation-based technologies).
-> * Doesn’t intend to primarily measure RNA structure, RNA fusions, RNA modifications, or RNA interactions.
-> * Doesn’t intend to primarily measure non-mRNA (e.g. tRNA, rRNA, small RNAs).
-> * Doesn’t intend to primarily measure viral RNA.
-> * Doesn’t intend to primarily measure introns.
-> * Doesn’t do ribosome profiling.
-
-##### Full-gene sequencing assays
-
-From the list of accepted assays, this list of [full-gene sequencing assays](./census_accepted_assays_full_gene.csv) are those that when used at the single-cell level will always perform full-gene sequencing.
-
-These data need to be normalized by gene length for downstream analysis.
+| Accepted Assays |  |  |
+|--------|--------|--------|
+| [EFO:0003755](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0003755)<br>for <i>FL-cDNA</i> | [EFO:0008640](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008640)<br>for <i>3'T-fill</i> | [EFO:0008641](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008641)<br>for <i>3’-end-seq</i> |
+| [EFO:0008643](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008643)<br>for <i>3′-Seq</i> | [EFO:0008661](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008661)<br>for <i>Bru-Seq</i> | [EFO:0008669](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008669)<br>for <i>CAGEscan</i> |
+| [EFO:0008673](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008673)<br>for <i>CapSeq</i> | [EFO:0008675](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008675)<br>for <i>CaptureSeq</i> | [EFO:0008679](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008679)<br>for <i>CEL-seq</i> |
+| [EFO:0008694](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008694)<br>for <i>ClickSeq</i> | [EFO:0008697](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008697)<br>for <i>cP-RNA-Seq</i> | [EFO:0008703](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008703)<br>for <i>CytoSeq</i> |
+| [EFO:0008708](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008708)<br>for <i>DeepCAGE</i> | [EFO:0008710](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008710)<br>for <i>Digital RNA</i> | [EFO:0008718](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008718)<br>for <i>DP-Seq</i> |
+| [EFO:0008720](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008720)<br>for <i>DroNc-seq</i> | [EFO:0008722](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008722)<br>for <i>Drop-seq</i> | [EFO:0008735](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008735)<br>for <i>FACS-seq</i> |
+| [EFO:0008747](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008747)<br>for <i>FRISCR</i> | [EFO:0008748](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008748)<br>for <i>FRT-Seq</i> | [EFO:0008752](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008752)<br>for <i>GMUCT 1.0</i> |
+| [EFO:0008753](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008753)<br>for <i>GMUCT 2.0</i> | [EFO:0008756](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008756)<br>for <i>GRO-CAP</i> | [EFO:0008763](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008763)<br>for <i>Hi-SCL</i> |
+| [EFO:0008780](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008780)<br>for <i>inDrop</i> | [EFO:0008796](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008796)<br>for <i>MARS-seq</i> | [EFO:0008797](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008797)<br>for <i>MATQ-seq</i> |
+| [EFO:0008824](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008824)<br>for <i>NanoCAGE</i> | [EFO:0008825](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008825)<br>for <i>Nanogrid RNA-Seq</i> | [EFO:0008826](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008826)<br>for <i>NET-Seq</i> |
+| [EFO:0008850](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008850)<br>for <i>PAS-Seq</i> | [EFO:0008859](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008859)<br>for <i>PEAT</i> | [EFO:0008863](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008863)<br>for <i>PLATE-Seq</i> |
+| [EFO:0008868](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008868)<br>for <i>PRO-cap</i> | [EFO:0008869](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008869)<br>for <i>PRO-seq</i> | [EFO:0008877](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008877)<br>for <i>Quartz-seq</i> |
+| [EFO:0008896](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008896)<br>for <i>RNA-Seq</i> | [EFO:0008897](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008897)<br>for <i>RNAtag-Seq</i> | [EFO:0008898](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008898)<br>for <i>RNET-seq</i> |
+| [EFO:0008903](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008903)<br>for <i>SC3-seq</i> | [EFO:0008919](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008919)<br>for <i>Seq-Well</i> | [EFO:0008929](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008929)<br>for <i>SMA</i> |
+| [EFO:0008930](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008930)<br>for <i>Smart-seq</i> | [EFO:0008931](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008931)<br>for <i>Smart-seq2</i> | [EFO:0008937](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008937)<br>for <i>snDrop-seq</i> |
+| [EFO:0008941](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008941)<br>for <i>sNuc-Seq</i> | [EFO:0008945](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008945)<br>for <i>SPET-seq</i> | [EFO:0008953](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008953)<br>for <i>STRT-seq</i> |
+| [EFO:0008954](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008954)<br>for <i>STRT-seq-2i</i> | [EFO:0008956](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008956)<br>for <i>SUPeR-seq</i> | [EFO:0008962](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008962)<br>for <i>TARDIS</i> |
+| [EFO:0008966](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008966)<br>for <i>TCR Chain Paring</i> | [EFO:0008967](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008967)<br>for <i>TCR-LA-MC PCR</i> | [EFO:0008972](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008972)<br>for <i>TL-seq</i> |
+| [EFO:0008974](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008974)<br>for <i>Tomo-Seq</i> | [EFO:0008975](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008975)<br>for <i>TRAP-Seq</i> | [EFO:0008978](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008978)<br>for <i>TSS Sequencing</i> |
+| [EFO:0008980](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008980)<br>for <i>UMI Method</i> | [EFO:0009309](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0009309)<br>for <i>Div-Seq</i> | [EFO:0009899](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0009899)<br>for <i>10x 3' v2</i> |
+| [EFO:0009900](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0009900)<br>for <i>10x 5' v2</i> | [EFO:0009901](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0009901)<br>for <i>10x 3' v1</i> | [EFO:0009919](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0009919)<br>for <i>SPLiT-seq</i> |
+| [EFO:0009922](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0009922)<br>for <i>10x 3' v3</i> | [EFO:0009991](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0009991)<br>for <i>Nuc-Seq</i> | [EFO:0009999](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0009999)<br>for <i>G&T-Seq</i> |
+| [EFO:0010003](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0010003)<br>for <i>RASL-seq</i> | [EFO:0010004](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0010004)<br>for <i>SCRB-seq</i> | [EFO:0010005](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0010005)<br>for <i>DR-Seq</i> |
+| [EFO:0010006](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0010006)<br>for <i>scM&T-seq</i> | [EFO:0010007](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0010007)<br>for <i>scTrio-seq</i> | [EFO:0010010](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0010010)<br>for <i>CEL-seq2</i> |
+| [EFO:0010022](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0010022)<br>for <i>Smart-3Seq</i> | [EFO:0010034](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0010034)<br>for <i>Cappable-Seq</i> | [EFO:0010041](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0010041)<br>for <i>Nascent-Seq</i> |
+| [EFO:0010058](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0010058)<br>for <i>Fluidigm C1-based library preparation</i> | [EFO:0010184](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0010184)<br>for <i>Smart-like</i> | [EFO:0010550](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0010550)<br>for <i>sci-RNA-seq</i> |
+| [EFO:0011025](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0011025)<br>for <i>10x 5' v1</i> | [EFO:0022396](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0022396)<br>for <i>TruSeq</i> | [EFO:0022488](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0022488)<br>for <i>Smart-seq3</i> |
+| [EFO:0022490](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0022490)<br>for <i>ScaleBio single cell RNA sequencing</i> | [EFO:0022600](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0022600)<br>for <i>Parse Evercode Whole Transcriptome v1</i> | [EFO:0022601](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0022601)<br>for <i>Parse Evercode Whole Transcriptome v2</i> |
+| [EFO:0022602](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0022602)<br>for <i>Parse Evercode Whole Transcriptome v3</i> | [EFO:0022604](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0022604)<br>for <i>10x 3' v4</i> | [EFO:0022605](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0022605)<br>for <i>10x 5' v3</i> |
+| [EFO:0022606](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0022606)<br>for <i>10x gene expression flex</i> | [EFO:0022839](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0022839)<br>for <i>STORM-seq</i> | [EFO:0022845](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0022845)<br>for <i>modified STRT-seq</i> |
+| [EFO:0022846](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0022846)<br>for <i>5' STRT-seq</i> | [EFO:0022857](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0022857)<br>for <i>Visium Spatial Gene Expression V1</i>  | [EFO:0022962](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0022962)<br>for <i>SHARE-seq</i> |
+| [EFO:0030001](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0030001)<br>for <i>sci-CAR</i> | [EFO:0030002](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0030002)<br>for <i>microwell-seq</i> | [EFO:0030003](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0030003)<br>for <i>10x 3' transcription profiling</i> |
+| [EFO:0030004](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0030004)<br>for <i>10x 5' transcription profiling</i> | [EFO:0030019](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0030019)<br>for <i>Seq-Well S3</i> | [EFO:0030021](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0030021)<br>for <i>Nx1-seq</i> |
+| [EFO:0030026](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0030026)<br>for <i>sci-Plex</i> | [EFO:0030028](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0030028)<br>for <i>sci-RNA-seq3</i> | [EFO:0030030](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0030030)<br>for <i>Quant-seq</i> |
+| [EFO:0030031](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0030031)<br>for <i>SCOPE-chip</i> | [EFO:0030059](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0030059)<br>for <i>10x multiome</i> | [EFO:0030060](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0030060)<br>for <i>mCT-seq</i> |
+| [EFO:0030061](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0030061)<br>for <i>mcSCRB-seq</i> | [EFO:0030062](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0030062)<br>for <i>Slide-seqV2</i> | [EFO:0030074](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0030074)<br>for <i>SORT-seq</i> |
+| [EFO:0700003](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0700003)<br>for <i>BD Rhapsody Whole Transcriptome Analysis</i> | [EFO:0700004](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0700004)<br>for <i>BD Rhapsody Targeted mRNA</i> | [EFO:0700010](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0700010)<br>for <i>TruDrop</i> |
+| [EFO:0700011](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0700011)<br>for <i>GEXSCOPE technology</i> | [EFO:0700016](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0700016)<br>for <i>Smart-seq v4</i> | [EFO:0900000](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0900000)<br>for <i>particle-templated instant partition sequencing</i> |
+| [EFO:0900001](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0900001)<br>for <i>Asteria scRNA-seq kit</i> | [EFO:0900002](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0900002)<br>for <i>HIVE CLX Single-Cell RNAseq Solution</i> |  |
 
 ##### Spatial Assays
 
-Only observations from Visium and Slide-seq assays MUST be included in Census, as indicated in the list of [accepted assays](https://github.com/chanzuckerberg/cellxgene-census/pull/1387/census_accepted_assays.csv). Per the CELLxGENE dataset schema, datasets with spatial observations can be identified with the presence of the slot uns["spatial"]. For these assays, observations from datasets that contain more than one tissue section MUST NOT be included in Census.
+There are further requirements for two spatial assays:
 
-The full logic above can be asserted as follows:
+* If [`assay_ontology_term_id`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/7.0.0/schema.md#assay_ontology_term_id) is <a href="https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0010961"><code>"EFO:0010961"</code></a> for <i>Visium Spatial Gene Expression</i>, then [<code>is_single</code>](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/7.0.0/schema.md#is_single) MUST be <code>True</code> indicating that the dataset represents one Space Ranger output for a single tissue section.
 
-* if `assay_ontology_term_id` is ["EFO:0010961"](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0022857) for Visium Spatial Gene Expression V1 and the dataset represents one Space Ranger output for a single tissue section (e.g.the dataset has `True` in `uns["spatial"]["is_single"]`)
-* if `assay_ontology_term_id` is ["EFO:0030062"](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0030062) for Slide-seqV2 and the dataset represents the output for a single array on a puck (e.g. the dataset has `True` in `uns["spatial"]["is_single"]`)
+* If [`assay_ontology_term_id`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/7.0.0/schema.md#assay_ontology_term_id) is <a href="https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0030062"><code>"EFO:0030062"</code></a> for <i>Slide-seqV2</i>, then [<code>is_single</code>](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/7.0.0/schema.md#is_single) MUST be <code>True</code>, indicating that the dataset represents the output for a single array on a puck.
+
+Otherwise, Census MUST NOT include the corresponding observations (cells).
+
+##### Full-gene sequencing assays
+
+Full-gene sequencing assays represent the subset of accepted assays that perform full-gene sequencing when used at the single-cell level. Such data MUST be normalized by gene length for downstream analysis. 
+
+| Full-gene sequencing assays |  |  |
+|--------|--------|--------|
+| [EFO:0003755](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0003755)<br>for <i>FL-cDNA</i> | [EFO:0008441](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008441)<br>for <i>full length single cell RNA sequencing</i> | [EFO:0008747](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008747)<br>for <i>FRISCR</i> |
+| [EFO:0008763](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008763)<br>for <i>Hi-SCL</i> | [EFO:0008797](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008797)<br>for <i>MATQ-seq</i> | [EFO:0008877](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008877)<br>for <i>Quartz-seq</i> |
+| [EFO:0008930](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008930)<br>for <i>Smart-seq</i> | [EFO:0008931](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008931)<br>for <i>Smart-seq2</i> | [EFO:0008956](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008956)<br>for <i>SUPeR-seq</i> |
+| [EFO:0009810](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0009810)<br>for <i>full length single nucleus RNA sequencing</i> | [EFO:0009999](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0009999)<br>for <i>G&T-Seq</i> | [EFO:0010004](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0010004)<br>for <i>SCRB-seq</i> |
+| [EFO:0010006](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0010006)<br>for <i>scM&T-seq</i> | [EFO:0010022](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0010022)<br>for <i>Smart-3Seq</i> | [EFO:0010058](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0010058)<br>for <i>Fluidigm C1-based library preparation</i> |
+| [EFO:0010184](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0010184)<br>for <i>Smart-like</i> | [EFO:0022396](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0022396)<br>for <i>TruSeq</i> | [EFO:0022488](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0022488)<br>for <i>Smart-seq3</i> |
+| [EFO:0022839](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0022839)<br>for <i>STORM-seq</i> | [EFO:0030031](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0030031)<br>for <i>SCOPE-chip</i> | [EFO:0030060](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0030060)<br>for <i>mCT-seq</i> |
+| [EFO:0030061](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0030061)<br>for <i>mcSCRB-seq</i> | [EFO:0700016](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0700016)<br>for <i>Smart-seq v4</i> |  |
+| | | |
 
 #### Data matrix types
 
@@ -914,6 +951,8 @@ Spatial data for organisms MUST be stored as a `SOMAExperiment` in `census_obj["
 
 For example, spatial data for _Homo sapiens_ MUST be stored as a `SOMAExperiment` in `census_obj["census_spatial_sequencing"]["homo_sapiens"]`.
 
+**EDITORIAL NOTE: The assay references/restatement will be addressed when this section is rewritten**.
+
 Only Visium Spatial Gene Expression V1 ("EFO:0022857") and Slide-seqV2 ("EFO:0030062") are supported for spatial data. [See the "assays included" section above](assays).
 
 For each organism the `SOMAExperiment` MUST contain the following:
@@ -1095,7 +1134,34 @@ The high resolution image of a Visium Spatial Gene Expression V1("EFO:0022857") 
 * Multi-species data constraints
   * Deleted section due to deprecated requirements for datasets containing multiple species or orthologous gene references
 * Assays
-  * PENDING
+  * Inlined and updated the Census Accepted Assays (CSV) file
+    * Added <code>EFO:0008703</code> for <i>CytoSeq</i>  
+    * Added <code>EFO:0009999</code> for <i>G&T-Seq</i>  
+    * Added <code>EFO:0010005</code> for <i>DR-Seq</i>  
+    * Added <code>EFO:0010006</code> for <i>scM&T-seq</i>  
+    * Added <code>EFO:0010007</code> for <i>scTrio-seq</i>  
+    * Added <code>EFO:0022604</code> for <i>10x 3' v4</i>  
+    * Added <code>EFO:0022605</code> for <i>10x 5' v3</i>  
+    * Added <code>EFO:0022857</code> for <i>Visium Spatial Gene Expression V1</i>  
+    * Added <code>EFO:0022962</code> for <i>SHARE-seq</i>  
+    * Added <code>EFO:0030001</code> for <i>sci-CAR</i>  
+    * Added <code>EFO:0030026</code> for <i>sci-Plex</i>  
+    * Added <code>EFO:0030059</code> for <i>10x multiome</i>  
+    * Added <code>EFO:0030060</code> for <i>mCT-seq</i>  
+    * Added <code>EFO:0900000</code> for <i>particle-templated instant partition sequencing</i>  
+    * Added <code>EFO:0900001</code> for <i>Asteria scRNA-seq kit</i>  
+    * Added <code>EFO:0900002</code> for <i>HIVE CLX Single-Cell RNAseq Solution</i>  
+    * Removed <code>EFO:0008908</code> for <i>SCI-seq</i>
+    * Removed <code>EFO:0010713</code> for <i>10x immune profiling</i>
+    * Removed <code>EFO:0010714</code> for <i>10x TCR enrichment</i>
+    * Removed <code>EFO:0010715</code> for <i>10x Ig enrichment</i>
+    * Removed <code>EFO:0010961</code> for <i>Visium Spatial Gene Expression</i>
+    * Removed <code>EFO:0010964</code> for <i>barcoded plate-based single cell RNA-seq</i>
+    * Removed <code>EFO:0030078</code> for <i>droplet-based single-cell RNA library preparation</i>
+  * Inlined and updated the Census Accepted Assays Full Gene (CSV) file
+    * Added <code>EFO:0009999</code> for <i>G&T-Seq</i>
+    * Added <code>EFO:0010006</code> for <i>scM&T-seq</i>
+    * Added <code>EFO:0030060</code> for <i>mCT-seq</i>  
 * Census table of organisms – `census_obj["census_info"]["organisms"]`
   * Replaced the code reference that documented the value of <code>organism</code> with its requirements
 * Cell metadata – `census_obj["census_data"][organism].obs`
