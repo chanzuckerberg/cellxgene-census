@@ -432,7 +432,9 @@ def post_acc_axes_processing(accumulated: list[tuple[ExperimentBuilder, tuple[pd
     def per_dataset_summary_counts(eb: ExperimentBuilder, obs: pd.DataFrame) -> None:
         for _, obs_slice in obs.groupby("dataset_id"):
             assert obs_slice.soma_joinid.max() - obs_slice.soma_joinid.min() + 1 == len(obs_slice)
-            eb.census_summary_cell_counts = accumulate_summary_counts(eb.census_summary_cell_counts, obs_slice)
+            eb.census_summary_cell_counts = accumulate_summary_counts(
+                eb.specification.name, eb.census_summary_cell_counts, obs_slice
+            )
 
     for eb, (obs, var) in accumulated:
         if not len(obs):
@@ -620,7 +622,9 @@ def dispatch_X_chunk(
     end_idx = min(row_start + n_rows, adata.n_obs)
     n_chunks = math.ceil((end_idx - row_start) / minor_stride + 0.5)
     for idx in range(row_start, end_idx, minor_stride):
-        logger.info(f"processing X {adata.filename}, {row_start}, chunk {(idx-row_start)//minor_stride} of {n_chunks}")
+        logger.info(
+            f"processing X {adata.filename}, {row_start}, chunk {(idx - row_start) // minor_stride} of {n_chunks}"
+        )
 
         # get the chunk
         adata_chunk = adata[idx : min(idx + minor_stride, end_idx)]
