@@ -89,9 +89,7 @@ def build(args: CensusBuildArgs, *, validate: bool = True) -> int:
     with create_dask_client(args, n_workers=n_workers, threads_per_worker=1, memory_limit=0) as client:
         # Step 1 - get all source datasets
         organism_ontology_term_ids = sorted({eb.specification.organism_ontology_term_id for eb in experiment_builders})
-        datasets = build_step1_get_source_datasets(
-            args, experiment_builders, organism_ontology_term_ids=organism_ontology_term_ids
-        )
+        datasets = build_step1_get_source_datasets(args, organism_ontology_term_ids=organism_ontology_term_ids)
 
         # Step 2 - create root collection, and all child objects, but do not populate any dataframes or matrices
         root_collection = build_step2_create_root_collection(args.soma_path.as_posix(), experiment_builders)
