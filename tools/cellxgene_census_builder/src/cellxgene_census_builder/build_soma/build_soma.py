@@ -183,7 +183,6 @@ def populate_root_collection(root_collection: soma.Collection) -> soma.Collectio
 
 def build_step1_get_source_datasets(
     args: CensusBuildArgs,
-    experiment_builders: list[ExperimentBuilder],
     organism_ontology_term_ids: list[str] | None = None,
 ) -> list[Dataset]:
     logger.info("Build step 1 - get source assets - started")
