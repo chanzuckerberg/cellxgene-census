@@ -4,6 +4,7 @@ from typing import TextIO
 
 import cellxgene_census
 import pandas as pd
+from tiledbsoma import DataFrame
 
 from .build_soma.globals import CENSUS_DATA_NAME, CENSUS_INFO_NAME
 
@@ -80,7 +81,7 @@ def display_diff(
     curr_datasets = census[CENSUS_INFO_NAME]["datasets"].read().concat().to_pandas()
 
     # Build dataset_id -> organism mapping for each census so we can report organism for added/removed datasets
-    def _build_dataset_organism_map(census_obj) -> dict[str, str]:
+    def _build_dataset_organism_map(census_obj: DataFrame) -> dict[str, str]:
         mapping: dict[str, set[str]] = {}
         for org, exp in census_obj[CENSUS_DATA_NAME].items():
             df = exp.obs.read(column_names=["dataset_id"]).concat().to_pandas()
