@@ -718,7 +718,7 @@ def validate_X_layers_raw_contents(
 
         # obs.nnz
         nnz = expected_X.getnnz(axis=1)
-        census_obs_nnz = census_obs.nnz.to_numpy(dtype=np.int64, copy=False)
+        census_obs_nnz = census_obs.nnz.to_numpy(dtype=np.int64)
         assert np.all(census_obs_nnz > 0)  # All cells must contain at least one count value > 0
         assert np.array_equal(census_obs_nnz, nnz), f"{eb.name}:{dataset.dataset_id} obs.nnz incorrect."
 

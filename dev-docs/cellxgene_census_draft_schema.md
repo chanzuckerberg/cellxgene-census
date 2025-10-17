@@ -80,94 +80,27 @@ The Census MUST only include observations (cells) corresponding to the following
     </tr>
     <tr>
       <td>
-        <a href="https://www.ebi.ac.uk/ols4/ontologies/ncbitaxon/classes?obo_id=NCBITaxon%3A9595"><code>"NCBITaxon:9595"</code></a>
-      </td>
-      <td><i>Gorilla gorilla gorilla</i></td>
-    </tr>
-    <tr>
-      <td>
         <a href="https://www.ebi.ac.uk/ols4/ontologies/ncbitaxon/classes?obo_id=NCBITaxon%3A9606"><code>"NCBITaxon:9606"</code></a>
       </td>
       <td><i>Homo sapiens</i></td>
     </tr>
     <tr>
       <td>
-        <a href="https://www.ebi.ac.uk/ols4/ontologies/ncbitaxon/classes?obo_id=NCBITaxon%3A9541"><code>"NCBITaxon:9541"</code></a><br>or one of its descendants
-      </td>
-      <td><i>Macaca fascicularis<br>and its descendants</i></td>
-    </tr>
-    <tr>
-      <td>
-        <a href="https://www.ebi.ac.uk/ols4/ontologies/ncbitaxon/classes?obo_id=NCBITaxon%3A9544"><code>"NCBITaxon:9544"</code></a><br>or one of its descendants
+        <a href="https://www.ebi.ac.uk/ols4/ontologies/ncbitaxon/classes?obo_id=NCBITaxon%3A9544"><code>"NCBITaxon:9544"</code></a>
         </td>
-      <td><i>Macaca mulatta<br>and its descendants</i></td>
+      <td><i>Macaca mulatta</i></td>
     </tr>
     <tr>
       <td>
-        <a href="https://www.ebi.ac.uk/ols4/ontologies/ncbitaxon/classes?obo_id=NCBITaxon%3A30608"><code>"NCBITaxon:30608"</code></a>
+        <a href="https://www.ebi.ac.uk/ols4/ontologies/ncbitaxon/classes?obo_id=NCBITaxon%3A10090"><code>"NCBITaxon:10090"</code></a>
       </td>
-      <td><i>Microcebus murinus</i></td>
+      <td><i>Mus musculus</i></td>
     </tr>
     <tr>
       <td>
-        <a href="https://www.ebi.ac.uk/ols4/ontologies/ncbitaxon/classes?obo_id=NCBITaxon%3A10090"><code>"NCBITaxon:10090"</code></a><br>or one of its descendants
+          <a href="https://www.ebi.ac.uk/ols4/ontologies/ncbitaxon/classes?obo_id=NCBITaxon%3A9598"><code>"NCBITaxon:9598"</code></a>
       </td>
-      <td><i>Mus musculus<br>and its descendants</i></td>
-    </tr>
-    <tr>
-      <td>
-        <a href="https://www.ebi.ac.uk/ols4/ontologies/ncbitaxon/classes?obo_id=NCBITaxon%3A9986"><code>"NCBITaxon:9986"</code></a><br>or one of its descendants
-      </td>
-      <td><i>Oryctolagus cuniculus<br>and its descendants</i></td>
-    </tr>
-    <tr>
-      <td>
-          <a href="https://www.ebi.ac.uk/ols4/ontologies/ncbitaxon/classes?obo_id=NCBITaxon%3A9598"><code>"NCBITaxon:9598"</code></a><br>or one of its descendants
-      </td>
-      <td><i>Pan troglodytes<br>and its descendants</i></td>
-    </tr>
-    <tr>
-      <td>
-        <a href="https://www.ebi.ac.uk/ols4/ontologies/ncbitaxon/classes?obo_id=NCBITaxon%3A10116"><code>"NCBITaxon:10116"</code></a><br>or one of its descendants
-      </td>
-      <td><i>Rattus norvegicus<br>and its descendants</i></td>
-    </tr>
-    <tr>
-      <td>
-        <a href="https://www.ebi.ac.uk/ols4/ontologies/ncbitaxon/classes?obo_id=NCBITaxon%3A9823"><code>"NCBITaxon:9823"</code></a><br>or one of its descendants
-      </td>
-      <td><i>Sus scrofa<br>and its descendants</i></td>
-    </tr>
-  </tbody>
-</table><br>
-
-The following values for [`organism_ontology_term_id`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/7.0.0/schema.md#organism_ontology_term_id) MUST NOT be included:
-
-<table>
-  <thead>
-    <tr>
-      <th>Value</th>
-      <th>for Organism</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>
-        <a href="https://www.ebi.ac.uk/ols4/ontologies/ncbitaxon/classes?obo_id=NCBITaxon%3A6239"><code>"NCBITaxon:6293"</code></a>
-      </td>
-      <td><i>Caenorhabditis elegans</i></td>
-    </tr>
-    <tr>
-      <td>
-        <a href="https://www.ebi.ac.uk/ols4/ontologies/ncbitaxon/classes?obo_id=NCBITaxon%3A7955"><code>"NCBITaxon:7955"</code></a>
-      </td>
-      <td><i>Danio rerio</i></td>
-    </tr>
-    <tr>
-      <td>
-        <a href="https://www.ebi.ac.uk/ols4/ontologies/ncbitaxon/classes?obo_id=NCBITaxon%3A7227"><code>"NCBITaxon:7227"</code></a>
-      </td>
-      <td><i>Drosophila melanogaster</i></td>
+      <td><i>Pan troglodytes</td>
     </tr>
   </tbody>
 </table><br>
@@ -182,24 +115,6 @@ The following values for [`feature_reference`](https://github.com/chanzuckerberg
     </tr>
   </thead>
   <tbody>
-    <tr>
-      <td>
-        <a href="https://www.ebi.ac.uk/ols4/ontologies/ncbitaxon/classes?obo_id=NCBITaxon%3A6239"><code>"NCBITaxon:6293"</code></a>
-      </td>
-      <td><i>Caenorhabditis elegans</i></td>
-    </tr>
-    <tr>
-      <td>
-        <a href="https://www.ebi.ac.uk/ols4/ontologies/ncbitaxon/classes?obo_id=NCBITaxon%3A7955"><code>"NCBITaxon:7955"</code></a>
-      </td>
-      <td><i>Danio rerio</i></td>
-    </tr>
-    <tr>
-      <td>
-        <a href="https://www.ebi.ac.uk/ols4/ontologies/ncbitaxon/classes?obo_id=NCBITaxon%3A7227"><code>"NCBITaxon:7227"</code></a>
-      </td>
-      <td><i>Drosophila melanogaster</i></td>
-    </tr>
     <tr>
       <td>
         <a href="https://www.ebi.ac.uk/ols4/ontologies/ncbitaxon/classes?obo_id=NCBITaxon%3A2697049"><code>"NCBITaxon:2697049"</code></a>
@@ -1175,14 +1090,8 @@ The high resolution image of a Visium Spatial Gene Expression V1("EFO:0022857") 
 * Species
   * Renamed section from _Species_ to _Organisms_ for consistency
   * Added _Callithrix jacchus_
-  * Added _Gorilla gorilla gorilla_
-  * Added _Macaca fascicularis_
   * Added _Macaca mulatta_
-  * Added _Microcebus murinus_
-  * Added _Oryctolagus cuniculus_
   * Added _Pan troglodytes_
-  * Added _Rattus norvegicus_
-  * Added _Sus scrofa_
 * Multi-species data constraints
   * Deleted section due to deprecated requirements for datasets containing multiple species or orthologous gene references
 * Assays
