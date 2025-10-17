@@ -88,7 +88,10 @@ def build(args: CensusBuildArgs, *, validate: bool = True) -> int:
     n_workers = clamp(cpu_count(), 1, args.config.max_worker_processes)
     with create_dask_client(args, n_workers=n_workers, threads_per_worker=1, memory_limit=0) as client:
         # Step 1 - get all source datasets
-        datasets = build_step1_get_source_datasets(args, experiment_builders)
+        organism_ontology_term_ids = sorted({eb.specification.organism_ontology_term_id for eb in experiment_builders})
+        datasets = build_step1_get_source_datasets(
+            args, experiment_builders, organism_ontology_term_ids=organism_ontology_term_ids
+        )
 
         # Step 2 - create root collection, and all child objects, but do not populate any dataframes or matrices
         root_collection = build_step2_create_root_collection(args.soma_path.as_posix(), experiment_builders)
@@ -179,12 +182,13 @@ def populate_root_collection(root_collection: soma.Collection) -> soma.Collectio
 
 
 def build_step1_get_source_datasets(
-    args: CensusBuildArgs, experiment_builders: list[ExperimentBuilder]
+    args: CensusBuildArgs,
+    experiment_builders: list[ExperimentBuilder],
+    organism_ontology_term_ids: list[str] | None = None,
 ) -> list[Dataset]:
     logger.info("Build step 1 - get source assets - started")
 
     # Load manifest defining the datasets
-    organism_ontology_term_ids = sorted({eb.specification.organism_ontology_term_id for eb in experiment_builders})
     all_datasets = load_manifest(
         args.config.manifest,
         args.config.dataset_id_blocklist_uri,
