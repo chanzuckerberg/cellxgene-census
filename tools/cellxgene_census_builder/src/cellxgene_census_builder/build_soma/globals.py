@@ -350,8 +350,6 @@ FULL_GENE_ASSAY = [
     "EFO:0700016",  # Smart-seq v4
 ]
 
-DONOR_ID_IGNORE = ["pooled", "unknown"]
-
 
 # The default configuration for TileDB contexts used in the builder.
 # Ref: https://docs.tiledb.com/main/how-to/configuration#configuration-parameters
