@@ -59,18 +59,19 @@ get_presence_matrix <- function(census, organism, measurement_name = "RNA") {
 #' census$close()
 #' }
 get_seurat <- function(
-    census,
-    organism,
-    measurement_name = "RNA",
-    X_layers = c(counts = "raw", data = NULL),
-    obs_value_filter = NULL,
-    obs_coords = NULL,
-    obs_column_names = NULL,
-    obsm_layers = FALSE,
-    var_value_filter = NULL,
-    var_coords = NULL,
-    var_column_names = NULL,
-    var_index = "feature_id") {
+  census,
+  organism,
+  measurement_name = "RNA",
+  X_layers = c(counts = "raw", data = NULL),
+  obs_value_filter = NULL,
+  obs_coords = NULL,
+  obs_column_names = NULL,
+  obsm_layers = FALSE,
+  var_value_filter = NULL,
+  var_coords = NULL,
+  var_column_names = NULL,
+  var_index = "feature_id"
+) {
   stopifnot(
     "R package 'Seurat' is not installed." = require("Seurat", quietly = T)
   )
@@ -132,18 +133,19 @@ get_seurat <- function(
 #' census$close()
 #' }
 get_single_cell_experiment <- function(
-    census,
-    organism,
-    measurement_name = "RNA",
-    X_layers = c(counts = "raw"),
-    obs_value_filter = NULL,
-    obs_coords = NULL,
-    obs_column_names = NULL,
-    obsm_layers = FALSE,
-    var_value_filter = NULL,
-    var_coords = NULL,
-    var_column_names = NULL,
-    var_index = "feature_id") {
+  census,
+  organism,
+  measurement_name = "RNA",
+  X_layers = c(counts = "raw"),
+  obs_value_filter = NULL,
+  obs_coords = NULL,
+  obs_column_names = NULL,
+  obsm_layers = FALSE,
+  var_value_filter = NULL,
+  var_coords = NULL,
+  var_column_names = NULL,
+  var_index = "feature_id"
+) {
   stopifnot(
     "R package 'SingleCellExperiment' is not installed." = require("SingleCellExperiment", quietly = T)
   )
