@@ -601,7 +601,7 @@ def dispatch_X_chunk(
     _is_full_gene_assay = np.isin(adata.obs.assay_ontology_term_id.to_numpy(), FULL_GENE_ASSAY)
     if _is_full_gene_assay.any():
         is_full_gene_assay: npt.NDArray[np.bool_] | None = _is_full_gene_assay
-        feature_length: npt.NDArray[np.float32] | None = adata.var.feature_length.to_numpy(dtype=np.float32)
+        feature_length: npt.NDArray[np.int64] | None = adata.var.feature_length.to_numpy(dtype=np.int64)
     else:
         is_full_gene_assay = None
         feature_length = None
