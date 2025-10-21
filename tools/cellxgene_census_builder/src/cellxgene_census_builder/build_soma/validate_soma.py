@@ -718,8 +718,9 @@ def validate_X_layers_raw_contents(
 
         # obs.nnz
         nnz = expected_X.getnnz(axis=1)
-        assert np.all(census_obs.nnz.to_numpy() > 0.0)  # All cells must contain at least one count value > 0
-        assert np.array_equal(census_obs.nnz.to_numpy(), nnz), f"{eb.name}:{dataset.dataset_id} obs.nnz incorrect."
+        census_obs_nnz = census_obs.nnz.to_numpy(dtype=np.int64)
+        assert np.all(census_obs_nnz > 0)  # All cells must contain at least one count value > 0
+        assert np.array_equal(census_obs_nnz, nnz), f"{eb.name}:{dataset.dataset_id} obs.nnz incorrect."
 
         # obs.raw_mean_nnz - mean of the explicitly stored values (zeros are _ignored_)
         with np.errstate(divide="ignore"):
