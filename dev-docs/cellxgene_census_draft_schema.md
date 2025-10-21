@@ -1160,7 +1160,9 @@ The high resolution image of a Visium Spatial Gene Expression V1("EFO:0022857") 
   * Inlined and updated the Census Accepted Assays Full Gene (CSV) file
     * Added <code>EFO:0009999</code> for <i>G&T-Seq</i>
     * Added <code>EFO:0010006</code> for <i>scM&T-seq</i>
-    * Added <code>EFO:0030060</code> for <i>mCT-seq</i>  
+    * Added <code>EFO:0030060</code> for <i>mCT-seq</i>
+    * Removed <code>EFO:0008441</code> for <i>full length single cell RNA sequencing</i>
+    * Removed <code>EFO:0009810</code> for <i>full length single nucleus RNA sequencing</i>
 * Census table of organisms – `census_obj["census_info"]["organisms"]`
   * Replaced the code reference that documented the value of <code>organism</code> with its requirements
 * Cell metadata – `census_obj["census_data"][organism].obs`
