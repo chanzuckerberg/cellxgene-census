@@ -191,19 +191,18 @@ Otherwise, Census MUST NOT include the corresponding observations (cells).
 
 ##### Full-gene sequencing assays
 
-Full-gene sequencing assays represent the subset of accepted assays that perform full-gene sequencing when used at the single-cell level. Such data MUST be normalized by gene length for downstream analysis. 
+Full-gene sequencing assays represent the subset of accepted assays that perform full-gene sequencing when used at the single-cell level. Such data MUST be normalized by gene length for downstream analysis.
 
 | Full-gene sequencing assays |  |  |
 |--------|--------|--------|
-| [EFO:0003755](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0003755)<br>for <i>FL-cDNA</i> | [EFO:0008441](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008441)<br>for <i>full length single cell RNA sequencing</i> | [EFO:0008747](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008747)<br>for <i>FRISCR</i> |
-| [EFO:0008763](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008763)<br>for <i>Hi-SCL</i> | [EFO:0008797](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008797)<br>for <i>MATQ-seq</i> | [EFO:0008877](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008877)<br>for <i>Quartz-seq</i> |
-| [EFO:0008930](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008930)<br>for <i>Smart-seq</i> | [EFO:0008931](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008931)<br>for <i>Smart-seq2</i> | [EFO:0008956](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008956)<br>for <i>SUPeR-seq</i> |
-| [EFO:0009810](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0009810)<br>for <i>full length single nucleus RNA sequencing</i> | [EFO:0009999](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0009999)<br>for <i>G&T-Seq</i> | [EFO:0010004](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0010004)<br>for <i>SCRB-seq</i> |
-| [EFO:0010006](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0010006)<br>for <i>scM&T-seq</i> | [EFO:0010022](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0010022)<br>for <i>Smart-3Seq</i> | [EFO:0010058](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0010058)<br>for <i>Fluidigm C1-based SMARTer library preparation</i> |
-| [EFO:0010184](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0010184)<br>for <i>Smart-like</i> | [EFO:0022396](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0022396)<br>for <i>TruSeq</i> | [EFO:0022488](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0022488)<br>for <i>Smart-seq3</i> |
-| [EFO:0022839](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0022839)<br>for <i>STORM-seq</i> | [EFO:0030031](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0030031)<br>for <i>SCOPE-chip</i> | [EFO:0030060](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0030060)<br>for <i>mCT-seq</i> |
-| [EFO:0030061](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0030061)<br>for <i>mcSCRB-seq</i> | [EFO:0700016](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0700016)<br>for <i>Smart-seq v4</i> |  |
-| | | |
+| [EFO:0003755](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0003755)<br>for <i>FL-cDNA</i> | [EFO:0008747](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008747)<br>for <i>FRISCR</i> | [EFO:0008763](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008763)<br>for <i>Hi-SCL</i> |
+| [EFO:0008797](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008797)<br>for <i>MATQ-seq</i> | [EFO:0008877](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008877)<br>for <i>Quartz-seq</i> | [EFO:0008930](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008930)<br>for <i>Smart-seq</i> |
+| [EFO:0008931](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008931)<br>for <i>Smart-seq2</i> | [EFO:0008956](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0008956)<br>for <i>SUPeR-seq</i> | [EFO:0009999](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0009999)<br>for <i>G&T-Seq</i> |
+| [EFO:0010004](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0010004)<br>for <i>SCRB-seq</i> | [EFO:0010006](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0010006)<br>for <i>scM&T-seq</i> | [EFO:0010022](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0010022)<br>for <i>Smart-3Seq</i> |
+| [EFO:0010058](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0010058)<br>for <i>Fluidigm C1-based<br>SMARTer library preparation</i> | [EFO:0010184](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0010184)<br>for <i>Smart-like</i> | [EFO:0022396](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0022396)<br>for <i>TruSeq</i> |
+| [EFO:0022488](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0022488)<br>for <i>Smart-seq3</i> | [EFO:0022839](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0022839)<br>for <i>STORM-seq</i> | [EFO:0030031](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0030031)<br>for <i>SCOPE-chip</i> |
+| [EFO:0030060](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0030060)<br>for <i>mCT-seq</i> | [EFO:0030061](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0030061)<br>for <i>mcSCRB-seq</i> | [EFO:0700016](https://www.ebi.ac.uk/ols4/ontologies/efo/classes?obo_id=EFO%3A0700016)<br>for <i>Smart-seq v4</i> |
+
 
 #### Data matrix types
 
@@ -1161,7 +1160,9 @@ The high resolution image of a Visium Spatial Gene Expression V1("EFO:0022857") 
   * Inlined and updated the Census Accepted Assays Full Gene (CSV) file
     * Added <code>EFO:0009999</code> for <i>G&T-Seq</i>
     * Added <code>EFO:0010006</code> for <i>scM&T-seq</i>
-    * Added <code>EFO:0030060</code> for <i>mCT-seq</i>  
+    * Added <code>EFO:0030060</code> for <i>mCT-seq</i>
+    * Removed <code>EFO:0008441</code> for <i>full length single cell RNA sequencing</i>
+    * Removed <code>EFO:0009810</code> for <i>full length single nucleus RNA sequencing</i>
 * Census table of organisms – `census_obj["census_info"]["organisms"]`
   * Replaced the code reference that documented the value of <code>organism</code> with its requirements
 * Cell metadata – `census_obj["census_data"][organism].obs`
