@@ -30,7 +30,12 @@ def test_get_presence_matrix(organism: str, census: soma.Collection, modality: s
     census_datasets = census["census_info"]["datasets"].read().concat().to_pandas()
 
     pm = cellxgene_census.get_presence_matrix(census, organism, modality=modality)
-    assert isinstance(pm, scipy.sparse.csr_matrix)
+    assert isinstance(
+        pm,
+        scipy.sparse.csr_matrix
+        if "csr_array" not in dir(scipy.sparse)
+        else (scipy.sparse.csr_matrix, scipy.sparse.csr_array),
+    )
     assert pm.shape[0] == len(census_datasets)
     assert pm.shape[1] == len(
         census[modality][organism].ms["RNA"].var.read(column_names=["soma_joinid"]).concat().to_pandas()
