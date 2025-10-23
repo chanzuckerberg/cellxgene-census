@@ -11,7 +11,7 @@ RUN apt update && \
   add-apt-repository -y ppa:deadsnakes/ppa && \
   apt update && \
   apt -y full-upgrade && \
-  apt -y install python3.11 python3.11-venv && \
+  apt -y install python3.11 python3.11-venv python3.11-pip && \
   apt-get clean
 
 # set python3.11 as default
