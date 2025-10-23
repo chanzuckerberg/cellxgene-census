@@ -11,7 +11,7 @@ RUN apt update && \
   add-apt-repository -y ppa:deadsnakes/ppa && \
   apt update && \
   apt -y full-upgrade && \
-  apt -y install python3.11 python3.11-venv python3-pip awscli && \
+  apt -y install python3.11 python3.11-venv && \
   apt-get clean
 
 # set python3.11 as default
@@ -22,7 +22,7 @@ RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1
 ADD entrypoint.sh /
 ADD dist/ /tools/cellxgene_census_builder
 
-RUN python3.11 -m pip install -U pip Cython wheel build
+RUN python3.11 -m pip install -U pip Cython wheel build awscli
 RUN python3.11 -m pip install /tools/cellxgene_census_builder/*.whl
 
 WORKDIR /census-build
