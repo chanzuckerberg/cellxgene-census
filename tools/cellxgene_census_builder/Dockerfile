@@ -23,6 +23,7 @@ ADD entrypoint.sh /
 ADD dist/ /tools/cellxgene_census_builder
 
 RUN python3.11 -m pip install -U pip Cython wheel build awscli
+RUN aws --version
 RUN python3.11 -m pip install /tools/cellxgene_census_builder/*.whl
 
 WORKDIR /census-build
