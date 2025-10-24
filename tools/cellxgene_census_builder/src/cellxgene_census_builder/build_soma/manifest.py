@@ -39,7 +39,12 @@ def null_to_empty_str(val: str | None) -> str:
     return val
 
 
-def load_manifest_from_CxG() -> list[Dataset]:
+def load_manifest_from_CxG(organism_ontology_term_ids: list[str] | None = None) -> list[Dataset]:
+    """Load dataset manifest from the CELLxGENE Discover API.
+
+    If `organism_ontology_term_ids` is provided, only include datasets whose
+    `organism[*].ontology_term_id` intersects the provided list.
+    """
     logger.info("Loading manifest from CELLxGENE data portal...")
 
     # Load all collections and extract dataset_id
@@ -47,6 +52,7 @@ def load_manifest_from_CxG() -> list[Dataset]:
     assert isinstance(datasets, list), "Unexpected REST API response, /curation/v1/datasets"
 
     response = []
+    allowed_org_ids: set[str] = set(organism_ontology_term_ids or [])
 
     for dataset in datasets:
         dataset_id = dataset["dataset_id"]
@@ -70,6 +76,12 @@ def load_manifest_from_CxG() -> list[Dataset]:
         asset_h5ad_uri = assets_h5ad[0]["url"]
         asset_h5ad_filesize = assets_h5ad[0]["filesize"]
 
+        # If an organism filter is provided, skip datasets that do not intersect
+        if len(allowed_org_ids):
+            orgs = dataset.get("organism") or []
+            if not any(isinstance(org, dict) and org.get("ontology_term_id") in allowed_org_ids for org in orgs):
+                continue
+
         d = Dataset(
             dataset_id=dataset_id,
             dataset_asset_h5ad_uri=asset_h5ad_uri,
@@ -87,7 +99,7 @@ def load_manifest_from_CxG() -> list[Dataset]:
         )
         response.append(d)
 
-    logger.info(f"Found {len(datasets)} datasets")
+    logger.info(f"Found {len(response)} datasets")
 
     return response
 
@@ -136,14 +148,26 @@ def apply_blocklist(datasets: list[Dataset], dataset_id_blocklist_uri: str | Non
 def load_manifest(
     manifest_fp: str | io.TextIOBase | None = None,
     dataset_id_blocklist_uri: str | None = None,
+    organism_ontology_term_ids: list[str] | None = None,
 ) -> list[Dataset]:
     """Load dataset manifest from the file pointer if provided, else bootstrap
-    from the CELLxGENE REST API.  Apply the blocklist if provided.
+    from the CELLxGENE REST API. Apply the blocklist if provided.
+
+    If `organism_ontology_term_ids` is provided, it can only be used when
+    loading from the REST API (i.e., `manifest_fp` must be None). Otherwise a
+    ValueError is raised.
     """
     if manifest_fp is not None:
+        if organism_ontology_term_ids is not None:
+            msg = (
+                "organism_ontology_term_ids filter is only supported when loading from the CELLxGENE REST API "
+                "(manifest_fp must be None)."
+            )
+            logger.error(msg)
+            raise ValueError(msg)
         datasets = load_manifest_from_fp(manifest_fp)
     else:
-        datasets = load_manifest_from_CxG()
+        datasets = load_manifest_from_CxG(organism_ontology_term_ids=organism_ontology_term_ids)
 
     datasets = apply_blocklist(datasets, dataset_id_blocklist_uri)
     datasets = dedup_datasets(datasets)
