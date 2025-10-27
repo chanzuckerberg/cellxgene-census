@@ -12,7 +12,7 @@ USE_ARROW_DICTIONARY = True
 
 CENSUS_SCHEMA_VERSION = "2.4.0"
 
-CXG_SCHEMA_VERSION = "6.0.0"  # the CELLxGENE schema version supported
+CXG_SCHEMA_VERSION = "7.0.0"  # the CELLxGENE schema version supported
 
 # Columns expected in the census_datasets dataframe
 CENSUS_DATASETS_TABLE_SPEC = TableSpec.create(
@@ -208,10 +208,8 @@ CENSUS_POINT_CLOUD_PLATFORM_CONFIG = {
 # list of EFO terms that correspond to RNA seq modality/measurement. These terms
 # define the inclusive filter applied to obs.assay_ontology_term_id. All other
 # terms are excluded from the Census.
-# This list plus ALLOWED_SPATIAL_ASSAYS, should be kept in sync with docs/census_accepted_assays.csv
 RNA_SEQ = [
     "EFO:0003755",  # FL-cDNA
-    "EFO:0008440",  #
     "EFO:0008640",  # 3'T-fill
     "EFO:0008641",  # 3’-end-seq
     "EFO:0008643",  # 3′-Seq
@@ -222,6 +220,7 @@ RNA_SEQ = [
     "EFO:0008679",  # CEL-seq
     "EFO:0008694",  # ClickSeq
     "EFO:0008697",  # cP-RNA-Seq
+    "EFO:0008703",  # CytoSeq
     "EFO:0008708",  # DeepCAGE
     "EFO:0008710",  # Digital RNA
     "EFO:0008718",  # DP-Seq
@@ -250,7 +249,6 @@ RNA_SEQ = [
     "EFO:0008897",  # RNAtag-Seq
     "EFO:0008898",  # RNET-seq
     "EFO:0008903",  # SC3-seq
-    "EFO:0008908",  # SCI-seq
     "EFO:0008919",  # Seq-Well
     "EFO:0008929",  # SMA
     "EFO:0008930",  # Smart-seq
@@ -276,19 +274,19 @@ RNA_SEQ = [
     "EFO:0009919",  # SPLiT-seq
     "EFO:0009922",  # 10x 3' v3
     "EFO:0009991",  # Nuc-Seq
+    "EFO:0009999",  # G&T-Seq
     "EFO:0010003",  # RASL-seq
     "EFO:0010004",  # SCRB-seq
+    "EFO:0010005",  # DR-Seq
+    "EFO:0010006",  # scM&T-seq
+    "EFO:0010007",  # scTrio-seq
     "EFO:0010010",  # CEL-seq2
     "EFO:0010022",  # Smart-3Seq
     "EFO:0010034",  # Cappable-Seq
     "EFO:0010041",  # Nascent-Seq
-    "EFO:0010058",  # Fluidigm C1-based library preparation
+    "EFO:0010058",  # Fluidigm C1-based SMARTer library preparation
     "EFO:0010184",  # Smart-like
     "EFO:0010550",  # sci-RNA-seq
-    "EFO:0010713",  # 10x immune profiling
-    "EFO:0010714",  # 10x TCR enrichment
-    "EFO:0010715",  # 10x Ig enrichment
-    "EFO:0010964",  # barcoded plate-based single cell RNA-seq
     "EFO:0011025",  # 10x 5' v1
     "EFO:0022396",  # TruSeq
     "EFO:0022488",  # Smart-seq3
@@ -296,40 +294,47 @@ RNA_SEQ = [
     "EFO:0022600",  # Parse Evercode Whole Transcriptome v1
     "EFO:0022601",  # Parse Evercode Whole Transcriptome v2
     "EFO:0022602",  # Parse Evercode Whole Transcriptome v3
+    "EFO:0022604",  # 10x 3' v4
+    "EFO:0022605",  # 10x 5' v3
     "EFO:0022606",  # 10x gene expression flex
     "EFO:0022839",  # STORM-seq
     "EFO:0022845",  # modified STRT-seq
     "EFO:0022846",  # 5' STRT-seq
+    "EFO:0022962",  # SHARE-seq
+    "EFO:0030001",  # sci-CAR
     "EFO:0030002",  # microwell-seq
     "EFO:0030003",  # 10x 3' transcription profiling
     "EFO:0030004",  # 10x 5' transcription profiling
     "EFO:0030019",  # Seq-Well S3
     "EFO:0030021",  # Nx1-seq
+    "EFO:0030026",  # sci-Plex
     "EFO:0030028",  # sci-RNA-seq3
     "EFO:0030030",  # Quant-seq
     "EFO:0030031",  # SCOPE-chip
+    "EFO:0030059",  # 10x multiome
+    "EFO:0030060",  # mCT-seq
     "EFO:0030061",  # mcSCRB-seq
     "EFO:0030074",  # SORT-seq
-    "EFO:0030078",  # droplet-based single-cell RNA library preparation
     "EFO:0700003",  # BD Rhapsody Whole Transcriptome Analysis
     "EFO:0700004",  # BD Rhapsody Targeted mRNA
     "EFO:0700010",  # TruDrop
     "EFO:0700011",  # GEXSCOPE technology
     "EFO:0700016",  # Smart-seq v4
+    "EFO:0900000",  # particle-templated instant partition sequencing
+    "EFO:0900001",  # Asteria scRNA-seq kit
+    "EFO:0900002",  # HIVE CLX Single-Cell RNAseq Solution
 ]
 
 # list of EFO terms that correspond to SPATIAL modality/measurement. These terms
 # define the inclusive filter applied to obs.assay_ontology_term_id. All other
 ALLOWED_SPATIAL_ASSAYS = [
-    "EFO:0022857",  # Visium Spatial Gene Expression
+    "EFO:0022857",  # Visium Spatial Gene Expression V1
     "EFO:0030062",  # Slide-seqV2
 ]
 
 # Full-gene assays have special handling in the "normalized" X layers
-# This list should be kept in sync with docs/census_accepted_assays_full_gene.csv
 FULL_GENE_ASSAY = [
     "EFO:0003755",  # FL-cDNA
-    "EFO:0008441",  # full length single cell RNA sequencing
     "EFO:0008747",  # FRISCR
     "EFO:0008763",  # Hi-SCL
     "EFO:0008797",  # MATQ-seq
@@ -337,15 +342,17 @@ FULL_GENE_ASSAY = [
     "EFO:0008930",  # Smart-seq
     "EFO:0008931",  # Smart-seq2
     "EFO:0008956",  # SUPeR-seq
-    "EFO:0009810",  # full length single nucleus RNA sequencing
+    "EFO:0009999",  # G&T-Seq
     "EFO:0010004",  # SCRB-seq
+    "EFO:0010006",  # scM&T-seq
     "EFO:0010022",  # Smart-3Seq
-    "EFO:0010058",  # Fluidigm C1-based library preparation
+    "EFO:0010058",  # Fluidigm C1-based SMARTer library preparation
     "EFO:0010184",  # Smart-like
     "EFO:0022396",  # TruSeq
     "EFO:0022488",  # Smart-seq3
     "EFO:0022839",  # STORM-seq
     "EFO:0030031",  # SCOPE-chip
+    "EFO:0030060",  # mCT-seq
     "EFO:0030061",  # mcSCRB-seq
     "EFO:0700016",  # Smart-seq v4
 ]
