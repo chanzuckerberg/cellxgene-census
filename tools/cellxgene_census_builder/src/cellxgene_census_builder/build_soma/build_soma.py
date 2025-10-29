@@ -183,6 +183,15 @@ def build_step1_get_source_datasets(
     args: CensusBuildArgs,
     organism_ontology_term_ids: list[str] | None = None,
 ) -> list[Dataset]:
+    """Stage source H5AD assets locally, either from manifest or by querying CELLxGENE
+    REST API.
+
+    organism_ontology_term_ids: if provided, only stage the datasets the API metadata
+    associates with these organisms. Otherwise, all datasets with the desired CxG
+    schema version will be staged (whether or not we have a SOMAExperimentSpecification
+    for their organism). Ignored if a manifest file is provided (since the manifest
+    enumerates the datasets to be staged).
+    """
     logger.info("Build step 1 - get source assets - started")
 
     # Load manifest defining the datasets
