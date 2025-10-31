@@ -4,6 +4,7 @@ from typing import TextIO
 
 import cellxgene_census
 import pandas as pd
+from tiledbsoma import DataFrame
 
 from .build_soma.globals import CENSUS_DATA_NAME, CENSUS_INFO_NAME
 
@@ -63,15 +64,34 @@ def display_diff(
 
     for organism in census[CENSUS_DATA_NAME]:
         curr_count = census[CENSUS_DATA_NAME][organism].obs.count
-        prev_count = previous_census[CENSUS_DATA_NAME][organism].obs.count
-        print(
-            f"Previous {organism} cell count: {prev_count}, current {organism} cell count: {curr_count}, delta {curr_count - prev_count}",
-            file=file,
-        )
+        if organism in previous_census[CENSUS_DATA_NAME]:
+            prev_count = previous_census[CENSUS_DATA_NAME][organism].obs.count
+            print(
+                f"Previous {organism} cell count: {prev_count}, current {organism} cell count: {curr_count}, delta {curr_count - prev_count}",
+                file=file,
+            )
+        else:
+            print(
+                f"New organism {organism} added, cell count: {curr_count}.",
+                file=file,
+            )
         print(file=file)
 
     prev_datasets = previous_census[CENSUS_INFO_NAME]["datasets"].read().concat().to_pandas()
     curr_datasets = census[CENSUS_INFO_NAME]["datasets"].read().concat().to_pandas()
+
+    # Build dataset_id -> organism mapping for each census so we can report organism for added/removed datasets
+    def _build_dataset_organism_map(census_obj: DataFrame) -> dict[str, str]:
+        mapping: dict[str, set[str]] = {}
+        for org, exp in census_obj[CENSUS_DATA_NAME].items():
+            df = exp.obs.read(column_names=["dataset_id"]).concat().to_pandas()
+            for dsid in df["dataset_id"].unique():
+                mapping.setdefault(dsid, set()).add(org)
+        # Convert sets to a stable, comma-separated string (handles rare multi-organism datasets)
+        return {k: ", ".join(sorted(v)) for k, v in mapping.items()}
+
+    curr_ds_to_org = _build_dataset_organism_map(census)
+    prev_ds_to_org = _build_dataset_organism_map(previous_census)
 
     # Datasets removed, added
     curr_datasets_ids = set(curr_datasets["dataset_id"])
@@ -81,16 +101,18 @@ def display_diff(
     removed_datasets = prev_dataset_ids - curr_datasets_ids
     if added_datasets:
         print(f"Datasets that were added ({len(added_datasets)})", file=file)
-        added_datasets_df = curr_datasets[curr_datasets["dataset_id"].isin(added_datasets)]
-        print(added_datasets_df[["dataset_id", "dataset_title", "collection_name"]], file=file)
+        added_datasets_df = curr_datasets[curr_datasets["dataset_id"].isin(added_datasets)].copy()
+        added_datasets_df["organism"] = added_datasets_df["dataset_id"].map(curr_ds_to_org).fillna("unknown")
+        print(added_datasets_df[["dataset_id", "organism", "dataset_title", "collection_name"]], file=file)
     else:
         print("No datasets were added", file=file)
     print(file=file)
 
     if removed_datasets:
         print(f"Datasets that were removed ({len(removed_datasets)})", file=file)
-        removed_datasets_df = prev_datasets[prev_datasets["dataset_id"].isin(removed_datasets)]
-        print(removed_datasets_df[["dataset_id", "dataset_title", "collection_name"]], file=file)
+        removed_datasets_df = prev_datasets[prev_datasets["dataset_id"].isin(removed_datasets)].copy()
+        removed_datasets_df["organism"] = removed_datasets_df["dataset_id"].map(prev_ds_to_org).fillna("unknown")
+        print(removed_datasets_df[["dataset_id", "organism", "dataset_title", "collection_name"]], file=file)
     else:
         print("No datasets were removed", file=file)
     print(file=file)
@@ -104,8 +126,21 @@ def display_diff(
     ][["dataset_id", "dataset_total_cell_count_prev", "dataset_total_cell_count_curr"]]
 
     if not datasets_with_different_cell_counts.empty:
+        org_series = datasets_with_different_cell_counts["dataset_id"].map(curr_ds_to_org)
+        datasets_with_different_cell_counts.insert(1, "organism", org_series.fillna("???"))
+
         print("Datasets that have a different cell count", file=file)
-        print(datasets_with_different_cell_counts, file=file)
+        print(
+            datasets_with_different_cell_counts[
+                [
+                    "dataset_id",
+                    "organism",
+                    "dataset_total_cell_count_prev",
+                    "dataset_total_cell_count_curr",
+                ]
+            ],
+            file=file,
+        )
         print(file=file)
 
     # Deltas between summary_cell_counts dataframes
@@ -135,22 +170,31 @@ def display_diff(
     # Genes removed, added
     for organism in census[CENSUS_DATA_NAME]:
         curr_genes = census[CENSUS_DATA_NAME][organism].ms["RNA"].var.read().concat().to_pandas()
+        if organism not in previous_census[CENSUS_DATA_NAME]:
+            # Nothing to diff against for a new organism; report and skip gene diffs
+            print(
+                f"New organism {organism} added with {len(curr_genes)} genes.",
+                file=file,
+            )
+            print(file=file)
+            continue
+
         prev_genes = previous_census[CENSUS_DATA_NAME][organism].ms["RNA"].var.read().concat().to_pandas()
 
         new_genes = set(curr_genes["feature_id"]) - set(prev_genes["feature_id"])
         if new_genes:
-            print("Genes added", file=file)
+            print(f"Genes added in {organism} ({len(new_genes)}):", file=file)
             print(new_genes, file=file)
         else:
-            print("No genes were added.", file=file)
+            print(f"No genes were added in {organism}.", file=file)
             print(file=file)
 
         removed_genes = set(prev_genes["feature_id"]) - set(curr_genes["feature_id"])
         if removed_genes:
-            print("Genes removed", file=file)
+            print(f"Genes removed in {organism} ({len(removed_genes)}):", file=file)
             print(removed_genes, file=file)
         else:
-            print("No genes were removed.", file=file)
+            print(f"No genes were removed in {organism}.", file=file)
             print(file=file)
 
     return 0
