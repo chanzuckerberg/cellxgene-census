@@ -32,28 +32,28 @@ SPATIAL_TEST_DATASETS = [
         "collection_id": "21bbfaec-6958-46bc-b1cd-1535752f6304",
         "collection_name": "Single cell and spatial transcriptomics in Sjögren’s Disease-affected Human Salivary Glands",
         "dataset_title": "spRNA-seq for GZMK+CD8+ T cells Target A Specific Acinar Cell Type in Sjögren’s Disease - Block #7",
-        "dataset_version_id": "7be1ae04-65be-482c-abc2-f5bbe87521ae",
+        "dataset_version_id": "b5e5b9f2-1d74-4590-8dd1-6fc505ca6f5b",
     },  # Homo sapiens Visium
     {
         "dataset_id": "2d821164-4681-47dd-b2ac-eb5fddb5b621",
         "collection_id": "68cba939-4e72-4405-80ef-512a05044fba",
         "collection_name": "Profiling the heterogeneity of colorectal cancer consensus molecular subtypes using spatial transcriptomics",
         "dataset_title": "S5_Rec A121573 Rep1",
-        "dataset_version_id": "f171cbd7-e820-481b-9f0a-6f7659befb35",
+        "dataset_version_id": "f4960511-686c-4955-989a-cf2b033231fc",
     },  # Homo sapiens Visium
     {
         "dataset_id": "1637e817-d091-4793-a3af-796ef57e2668",
         "collection_id": "a96133de-e951-4e2d-ace6-59db8b3bfb1d",
         "collection_name": "HTAN/HTAPP Broad - Spatio-molecular dissection of the breast cancer metastatic microenvironment",
         "dataset_title": "HTAPP-982-SMP-7629 Slide-seq",
-        "dataset_version_id": "64572ef1-b613-476e-987a-b4a53f4e5c28",
+        "dataset_version_id": "45ff37e4-1381-47bf-877d-88811db99550",
     },  # Homo sapiens Slide-seq
     {
         "dataset_id": "686e1a03-54e6-44ec-b9f5-98e3bd75560e",
         "collection_id": "8e880741-bf9a-4c8e-9227-934204631d2a",
         "collection_name": "High Resolution Slide-seqV2 Spatial Transcriptomics Enables Discovery of Disease-Specific Cell Neighborhoods and Pathways",
         "dataset_title": "Spatial transcriptomics in mouse: Puck_200127_09",
-        "dataset_version_id": "9056032e-08d0-4dcc-828d-814db30fb381",
+        "dataset_version_id": "ddc67f74-2f9b-4b9d-8f17-fc7139350f36",
     },  # Mus musculus Slide-seq w/ repeated coordinates
 ]
 
