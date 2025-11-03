@@ -268,7 +268,7 @@ def test_empty_estimated_density(tmp_path: pathlib.Path) -> None:
     adata = anndata.AnnData(
         obs=pd.DataFrame(), var=pd.DataFrame({"feature_id": [0, 1, 2]}), X=sparse.csr_matrix((0, 3), dtype=np.float32)
     )
-    adata.uns["schema_version"] = "6.0.0"
+    adata.uns["schema_version"] = "7.0.0"
     adata.write_h5ad(path)
 
     with open_anndata(path) as ad:
@@ -305,7 +305,7 @@ def test_open_anndata_raw_X(tmp_path: pathlib.Path) -> None:
         var=pd.DataFrame({"feature_id": [0, 1, 2]}),
         X=sparse.csr_matrix((2, 3), dtype=np.float32),
         raw={"X": sparse.csr_matrix((2, 4), dtype=np.float32)},
-        uns={"schema_version": "6.0.0"},
+        uns={"schema_version": "7.0.0"},
     )
     adata.write_h5ad(path)
 
@@ -329,7 +329,7 @@ def test_filter_uns_organism_match_filters_var_only(tmp_path: pathlib.Path) -> N
             index=[f"feature_{i}" for i in range(n_vars)],
         ),
         X=sparse.random(n_obs, n_vars, format="csr", dtype=np.float32),
-        uns={"schema_version": "6.0.0", "organism_ontology_term_id": "NCBITaxon:9606"},
+        uns={"schema_version": "7.0.0", "organism_ontology_term_id": "NCBITaxon:9606"},
     )
     path = (tmp_path / "species_match.h5ad").as_posix()
     adata.write_h5ad(path)
@@ -352,7 +352,7 @@ def test_filter_uns_organism_mismatch_returns_empty(tmp_path: pathlib.Path) -> N
             index=[f"feature_{i}" for i in range(n_vars)],
         ),
         X=sparse.random(n_obs, n_vars, format="csr", dtype=np.float32),
-        uns={"schema_version": "6.0.0", "organism_ontology_term_id": "NCBITaxon:9606"},
+        uns={"schema_version": "7.0.0", "organism_ontology_term_id": "NCBITaxon:9606"},
     )
     path = (tmp_path / "species_mismatch.h5ad").as_posix()
     adata.write_h5ad(path)

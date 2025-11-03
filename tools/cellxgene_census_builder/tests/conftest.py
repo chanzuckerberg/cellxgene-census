@@ -125,8 +125,8 @@ def get_anndata(
     uns: dict[str, Any] = {}
     uns["batch_condition"] = np.array(["a", "b"], dtype="object")
 
-    # Set CxG schema fields (schema 6.0.0: organism fields moved to uns)
-    uns["schema_version"] = "6.0.0"
+    # Set CxG schema fields
+    uns["schema_version"] = "7.0.0"
     uns["organism_ontology_term_id"] = organism.organism_ontology_term_id
     uns["organism"] = organism.name
 
