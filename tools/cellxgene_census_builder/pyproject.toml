@@ -28,15 +28,15 @@ dependencies= [
     "pyarrow==19.0.1",
     "pandas[performance]>=2.2.3",
     "anndata==0.11.3",
-    "numpy==1.26.4",
+    "numpy>=2",
     # IMPORTANT: consider TileDB format compat before advancing this version. It is important that
     # the tiledbsoma _format_ version lag that used in cellxgene-census package, ensuring that
     # recent cellxgene-census _readers_ are able to read the results of a Census build (writer).
     # The compatibility matrix is defined here:
     #    https://github.com/TileDB-Inc/TileDB/blob/dev/format_spec/FORMAT_SPEC.md
     "tiledbsoma==1.15.3",
-    "cellxgene-census==1.16.2",
-    "cellxgene_ontology_guide==1.4.2",
+    "cellxgene-census==1.17.0",
+    "cellxgene_ontology_guide==1.9.0",
     "scipy>=1.15.2",
     "fsspec[http]==2025.2.0",
     "s3fs==2025.2.0",
@@ -52,8 +52,7 @@ dependencies= [
     "tiledb==0.33.4",
     # Spatial testing
     "filelock==3.17.0",
-    "spatialdata==0.4.0", # spatialdata & xarray pinned due to dep conflicts in spatialdata 0.5.0
-    "xarray==2024.11.0",
+    "spatialdata>=0.5.0",
     "pooch==1.8.2",
     "pytest-xdist==3.6.1",
 ]

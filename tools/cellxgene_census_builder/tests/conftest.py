@@ -1,7 +1,7 @@
 import pathlib
 from functools import partial
 from textwrap import dedent
-from typing import Literal
+from typing import Any, Literal
 
 import anndata
 import attrs
@@ -80,7 +80,6 @@ def get_anndata(
             "cell_type_ontology_term_id": "CL:0000192",
             "assay_ontology_term_id": assay_ontology_term_id,
             "disease_ontology_term_id": "PATO:0000461",
-            "organism_ontology_term_id": organism.organism_ontology_term_id,
             "sex_ontology_term_id": "unknown",
             "tissue_ontology_term_id": "CL:0000192",
             "is_primary_data": False,
@@ -95,7 +94,6 @@ def get_anndata(
             "self_reported_ethnicity": "test",
             "sex": "test",
             "tissue": "test",
-            "organism": "test",
             "tissue_type": "tissue",
             "observation_joinid": "test",
         },
@@ -124,11 +122,13 @@ def get_anndata(
     obsm = {"X_awesome_embedding": random_embedding}
 
     # Create uns corpora metadata
-    uns = {}
+    uns: dict[str, Any] = {}
     uns["batch_condition"] = np.array(["a", "b"], dtype="object")
 
-    # Need to carefully set the corpora schema versions in order for tests to pass.
-    uns["schema_version"] = "5.2.0"  # type: ignore
+    # Set CxG schema fields
+    uns["schema_version"] = "7.0.0"
+    uns["organism_ontology_term_id"] = organism.organism_ontology_term_id
+    uns["organism"] = organism.name
 
     return anndata.AnnData(X=X, obs=obs, var=var, obsm=obsm, uns=uns)
 

@@ -34,7 +34,6 @@ from .globals import (
     CENSUS_X_LAYERS,
     CENSUS_X_LAYERS_PLATFORM_CONFIG,
     CXG_VAR_COLUMNS_READ,
-    DONOR_ID_IGNORE,
     FEATURE_DATASET_PRESENCE_MATRIX_NAME,
     FULL_GENE_ASSAY,
     MEASUREMENT_RNA_NAME,
@@ -190,7 +189,6 @@ class ExperimentBuilder:
         self.n_unique_obs: int = 0
         self.n_var: int = 0
         self.n_datasets: int = 0
-        self.n_donors: int = 0  # Caution: defined as (unique dataset_id, donor_id) tuples, *excluding* some values
         self.obs_df: pd.DataFrame | None = None
         self.var_df: pd.DataFrame | None = None
         self.dataset_obs_joinid_start: dict[str, int] = {}  # starting joinid per dataset_id
@@ -325,7 +323,7 @@ class ExperimentBuilder:
             # LIL is fast way to create spmatrix
             pm = sparse.lil_matrix((max_dataset_joinid + 1, self.n_var), dtype=bool)
             for dataset_joinid, cols in self.presence.items():
-                pm[dataset_joinid, cols] = 1
+                pm[dataset_joinid, cols.copy()] = 1
 
             pm = pm.tocoo()
             pm.eliminate_zeros()
@@ -432,7 +430,9 @@ def post_acc_axes_processing(accumulated: list[tuple[ExperimentBuilder, tuple[pd
     def per_dataset_summary_counts(eb: ExperimentBuilder, obs: pd.DataFrame) -> None:
         for _, obs_slice in obs.groupby("dataset_id"):
             assert obs_slice.soma_joinid.max() - obs_slice.soma_joinid.min() + 1 == len(obs_slice)
-            eb.census_summary_cell_counts = accumulate_summary_counts(eb.census_summary_cell_counts, obs_slice)
+            eb.census_summary_cell_counts = accumulate_summary_counts(
+                eb.specification.name, eb.census_summary_cell_counts, obs_slice
+            )
 
     for eb, (obs, var) in accumulated:
         if not len(obs):
@@ -456,7 +456,6 @@ def post_acc_axes_processing(accumulated: list[tuple[ExperimentBuilder, tuple[pd
         # compute intermediate values used later in the build
         eb.n_datasets = obs.dataset_id.nunique()
         eb.n_unique_obs = (obs.is_primary_data == True).sum()  # noqa: E712
-        eb.n_donors = obs[~obs.donor_id.isin(DONOR_ID_IGNORE)].groupby("dataset_id").donor_id.nunique().sum()
         eb.global_var_joinids = var[["feature_id", "soma_joinid"]].set_index("feature_id")
 
         grouped_by_id = obs.groupby("dataset_id").soma_joinid.agg(["min", "count"])
@@ -620,7 +619,9 @@ def dispatch_X_chunk(
     end_idx = min(row_start + n_rows, adata.n_obs)
     n_chunks = math.ceil((end_idx - row_start) / minor_stride + 0.5)
     for idx in range(row_start, end_idx, minor_stride):
-        logger.info(f"processing X {adata.filename}, {row_start}, chunk {(idx-row_start)//minor_stride} of {n_chunks}")
+        logger.info(
+            f"processing X {adata.filename}, {row_start}, chunk {(idx - row_start) // minor_stride} of {n_chunks}"
+        )
 
         # get the chunk
         adata_chunk = adata[idx : min(idx + minor_stride, end_idx)]
@@ -811,14 +812,12 @@ def populate_X_layers(
 class SummaryStats(TypedDict):
     total_cell_count: int
     unique_cell_count: int
-    number_donors: dict[str, int]
 
 
 def get_summary_stats(experiment_builders: Sequence[ExperimentBuilder]) -> SummaryStats:
     return {
         "total_cell_count": sum(e.n_obs for e in experiment_builders),
         "unique_cell_count": sum(e.n_unique_obs for e in experiment_builders),
-        "number_donors": {e.name: e.n_donors for e in experiment_builders},
     }
 
 

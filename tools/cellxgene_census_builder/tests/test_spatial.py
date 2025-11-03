@@ -23,51 +23,52 @@ class SpatialBuild:
     blocklist: Path
 
 
-# These should be updated with every schema update
-# Fields besides dataset_id are only needed for validation of the built object, and can be dummy values
+# dataset_version_id needs to be updated with every CxG schema update; see
+# https://api.cellxgene.cziscience.com/curation/v1/datasets/{dataset_id}/versions
+# Fields besides dataset_id and dataset_version_id are only needed for validation of the built object, and can be dummy values
 SPATIAL_TEST_DATASETS = [
     {
-        "dataset_id": "fee901ce-87ea-46cd-835a-c15906a4aa6d",
+        "dataset_id": "36a9ccdd-f1a3-4f15-aaad-8eae728cd66c",
         "collection_id": "21bbfaec-6958-46bc-b1cd-1535752f6304",
         "collection_name": "Single cell and spatial transcriptomics in Sjögren’s Disease-affected Human Salivary Glands",
         "dataset_title": "spRNA-seq for GZMK+CD8+ T cells Target A Specific Acinar Cell Type in Sjögren’s Disease - Block #7",
-        "dataset_version_id": "fee901ce-87ea-46cd-835a-c15906a4aa6d",
+        "dataset_version_id": "b5e5b9f2-1d74-4590-8dd1-6fc505ca6f5b",
     },  # Homo sapiens Visium
     {
-        "dataset_id": "e944a0f7-e398-4e8f-a060-94dae8a08fb3",
+        "dataset_id": "2d821164-4681-47dd-b2ac-eb5fddb5b621",
         "collection_id": "68cba939-4e72-4405-80ef-512a05044fba",
         "collection_name": "Profiling the heterogeneity of colorectal cancer consensus molecular subtypes using spatial transcriptomics",
         "dataset_title": "S5_Rec A121573 Rep1",
-        "dataset_version_id": "e944a0f7-e398-4e8f-a060-94dae8a08fb3",
+        "dataset_version_id": "f4960511-686c-4955-989a-cf2b033231fc",
     },  # Homo sapiens Visium
     {
-        "dataset_id": "db4b5e64-71bd-4ed8-8ec9-21471194485b",
+        "dataset_id": "1637e817-d091-4793-a3af-796ef57e2668",
         "collection_id": "a96133de-e951-4e2d-ace6-59db8b3bfb1d",
         "collection_name": "HTAN/HTAPP Broad - Spatio-molecular dissection of the breast cancer metastatic microenvironment",
         "dataset_title": "HTAPP-982-SMP-7629 Slide-seq",
-        "dataset_version_id": "db4b5e64-71bd-4ed8-8ec9-21471194485b",
+        "dataset_version_id": "45ff37e4-1381-47bf-877d-88811db99550",
     },  # Homo sapiens Slide-seq
     {
-        "dataset_id": "563baeba-7936-4600-b61c-c003f89c8bdb",
+        "dataset_id": "686e1a03-54e6-44ec-b9f5-98e3bd75560e",
         "collection_id": "8e880741-bf9a-4c8e-9227-934204631d2a",
         "collection_name": "High Resolution Slide-seqV2 Spatial Transcriptomics Enables Discovery of Disease-Specific Cell Neighborhoods and Pathways",
         "dataset_title": "Spatial transcriptomics in mouse: Puck_200127_09",
-        "dataset_version_id": "563baeba-7936-4600-b61c-c003f89c8bdb",
+        "dataset_version_id": "ddc67f74-2f9b-4b9d-8f17-fc7139350f36",
     },  # Mus musculus Slide-seq w/ repeated coordinates
 ]
 
 
 def _fetch_datasets_and_write_manifest(h5ad_dir: Path, manifest_pth: str) -> None:
     for dataset in SPATIAL_TEST_DATASETS:
-        dataset_id = dataset["dataset_id"]
+        dataset_version_id = dataset["dataset_version_id"]
         pooch.retrieve(
-            f"https://datasets.cellxgene.cziscience.com/{dataset_id}.h5ad",
+            f"https://datasets.cellxgene.cziscience.com/{dataset_version_id}.h5ad",
             None,
-            fname=f"{dataset_id}.h5ad",
+            fname=f"{dataset_version_id}.h5ad",
             path=h5ad_dir,
         )
     table = pd.DataFrame(SPATIAL_TEST_DATASETS)
-    table["dataset_asset_h5ad_uri"] = table["dataset_id"].apply(lambda x: str(h5ad_dir / f"{x}.h5ad"))
+    table["dataset_asset_h5ad_uri"] = table["dataset_version_id"].apply(lambda x: str(h5ad_dir / f"{x}.h5ad"))
     table.to_csv(manifest_pth, index=False)
 
 
