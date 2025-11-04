@@ -14,7 +14,7 @@ import psutil
 import pyarrow as pa
 import tiledbsoma
 import tiledbsoma as soma
-from anndata.experimental import read_elem_as_dask
+from anndata.experimental import read_elem_lazy
 from dask.delayed import Delayed
 from tiledbsoma import (
     Axis,
@@ -458,9 +458,7 @@ def add_image_collection(
     spatial_library_info: h5py.Group,
     scale_factors: dict[str, float],
 ) -> list[Delayed]:
-    image_dict = {
-        k: read_elem_as_dask(spatial_library_info["images"][k]) for k in spatial_library_info["images"].keys()
-    }
+    image_dict = {k: read_elem_lazy(spatial_library_info["images"][k]) for k in spatial_library_info["images"].keys()}
 
     scale_transform = ScaleTransform(
         ("y", "x"),
