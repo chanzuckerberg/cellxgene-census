@@ -53,6 +53,9 @@ def create_census_info_organisms(
             for eb in experiment_builders
         ]
     )
+    # Deduplicate multiple ExperimentSpecifications that refer to the same
+    # organism (e.g., spatial vs non-spatial experiments).
+    df = df.drop_duplicates(ignore_index=True)
     df["soma_joinid"] = range(len(df))
     with info_collection.add_new_dataframe(
         CENSUS_INFO_ORGANISMS_NAME,
