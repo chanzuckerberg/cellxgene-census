@@ -6,7 +6,7 @@ import cellxgene_census
 import pandas as pd
 from tiledbsoma import DataFrame
 
-from .build_soma.globals import CENSUS_DATA_NAME, CENSUS_INFO_NAME
+from .build_soma.globals import CENSUS_DATA_NAME, CENSUS_INFO_NAME, CENSUS_SPATIAL_SEQUENCING_NAME
 
 # Print all of the Pandas DataFrames, except the dimensions
 pd.options.display.max_columns = None
@@ -31,19 +31,34 @@ def display_summary(
         ("assay_ontology_term_id", "assays"),
     ]
 
-    obs_df = {
-        name: experiment.obs.read(column_names=[c[0] for c in COLS_TO_QUERY]).concat().to_pandas()
-        for name, experiment in census[CENSUS_DATA_NAME].items()
+    def _read_collection_obs(collection_name: str) -> dict[tuple[str, str], pd.DataFrame]:
+        results: dict[tuple[str, str], pd.DataFrame] = {}
+        for name, experiment in census.get(collection_name).items():
+            results[(name, collection_name)] = (
+                experiment.obs.read(column_names=[c[0] for c in COLS_TO_QUERY]).concat().to_pandas()
+            )
+        return results
+
+    # Read both collections and merge into a dict keyed by (experiment_name, collection_name)
+    experiments_obs = {
+        **_read_collection_obs(CENSUS_DATA_NAME),
+        **_read_collection_obs(CENSUS_SPATIAL_SEQUENCING_NAME),
     }
 
     # Use Pandas to summarize and display
-    stats = [(organism, col[1], df[col[0]].nunique()) for organism, df in obs_df.items() for col in COLS_TO_QUERY]
+    # Build stats including collection column; compute unique counts per organism per collection
+    stats = []
+    for (experiment_name, collection_name), df in experiments_obs.items():
+        for col in COLS_TO_QUERY:
+            stats.append((experiment_name, collection_name, col[1], df[col[0]].nunique()))
     print(
         census["census_info"]["summary"].read().concat().to_pandas()[["label", "value"]].to_string(index=False),
         file=file,
     )
-    stats_df = pd.DataFrame(stats, columns=["organism", "attribute", "unique count"])
-    display_stats_df = pd.pivot(stats_df, index=["organism"], columns=["attribute"], values=["unique count"])
+    stats_df = pd.DataFrame(stats, columns=["organism", "collection", "attribute", "unique count"])
+    display_stats_df = stats_df.pivot_table(
+        index=["organism", "collection"], columns=["attribute"], values=["unique count"], aggfunc="first"
+    )
     print(display_stats_df, file=file)
     print(file=file)
 
