@@ -6,7 +6,7 @@ dependencies= [
     "attrs",
     "cattrs>=23.2.2",
     "tiledbsoma==1.15.3",  # IMPORTANT: this must match the Census Builder version
-    "cellxgene-census==1.15.0",  # IMPORTANT: this must match the Census Builder version
+    "cellxgene-census==1.17.0",  # IMPORTANT: this must match the Census Builder version
     "pyyaml",
     "requests",
     "typed-argument-parser",
