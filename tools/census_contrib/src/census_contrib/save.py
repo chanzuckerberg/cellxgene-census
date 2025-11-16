@@ -5,6 +5,7 @@ from pathlib import Path
 
 import numpy as np
 import numpy.typing as npt
+import psutil
 import pyarrow as pa
 import tiledbsoma as soma
 from somacore.options import PlatformConfig
@@ -108,6 +109,10 @@ def roundHalfToEven(a: npt.NDArray[np.float32], keepbits: int) -> npt.NDArray[np
 def _consolidate_tiledb_object(uri: str | Path, modes: tuple[str, ...]) -> None:
     import tiledb
 
+    cpu_count = psutil.cpu_count() or 1
+    sys_mem_GiB = psutil.virtual_memory().total // (1024**3)
+    mem_budget_bytes = max(10, min(32, sys_mem_GiB // 8)) * 1024**3
+
     path: str = Path(uri).as_posix()
     for mode in modes:
         try:
@@ -116,7 +121,9 @@ def _consolidate_tiledb_object(uri: str | Path, modes: tuple[str, ...]) -> None:
                     {
                         "py.init_buffer_bytes": 4 * 1024**3,
                         "soma.init_buffer_bytes": 4 * 1024**3,
-                        "sm.consolidation.buffer_size": 4 * 1024**3,
+                        "sm.mem.total_budget": mem_budget_bytes,
+                        "sm.compute_concurrency_level": cpu_count,
+                        "sm.io_concurrency_level": cpu_count,
                         "sm.consolidation.mode": mode,
                         "sm.vacuum.mode": mode,
                     }

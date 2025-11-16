@@ -5,6 +5,7 @@ import logging
 import math
 import pathlib
 import urllib
+import urllib.parse
 from collections.abc import Generator, Iterator, Sequence
 from concurrent.futures import Future, ThreadPoolExecutor
 from importlib.metadata import metadata
