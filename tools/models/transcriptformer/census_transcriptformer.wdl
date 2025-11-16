@@ -106,7 +106,7 @@ task prepare {
     runtime {
         docker: docker
         cpu: 2
-        memory: "8GiB"
+        memory: "16GiB"
     }
 
     output {
