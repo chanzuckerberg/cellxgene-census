@@ -98,11 +98,11 @@ def roundHalfToEven(a: npt.NDArray[np.float32], keepbits: int) -> npt.NDArray[np
     maskbits = nmant - keepbits
     full_mask = (1 << bits) - 1
     mask = (full_mask >> maskbits) << maskbits
-    half_quantum1 = (1 << (maskbits - 1)) - 1
+    half_quantum1 = np.uint32((1 << (maskbits - 1)) - 1)
 
     b = a.view(np.uint32)
-    b += ((b >> maskbits) & 1) + half_quantum1
-    b &= mask
+    b += np.uint32(((b >> maskbits) & 1) + half_quantum1)
+    b &= np.uint32(mask)
     return a
 
 
