@@ -1,6 +1,6 @@
 # Census data releases
 
-**Last edited**: Feb 13th, 2024.
+**Last edited**: Nov 8th, 2025.
 
 **Contents:**
 
@@ -17,10 +17,7 @@ Any given Census build is named with a unique tag, normally the date of build, e
 
 ### Long-term supported (LTS) Census releases
 
-To enable data stability and scientific reproducibility, [CZ CELLxGENE Discover](https://cellxgene.cziscience.com/) plans to perform regular LTS Census data releases:
-
-* Published online every six months for public access, starting on May 15, 2023.
-* Available for public access for at least 5 years upon publication.
+To enable data stability and scientific reproducibility, [CZ CELLxGENE Discover](https://cellxgene.cziscience.com/) plans to keep certain Census data releases available for public access for at least 5 years upon publication.
 
 The most recent LTS Census data release is the default opened by the APIs and recognized as `census_version = "stable"`. To open previous LTS Census data releases, you can directly specify the version via its build date `census_version = "[YYYY]-[MM]-[DD]"`.
 
@@ -40,9 +37,7 @@ census <- open_soma(census_version = "stable")
 
 ### Weekly Census releases (latest)
 
-[CZ CELLxGENE Discover](https://cellxgene.cziscience.com/) ingests a handful of new datasets every week. To quickly enable access to these new data via the Census, CZ CELLxGENE Discover plans to perform weekly Census data releases:
-
-* Available for public access for 1 month.
+[CZ CELLxGENE Discover](https://cellxgene.cziscience.com/) ingests a handful of new datasets every week. To quickly enable access to these new data via the Census, CZ CELLxGENE Discover plans to perform weekly Census data releases, available for public access for 1 month.
 
 The most recent weekly release can be opened by the APIs by specifying `census_version = "latest"`.
 
@@ -61,6 +56,91 @@ census <- open_soma(census_version = "latest")
 ```
 
 ## List of LTS Census data releases
+
+### LTS 2025-11-08
+
+Open this data release by specifying `census_version = "2025-11-08"` in future calls to `open_soma()`.
+
+#### Version information
+
+| Information                       | Value                                                                                 |
+|-----------------------------------|---------------------------------------------------------------------------------------|
+| Census schema version             | [**2.4.0**](https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md) |
+| Census build date                 | **2025-11-08**                                                                        |
+| Dataset schema version            | [**7.0.0**](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/7.0.0/schema.md)      |
+| Number of datasets                | **1845**                                                                               |
+
+#### Schema changes
+
+Census schema 2.4.0 has a few important changes that may need adjustments in analysis code:
+
+* The obs `disease` and `disease_ontology_term_id` fields may now contain multiple values delimited by `' || '`, so exact string equality queries on these fields may yield incomplete results.
+* The var `feature_name` field is no longer necessarily unique. Previously, colliding gene symbols were disambiguated by appending their `feature_id` (Ensembl gene ID). `feature_name` is now populated with the exact gene symbols, even if used multiple times, while `feature_id` remains unique.
+
+These reflect changes in the newer CELLxGENE Dataset schema version.
+
+#### Cell counts
+
+<!--
+census["census_info"]["summary_cell_counts"].read(value_filter='category == "all"').concat().to_pandas().sort_values(by="total_cell_count",ascending=False)
+-->
+
+| Species              | Total cells     | Unique cells    |
+|----------------------|----------------:|----------------:|
+| _Homo sapiens_       | 162,025,130     | 99,633,637      |
+| _Mus musculus_       | 46,299,127      | 21,029,771      |
+| _Macaca mulatta_     | 7,010,229       | 2,929,014       |
+| _Callithrix jacchus_ | 2,275,451       | 1,712,738       |
+| _Pan troglodytes_    |   158,099       |   158,099       |
+
+#### Cell metadata
+
+<!--
+census_organisms = census["census_info"]["organisms"].read().concat().to_pandas()
+print("| Category                 | " 
+      + " | ".join(f"_{label}_".rjust(22) for label in census_organisms["organism_label"].tolist()) 
+      + " |")
+print("|:-------------------------|"
+      + "".join("-----------------------:|" for _ in range(len(census_organisms))))
+for colname in ("assay","cell_type","development_stage","disease","self_reported_ethnicity",
+                "sex","suspension_type","tissue","tissue_general"):
+    label = colname.replace("self_reported","self-reported").replace("_", " ")
+    label = label[0].upper() + label[1:]
+    print(f"| {label.ljust(24)} |", end="")
+    for organism in census_organisms["organism"].tolist():
+        col = census["census_data"][organism].obs.read(column_names=(colname,)).concat().to_pandas()
+        colu = pd.Series(col[colname].dropna().unique())
+        del col
+        count = len(colu.str.split(' || ',regex=False).explode().str.strip().unique())
+        print(f" {str(count).rjust(22)} |", end="")
+    print()
+-->
+
+| Category                 |         _Homo sapiens_ |         _Mus musculus_ |   _Callithrix jacchus_ |       _Macaca mulatta_ |      _Pan troglodytes_ |
+|:-------------------------|-----------------------:|-----------------------:|-----------------------:|-----------------------:|-----------------------:|
+| Assay                    |                     37 |                     16 |                      1 |                      2 |                      1 |
+| Cell type                |                    898 |                    473 |                     40 |                     54 |                     25 |
+| Development stage        |                    194 |                     66 |                      3 |                      4 |                      1 |
+| Disease                  |                    192 |                     16 |                      1 |                      1 |                      1 |
+| Self-reported ethnicity  |                     33 |                      1 |                      1 |                      1 |                      1 |
+| Sex                      |                      3 |                      3 |                      2 |                      3 |                      2 |
+| Suspension type          |                      2 |                      2 |                      1 |                      2 |                      1 |
+| Tissue                   |                    417 |                    101 |                     33 |                     29 |                      1 |
+| Tissue general           |                     70 |                     36 |                      1 |                      2 |                      1 |
+
+#### Embeddings
+
+Find out more in the [Census models page](https://cellxgene.cziscience.com/census-models).
+
+Available embeddings can be accessed via [`cellxgene_census.experimental.get_embedding()`](https://chanzuckerberg.github.io/cellxgene-census/_autosummary/cellxgene_census.experimental.get_embedding.html#cellxgene_census.experimental.get_embedding), or by specifying the `obs_embeddings`/`var_embeddings` field in [`cellxgene_census.get_anndata()`](https://chanzuckerberg.github.io/cellxgene-census/_autosummary/cellxgene_census.get_anndata.html#cellxgene_census.get_anndata).
+
+##### Cells
+
+| Method                       | _Homo sapiens_      | _Mus musculus_      |
+|------------------------------|---------------------|---------------------|
+| scVI                         | `scvi`              | `scvi`              |
+| TranscriptFormer tf-sapiens  | `tf-sapiens`        | _N/A_               |
+| TranscriptFormer tf-exemplar | `tf-exemplar-human` | `tf-exemplar-mouse` |
 
 ### LTS 2025-01-30
 
@@ -296,9 +376,6 @@ We aim to guarantee the following policy:
 
 * Every Census package version released after an LTS will be able to read _every_ Census data release until the next LTS.
 
-The current LTS release (2023-12-15) is compatible with the following package versions:
+The current LTS release (2025-11-08) is compatible with the following package versions:
 
-* 1.10.x
-* 1.11.x
-* 1.12.x
-* 1.13.x
+* 1.17.x
