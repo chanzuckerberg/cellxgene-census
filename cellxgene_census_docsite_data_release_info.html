@@ -157,38 +157,46 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#list-of-lts-census-data-releases">List of LTS Census data releases</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#lts-2025-01-30">LTS 2025-01-30</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#lts-2025-11-08">LTS 2025-11-08</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#version-information">Version information</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#cell-and-donor-counts">Cell and donor counts</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#schema-changes">Schema changes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cell-counts">Cell counts</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#cell-metadata">Cell metadata</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#embeddings">Embeddings</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#lts-2024-07-01">LTS 2024-07-01</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#lts-2025-01-30">LTS 2025-01-30</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#id1">Version information</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id2">Cell and donor counts</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id3">Cell metadata</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id4">Embeddings</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cell-and-donor-counts">Cell and donor counts</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">Cell metadata</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">Embeddings</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#lts-2024-07-01">LTS 2024-07-01</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id5">Version information</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id6">Cell and donor counts</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id7">Cell metadata</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id8">Embeddings</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#lts-2023-12-15">LTS 2023-12-15</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#id6">Version information</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id7">Cell and donor counts</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id8">Cell metadata</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id9">Embeddings</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id10">Version information</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id11">Cell and donor counts</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id12">Cell metadata</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id13">Embeddings</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#lts-2023-07-25">LTS 2023-07-25</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#id11">Version information</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id12">Cell and donor counts</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id13">Cell metadata</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id15">Version information</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id16">Cell and donor counts</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id17">Cell metadata</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#lts-2023-05-15">LTS 2023-05-15</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#errata">🔴 Errata 🔴</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id14">Version information</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id15">Cell and donor counts</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id16">Cell metadata</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id18">Version information</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id19">Cell and donor counts</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id20">Cell metadata</a></li>
 </ul>
 </li>
 </ul>
@@ -240,7 +248,7 @@
                 
   <section id="census-data-releases">
 <h1>Census data releases<a class="headerlink" href="#census-data-releases" title="Permalink to this heading"></a></h1>
-<p><strong>Last edited</strong>: Feb 13th, 2024.</p>
+<p><strong>Last edited</strong>: Nov 8th, 2025.</p>
 <p><strong>Contents:</strong></p>
 <ol class="arabic simple">
 <li><p><a class="reference internal" href="#what-is-a-census-data-release"><span class="std std-ref">What is a Census data release?</span></a></p></li>
@@ -254,11 +262,7 @@ a <a class="reference external" href="https://github.com/single-cell-data/TileDB
 <p>Any given Census build is named with a unique tag, normally the date of build, e.g., <code class="docutils literal notranslate"><span class="pre">&quot;2025-01-30&quot;</span></code>.</p>
 <section id="long-term-supported-lts-census-releases">
 <h3>Long-term supported (LTS) Census releases<a class="headerlink" href="#long-term-supported-lts-census-releases" title="Permalink to this heading"></a></h3>
-<p>To enable data stability and scientific reproducibility, <a class="reference external" href="https://cellxgene.cziscience.com/">CZ CELLxGENE Discover</a> plans to perform regular LTS Census data releases:</p>
-<ul class="simple">
-<li><p>Published online every six months for public access, starting on May 15, 2023.</p></li>
-<li><p>Available for public access for at least 5 years upon publication.</p></li>
-</ul>
+<p>To enable data stability and scientific reproducibility, <a class="reference external" href="https://cellxgene.cziscience.com/">CZ CELLxGENE Discover</a> plans to keep certain Census data releases available for public access for at least 5 years upon publication.</p>
 <p>The most recent LTS Census data release is the default opened by the APIs and recognized as <code class="docutils literal notranslate"><span class="pre">census_version</span> <span class="pre">=</span> <span class="pre">&quot;stable&quot;</span></code>. To open previous LTS Census data releases, you can directly specify the version via its build date <code class="docutils literal notranslate"><span class="pre">census_version</span> <span class="pre">=</span> <span class="pre">&quot;[YYYY]-[MM]-[DD]&quot;</span></code>.</p>
 <p>Python</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">cellxgene_census</span>
@@ -273,10 +277,7 @@ a <a class="reference external" href="https://github.com/single-cell-data/TileDB
 </section>
 <section id="weekly-census-releases-latest">
 <h3>Weekly Census releases (latest)<a class="headerlink" href="#weekly-census-releases-latest" title="Permalink to this heading"></a></h3>
-<p><a class="reference external" href="https://cellxgene.cziscience.com/">CZ CELLxGENE Discover</a> ingests a handful of new datasets every week. To quickly enable access to these new data via the Census, CZ CELLxGENE Discover plans to perform weekly Census data releases:</p>
-<ul class="simple">
-<li><p>Available for public access for 1 month.</p></li>
-</ul>
+<p><a class="reference external" href="https://cellxgene.cziscience.com/">CZ CELLxGENE Discover</a> ingests a handful of new datasets every week. To quickly enable access to these new data via the Census, CZ CELLxGENE Discover plans to perform weekly Census data releases, available for public access for 1 month.</p>
 <p>The most recent weekly release can be opened by the APIs by specifying <code class="docutils literal notranslate"><span class="pre">census_version</span> <span class="pre">=</span> <span class="pre">&quot;latest&quot;</span></code>.</p>
 <p>Python</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">cellxgene_census</span>
@@ -292,11 +293,213 @@ a <a class="reference external" href="https://github.com/single-cell-data/TileDB
 </section>
 <section id="list-of-lts-census-data-releases">
 <h2>List of LTS Census data releases<a class="headerlink" href="#list-of-lts-census-data-releases" title="Permalink to this heading"></a></h2>
+<section id="lts-2025-11-08">
+<h3>LTS 2025-11-08<a class="headerlink" href="#lts-2025-11-08" title="Permalink to this heading"></a></h3>
+<p>Open this data release by specifying <code class="docutils literal notranslate"><span class="pre">census_version</span> <span class="pre">=</span> <span class="pre">&quot;2025-11-08&quot;</span></code> in future calls to <code class="docutils literal notranslate"><span class="pre">open_soma()</span></code>.</p>
+<section id="version-information">
+<h4>Version information<a class="headerlink" href="#version-information" title="Permalink to this heading"></a></h4>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Information</p></th>
+<th class="head"><p>Value</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Census schema version</p></td>
+<td><p><a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md"><strong>2.4.0</strong></a></p></td>
+</tr>
+<tr class="row-odd"><td><p>Census build date</p></td>
+<td><p><strong>2025-11-08</strong></p></td>
+</tr>
+<tr class="row-even"><td><p>Dataset schema version</p></td>
+<td><p><a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/7.0.0/schema.md"><strong>7.0.0</strong></a></p></td>
+</tr>
+<tr class="row-odd"><td><p>Number of datasets</p></td>
+<td><p><strong>1845</strong></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="schema-changes">
+<h4>Schema changes<a class="headerlink" href="#schema-changes" title="Permalink to this heading"></a></h4>
+<p>Census schema 2.4.0 has a few important changes that may need adjustments in analysis code:</p>
+<ul class="simple">
+<li><p>The obs <code class="docutils literal notranslate"><span class="pre">disease</span></code> and <code class="docutils literal notranslate"><span class="pre">disease_ontology_term_id</span></code> fields may now contain multiple values delimited by <code class="docutils literal notranslate"><span class="pre">'</span> <span class="pre">||</span> <span class="pre">'</span></code>, so exact string equality queries on these fields may yield incomplete results.</p></li>
+<li><p>The var <code class="docutils literal notranslate"><span class="pre">feature_name</span></code> field is no longer necessarily unique. Previously, colliding gene symbols were disambiguated by appending their <code class="docutils literal notranslate"><span class="pre">feature_id</span></code> (Ensembl gene ID). <code class="docutils literal notranslate"><span class="pre">feature_name</span></code> is now populated with the exact gene symbols, even if used multiple times, while <code class="docutils literal notranslate"><span class="pre">feature_id</span></code> remains unique.</p></li>
+</ul>
+<p>These reflect changes in the newer CELLxGENE Dataset schema version.</p>
+</section>
+<section id="cell-counts">
+<h4>Cell counts<a class="headerlink" href="#cell-counts" title="Permalink to this heading"></a></h4>
+<!--
+census["census_info"]["summary_cell_counts"].read(value_filter='category == "all"').concat().to_pandas().sort_values(by="total_cell_count",ascending=False)
+-->
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Species</p></th>
+<th class="head text-right"><p>Total cells</p></th>
+<th class="head text-right"><p>Unique cells</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><em>Homo sapiens</em></p></td>
+<td class="text-right"><p>162,025,130</p></td>
+<td class="text-right"><p>99,633,637</p></td>
+</tr>
+<tr class="row-odd"><td><p><em>Mus musculus</em></p></td>
+<td class="text-right"><p>46,299,127</p></td>
+<td class="text-right"><p>21,029,771</p></td>
+</tr>
+<tr class="row-even"><td><p><em>Macaca mulatta</em></p></td>
+<td class="text-right"><p>7,010,229</p></td>
+<td class="text-right"><p>2,929,014</p></td>
+</tr>
+<tr class="row-odd"><td><p><em>Callithrix jacchus</em></p></td>
+<td class="text-right"><p>2,275,451</p></td>
+<td class="text-right"><p>1,712,738</p></td>
+</tr>
+<tr class="row-even"><td><p><em>Pan troglodytes</em></p></td>
+<td class="text-right"><p>158,099</p></td>
+<td class="text-right"><p>158,099</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="cell-metadata">
+<h4>Cell metadata<a class="headerlink" href="#cell-metadata" title="Permalink to this heading"></a></h4>
+<!--
+census_organisms = census["census_info"]["organisms"].read().concat().to_pandas()
+print("| Category                 | " 
+      + " | ".join(f"_{label}_".rjust(22) for label in census_organisms["organism_label"].tolist()) 
+      + " |")
+print("|:-------------------------|"
+      + "".join("-----------------------:|" for _ in range(len(census_organisms))))
+for colname in ("assay","cell_type","development_stage","disease","self_reported_ethnicity",
+                "sex","suspension_type","tissue","tissue_general"):
+    label = colname.replace("self_reported","self-reported").replace("_", " ")
+    label = label[0].upper() + label[1:]
+    print(f"| {label.ljust(24)} |", end="")
+    for organism in census_organisms["organism"].tolist():
+        col = census["census_data"][organism].obs.read(column_names=(colname,)).concat().to_pandas()
+        colu = pd.Series(col[colname].dropna().unique())
+        del col
+        count = len(colu.str.split(' || ',regex=False).explode().str.strip().unique())
+        print(f" {str(count).rjust(22)} |", end="")
+    print()
+-->
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head text-left"><p>Category</p></th>
+<th class="head text-right"><p><em>Homo sapiens</em></p></th>
+<th class="head text-right"><p><em>Mus musculus</em></p></th>
+<th class="head text-right"><p><em>Callithrix jacchus</em></p></th>
+<th class="head text-right"><p><em>Macaca mulatta</em></p></th>
+<th class="head text-right"><p><em>Pan troglodytes</em></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td class="text-left"><p>Assay</p></td>
+<td class="text-right"><p>37</p></td>
+<td class="text-right"><p>16</p></td>
+<td class="text-right"><p>1</p></td>
+<td class="text-right"><p>2</p></td>
+<td class="text-right"><p>1</p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p>Cell type</p></td>
+<td class="text-right"><p>898</p></td>
+<td class="text-right"><p>473</p></td>
+<td class="text-right"><p>40</p></td>
+<td class="text-right"><p>54</p></td>
+<td class="text-right"><p>25</p></td>
+</tr>
+<tr class="row-even"><td class="text-left"><p>Development stage</p></td>
+<td class="text-right"><p>194</p></td>
+<td class="text-right"><p>66</p></td>
+<td class="text-right"><p>3</p></td>
+<td class="text-right"><p>4</p></td>
+<td class="text-right"><p>1</p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p>Disease</p></td>
+<td class="text-right"><p>192</p></td>
+<td class="text-right"><p>16</p></td>
+<td class="text-right"><p>1</p></td>
+<td class="text-right"><p>1</p></td>
+<td class="text-right"><p>1</p></td>
+</tr>
+<tr class="row-even"><td class="text-left"><p>Self-reported ethnicity</p></td>
+<td class="text-right"><p>33</p></td>
+<td class="text-right"><p>1</p></td>
+<td class="text-right"><p>1</p></td>
+<td class="text-right"><p>1</p></td>
+<td class="text-right"><p>1</p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p>Sex</p></td>
+<td class="text-right"><p>3</p></td>
+<td class="text-right"><p>3</p></td>
+<td class="text-right"><p>2</p></td>
+<td class="text-right"><p>3</p></td>
+<td class="text-right"><p>2</p></td>
+</tr>
+<tr class="row-even"><td class="text-left"><p>Suspension type</p></td>
+<td class="text-right"><p>2</p></td>
+<td class="text-right"><p>2</p></td>
+<td class="text-right"><p>1</p></td>
+<td class="text-right"><p>2</p></td>
+<td class="text-right"><p>1</p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p>Tissue</p></td>
+<td class="text-right"><p>417</p></td>
+<td class="text-right"><p>101</p></td>
+<td class="text-right"><p>33</p></td>
+<td class="text-right"><p>29</p></td>
+<td class="text-right"><p>1</p></td>
+</tr>
+<tr class="row-even"><td class="text-left"><p>Tissue general</p></td>
+<td class="text-right"><p>70</p></td>
+<td class="text-right"><p>36</p></td>
+<td class="text-right"><p>1</p></td>
+<td class="text-right"><p>2</p></td>
+<td class="text-right"><p>1</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="embeddings">
+<h4>Embeddings<a class="headerlink" href="#embeddings" title="Permalink to this heading"></a></h4>
+<p>Find out more in the <a class="reference external" href="https://cellxgene.cziscience.com/census-models">Census models page</a>.</p>
+<p>Available embeddings can be accessed via <a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/_autosummary/cellxgene_census.experimental.get_embedding.html#cellxgene_census.experimental.get_embedding"><code class="docutils literal notranslate"><span class="pre">cellxgene_census.experimental.get_embedding()</span></code></a>, or by specifying the <code class="docutils literal notranslate"><span class="pre">obs_embeddings</span></code>/<code class="docutils literal notranslate"><span class="pre">var_embeddings</span></code> field in <a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/_autosummary/cellxgene_census.get_anndata.html#cellxgene_census.get_anndata"><code class="docutils literal notranslate"><span class="pre">cellxgene_census.get_anndata()</span></code></a>.</p>
+<section id="cells">
+<h5>Cells<a class="headerlink" href="#cells" title="Permalink to this heading"></a></h5>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Method</p></th>
+<th class="head"><p><em>Homo sapiens</em></p></th>
+<th class="head"><p><em>Mus musculus</em></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>scVI</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">scvi</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">scvi</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>TranscriptFormer tf-sapiens</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tf-sapiens</span></code></p></td>
+<td><p><em>N/A</em></p></td>
+</tr>
+<tr class="row-even"><td><p>TranscriptFormer tf-exemplar</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tf-exemplar-human</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tf-exemplar-mouse</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+</section>
 <section id="lts-2025-01-30">
 <h3>LTS 2025-01-30<a class="headerlink" href="#lts-2025-01-30" title="Permalink to this heading"></a></h3>
 <p>Open this data release by specifying <code class="docutils literal notranslate"><span class="pre">census_version</span> <span class="pre">=</span> <span class="pre">&quot;2025-01-30&quot;</span></code> in future calls to <code class="docutils literal notranslate"><span class="pre">open_soma()</span></code>.</p>
-<section id="version-information">
-<h4>Version information<a class="headerlink" href="#version-information" title="Permalink to this heading"></a></h4>
+<section id="id1">
+<h4>Version information<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h4>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Information</p></th>
@@ -340,8 +543,8 @@ a <a class="reference external" href="https://github.com/single-cell-data/TileDB
 </tbody>
 </table>
 </section>
-<section id="cell-metadata">
-<h4>Cell metadata<a class="headerlink" href="#cell-metadata" title="Permalink to this heading"></a></h4>
+<section id="id2">
+<h4>Cell metadata<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h4>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head text-left"><p>Category</p></th>
@@ -389,12 +592,12 @@ a <a class="reference external" href="https://github.com/single-cell-data/TileDB
 </tbody>
 </table>
 </section>
-<section id="embeddings">
-<h4>Embeddings<a class="headerlink" href="#embeddings" title="Permalink to this heading"></a></h4>
+<section id="id3">
+<h4>Embeddings<a class="headerlink" href="#id3" title="Permalink to this heading"></a></h4>
 <p>Find out more in the <a class="reference external" href="https://cellxgene.cziscience.com/census-models">Census model page</a>.</p>
 <p>Available embeddings can be accessed via <a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/_autosummary/cellxgene_census.experimental.get_embedding.html#cellxgene_census.experimental.get_embedding"><code class="docutils literal notranslate"><span class="pre">cellxgene_census.experimental.get_embedding()</span></code></a>, or by specifying the <code class="docutils literal notranslate"><span class="pre">obs_embeddings</span></code>/<code class="docutils literal notranslate"><span class="pre">var_embeddings</span></code> field in <a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/_autosummary/cellxgene_census.get_anndata.html#cellxgene_census.get_anndata"><code class="docutils literal notranslate"><span class="pre">cellxgene_census.get_anndata()</span></code></a>.</p>
-<section id="cells">
-<h5>Cells<a class="headerlink" href="#cells" title="Permalink to this heading"></a></h5>
+<section id="id4">
+<h5>Cells<a class="headerlink" href="#id4" title="Permalink to this heading"></a></h5>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Method</p></th>
@@ -415,8 +618,8 @@ a <a class="reference external" href="https://github.com/single-cell-data/TileDB
 <section id="lts-2024-07-01">
 <h3>LTS 2024-07-01<a class="headerlink" href="#lts-2024-07-01" title="Permalink to this heading"></a></h3>
 <p>Open this data release by specifying <code class="docutils literal notranslate"><span class="pre">census_version</span> <span class="pre">=</span> <span class="pre">&quot;2024-07-01&quot;</span></code> in future calls to <code class="docutils literal notranslate"><span class="pre">open_soma()</span></code>.</p>
-<section id="id1">
-<h4>Version information<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h4>
+<section id="id5">
+<h4>Version information<a class="headerlink" href="#id5" title="Permalink to this heading"></a></h4>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Information</p></th>
@@ -439,8 +642,8 @@ a <a class="reference external" href="https://github.com/single-cell-data/TileDB
 </tbody>
 </table>
 </section>
-<section id="id2">
-<h4>Cell and donor counts<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h4>
+<section id="id6">
+<h4>Cell and donor counts<a class="headerlink" href="#id6" title="Permalink to this heading"></a></h4>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Type</p></th>
@@ -460,8 +663,8 @@ a <a class="reference external" href="https://github.com/single-cell-data/TileDB
 </tbody>
 </table>
 </section>
-<section id="id3">
-<h4>Cell metadata<a class="headerlink" href="#id3" title="Permalink to this heading"></a></h4>
+<section id="id7">
+<h4>Cell metadata<a class="headerlink" href="#id7" title="Permalink to this heading"></a></h4>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Category</p></th>
@@ -509,12 +712,12 @@ a <a class="reference external" href="https://github.com/single-cell-data/TileDB
 </tbody>
 </table>
 </section>
-<section id="id4">
-<h4>Embeddings<a class="headerlink" href="#id4" title="Permalink to this heading"></a></h4>
+<section id="id8">
+<h4>Embeddings<a class="headerlink" href="#id8" title="Permalink to this heading"></a></h4>
 <p>Find out more in the <a class="reference external" href="https://cellxgene.cziscience.com/census-models">Census model page</a>.</p>
 <p>Available embeddings can be accessed via <a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/_autosummary/cellxgene_census.experimental.get_embedding.html#cellxgene_census.experimental.get_embedding"><code class="docutils literal notranslate"><span class="pre">cellxgene_census.experimental.get_embedding()</span></code></a>, or by specifying the <code class="docutils literal notranslate"><span class="pre">obs_embeddings</span></code>/<code class="docutils literal notranslate"><span class="pre">var_embeddings</span></code> field in <a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/_autosummary/cellxgene_census.get_anndata.html#cellxgene_census.get_anndata"><code class="docutils literal notranslate"><span class="pre">cellxgene_census.get_anndata()</span></code></a>.</p>
-<section id="id5">
-<h5>Cells<a class="headerlink" href="#id5" title="Permalink to this heading"></a></h5>
+<section id="id9">
+<h5>Cells<a class="headerlink" href="#id9" title="Permalink to this heading"></a></h5>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Method</p></th>
@@ -539,8 +742,8 @@ a <a class="reference external" href="https://github.com/single-cell-data/TileDB
 <section id="lts-2023-12-15">
 <h3>LTS 2023-12-15<a class="headerlink" href="#lts-2023-12-15" title="Permalink to this heading"></a></h3>
 <p>Open this data release by specifying <code class="docutils literal notranslate"><span class="pre">census_version</span> <span class="pre">=</span> <span class="pre">&quot;2023-12-15&quot;</span></code> in future calls to <code class="docutils literal notranslate"><span class="pre">open_soma()</span></code>.</p>
-<section id="id6">
-<h4>Version information<a class="headerlink" href="#id6" title="Permalink to this heading"></a></h4>
+<section id="id10">
+<h4>Version information<a class="headerlink" href="#id10" title="Permalink to this heading"></a></h4>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Information</p></th>
@@ -563,8 +766,8 @@ a <a class="reference external" href="https://github.com/single-cell-data/TileDB
 </tbody>
 </table>
 </section>
-<section id="id7">
-<h4>Cell and donor counts<a class="headerlink" href="#id7" title="Permalink to this heading"></a></h4>
+<section id="id11">
+<h4>Cell and donor counts<a class="headerlink" href="#id11" title="Permalink to this heading"></a></h4>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Type</p></th>
@@ -584,8 +787,8 @@ a <a class="reference external" href="https://github.com/single-cell-data/TileDB
 </tbody>
 </table>
 </section>
-<section id="id8">
-<h4>Cell metadata<a class="headerlink" href="#id8" title="Permalink to this heading"></a></h4>
+<section id="id12">
+<h4>Cell metadata<a class="headerlink" href="#id12" title="Permalink to this heading"></a></h4>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Category</p></th>
@@ -633,12 +836,12 @@ a <a class="reference external" href="https://github.com/single-cell-data/TileDB
 </tbody>
 </table>
 </section>
-<section id="id9">
-<h4>Embeddings<a class="headerlink" href="#id9" title="Permalink to this heading"></a></h4>
+<section id="id13">
+<h4>Embeddings<a class="headerlink" href="#id13" title="Permalink to this heading"></a></h4>
 <p>Find out more in the <a class="reference external" href="https://cellxgene.cziscience.com/census-models">Census model page</a>.</p>
 <p>Available embeddings can be accessed via <a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/_autosummary/cellxgene_census.experimental.get_embedding.html#cellxgene_census.experimental.get_embedding"><code class="docutils literal notranslate"><span class="pre">cellxgene_census.experimental.get_embedding()</span></code></a>, or by specifying the <code class="docutils literal notranslate"><span class="pre">obs_embeddings</span></code>/<code class="docutils literal notranslate"><span class="pre">var_embeddings</span></code> field in <a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/_autosummary/cellxgene_census.get_anndata.html#cellxgene_census.get_anndata"><code class="docutils literal notranslate"><span class="pre">cellxgene_census.get_anndata()</span></code></a>.</p>
-<section id="id10">
-<h5>Cells<a class="headerlink" href="#id10" title="Permalink to this heading"></a></h5>
+<section id="id14">
+<h5>Cells<a class="headerlink" href="#id14" title="Permalink to this heading"></a></h5>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Method</p></th>
@@ -692,8 +895,8 @@ a <a class="reference external" href="https://github.com/single-cell-data/TileDB
 <section id="lts-2023-07-25">
 <h3>LTS 2023-07-25<a class="headerlink" href="#lts-2023-07-25" title="Permalink to this heading"></a></h3>
 <p>Open this data release by specifying <code class="docutils literal notranslate"><span class="pre">census_version</span> <span class="pre">=</span> <span class="pre">&quot;2023-07-25&quot;</span></code> in future calls to <code class="docutils literal notranslate"><span class="pre">open_soma()</span></code>.</p>
-<section id="id11">
-<h4>Version information<a class="headerlink" href="#id11" title="Permalink to this heading"></a></h4>
+<section id="id15">
+<h4>Version information<a class="headerlink" href="#id15" title="Permalink to this heading"></a></h4>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Information</p></th>
@@ -716,8 +919,8 @@ a <a class="reference external" href="https://github.com/single-cell-data/TileDB
 </tbody>
 </table>
 </section>
-<section id="id12">
-<h4>Cell and donor counts<a class="headerlink" href="#id12" title="Permalink to this heading"></a></h4>
+<section id="id16">
+<h4>Cell and donor counts<a class="headerlink" href="#id16" title="Permalink to this heading"></a></h4>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Type</p></th>
@@ -737,8 +940,8 @@ a <a class="reference external" href="https://github.com/single-cell-data/TileDB
 </tbody>
 </table>
 </section>
-<section id="id13">
-<h4>Cell metadata<a class="headerlink" href="#id13" title="Permalink to this heading"></a></h4>
+<section id="id17">
+<h4>Cell metadata<a class="headerlink" href="#id17" title="Permalink to this heading"></a></h4>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Category</p></th>
@@ -799,8 +1002,8 @@ a <a class="reference external" href="https://github.com/single-cell-data/TileDB
 <p>If you wish to use this data release, you can consider filtering out all of these 243,569 cells by using the <code class="docutils literal notranslate"><span class="pre">soma_joinids</span></code> provided in this file <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/raw/773edab79bbdc78eccb26ec4f8211a9b4c98a71a/tools/cell_dup_check/duplicate_cells_census_LTS_2023-05-15.csv.zip">duplicate_cells_census_LTS_2023-05-15.csv.zip</a>. You can filter specific cells by using the <code class="docutils literal notranslate"><span class="pre">value_filter</span></code> or <code class="docutils literal notranslate"><span class="pre">obs_value_filter</span></code> of the querying API functions, for more information follow this <a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/notebooks/api_demo/census_query_extract.html">tutorial</a>.</p>
 </section>
 </section>
-<section id="id14">
-<h4>Version information<a class="headerlink" href="#id14" title="Permalink to this heading"></a></h4>
+<section id="id18">
+<h4>Version information<a class="headerlink" href="#id18" title="Permalink to this heading"></a></h4>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Information</p></th>
@@ -823,8 +1026,8 @@ a <a class="reference external" href="https://github.com/single-cell-data/TileDB
 </tbody>
 </table>
 </section>
-<section id="id15">
-<h4>Cell and donor counts<a class="headerlink" href="#id15" title="Permalink to this heading"></a></h4>
+<section id="id19">
+<h4>Cell and donor counts<a class="headerlink" href="#id19" title="Permalink to this heading"></a></h4>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Type</p></th>
@@ -844,8 +1047,8 @@ a <a class="reference external" href="https://github.com/single-cell-data/TileDB
 </tbody>
 </table>
 </section>
-<section id="id16">
-<h4>Cell metadata<a class="headerlink" href="#id16" title="Permalink to this heading"></a></h4>
+<section id="id20">
+<h4>Cell metadata<a class="headerlink" href="#id20" title="Permalink to this heading"></a></h4>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Category</p></th>
@@ -902,12 +1105,9 @@ We aim to guarantee the following policy:</p>
 <ul class="simple">
 <li><p>Every Census package version released after an LTS will be able to read <em>every</em> Census data release until the next LTS.</p></li>
 </ul>
-<p>The current LTS release (2023-12-15) is compatible with the following package versions:</p>
+<p>The current LTS release (2025-11-08) is compatible with the following package versions:</p>
 <ul class="simple">
-<li><p>1.10.x</p></li>
-<li><p>1.11.x</p></li>
-<li><p>1.12.x</p></li>
-<li><p>1.13.x</p></li>
+<li><p>1.17.x</p></li>
 </ul>
 </section>
 </section>
@@ -924,7 +1124,7 @@ We aim to guarantee the following policy:</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Chan Zuckerberg Initiative.</p>
+    <p>&#169; Copyright 2022-Present, Chan Zuckerberg Initiative.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

@@ -51,7 +51,7 @@
     
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="FAQ" href="../../cellxgene_census_docsite_FAQ.html" />
+    <link rel="next" title="Train an scVI model using Census data" href="pytorch_scvi.html" />
     <link rel="prev" title="Computing on X using online (incremental) algorithms" href="../api_demo/census_compute_over_X.html" /> 
 </head>
 
@@ -173,6 +173,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#Make-predictions-with-the-model">Make predictions with the model</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="pytorch_scvi.html">Train an scVI model using Census data</a></li>
 </ul>
 </li>
 </ul>
@@ -220,7 +221,7 @@
                 
   <section id="Training-a-PyTorch-Model">
 <h1>Training a PyTorch Model<a class="headerlink" href="#Training-a-PyTorch-Model" title="Permalink to this heading"></a></h1>
-<p>This tutorial demonstrates training a simple Logistic Regression model using Census data, PyTorch, and <a class="reference external" href="https://github.com/single-cell-data/TileDB-SOMA-ML">TileDB-SOMA-ML</a>, which provides a PyTorch loader for SOMA datasets like Census. <em>Note: an earlier version of this notebook used a prototype loader in the ``cellxgene_census.experimental`` API, now replaced by TileDB-SOMA-ML.</em></p>
+<p>This tutorial demonstrates training a simple Logistic Regression model using Census data, PyTorch, and <a class="reference external" href="https://github.com/single-cell-data/TileDB-SOMA-ML">TileDB-SOMA-ML</a>, which provides a PyTorch loader for SOMA datasets like Census. <em>Note: an earlier version of this notebook used a prototype loader in the</em> <code class="docutils literal notranslate"><span class="pre">cellxgene_census.experimental</span></code> <em>API, now replaced by TileDB-SOMA-ML.</em></p>
 <p>We assume basic familiarity with PyTorch and the Census API. See the <a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/notebooks/api_demo/census_query_extract.html">Querying and fetching the single-cell data and cell/gene metadata</a> notebook tutorial for a quick primer on Census API usage.</p>
 <p><strong>Contents</strong></p>
 <ul class="simple">
@@ -255,8 +256,8 @@ The &#34;stable&#34; release is currently 2025-01-30. Specify &#39;census_versio
 </section>
 <section id="Create-an-ExperimentDataset">
 <h2>Create an ExperimentDataset<a class="headerlink" href="#Create-an-ExperimentDataset" title="Permalink to this heading"></a></h2>
-<p>To set up a PyTorch dataset from a Census slice, open an <code class="docutils literal notranslate"><span class="pre">`ExperimentAxisQuery</span></code> &lt;<a class="reference external" href="https://tiledbsoma.readthedocs.io/en/stable/python-tiledbsoma-experimentaxisquery.html">https://tiledbsoma.readthedocs.io/en/stable/python-tiledbsoma-experimentaxisquery.html</a>&gt;`__ and create a TileDB-SOMA-ML <code class="docutils literal notranslate"><span class="pre">`ExperimentDataset</span></code> &lt;<a class="reference external" href="https://single-cell-data.github.io/TileDB-SOMA-ML/#tiledbsoma_ml.ExperimentDataset">https://single-cell-data.github.io/TileDB-SOMA-ML/#tiledbsoma_ml.ExperimentDataset</a>&gt;`__ for it. We will also prepare a scikit-learn <code class="docutils literal notranslate"><span class="pre">`LabelEncoder</span></code> &lt;<a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html">https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html</a>&gt;`__ to help with mapping between
-Census cell types (categorical metadata) and PyTorch tensors.</p>
+<p>To set up a PyTorch dataset from a Census slice, open an <a class="reference external" href="https://tiledbsoma.readthedocs.io/en/stable/python-tiledbsoma-experimentaxisquery.html">ExperimentAxisQuery</a> and create a TileDB-SOMA-ML <a class="reference external" href="https://single-cell-data.github.io/TileDB-SOMA-ML/#tiledbsoma_ml.ExperimentDataset">ExperimentDataset</a> for it. We will also prepare a scikit-learn <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html">LabelEncoder</a> to help with mapping between Census cell
+types (categorical metadata) and PyTorch tensors.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
@@ -283,14 +284,14 @@ Census cell types (categorical metadata) and PyTorch tensors.</p>
 </pre></div>
 </div>
 </div>
-<section id="`ExperimentDataset-&lt;https://single-cell-data.github.io/TileDB-SOMA-ML/#tiledbsoma_ml.ExperimentDataset&gt;`__-class-explained">
-<h3><code class="docutils literal notranslate"><span class="pre">`ExperimentDataset</span></code> &lt;<a class="reference external" href="https://single-cell-data.github.io/TileDB-SOMA-ML/#tiledbsoma_ml.ExperimentDataset">https://single-cell-data.github.io/TileDB-SOMA-ML/#tiledbsoma_ml.ExperimentDataset</a>&gt;`__ class explained<a class="headerlink" href="#`ExperimentDataset-<https://single-cell-data.github.io/TileDB-SOMA-ML/#tiledbsoma_ml.ExperimentDataset>`__-class-explained" title="Permalink to this heading"></a></h3>
-<p>This class provides an implementation of PyTorch’s <code class="docutils literal notranslate"><span class="pre">IterableDataset</span></code> interface for accessing data from abstract sources. It encapsulates streaming the result set of a SOMA <code class="docutils literal notranslate"><span class="pre">`ExperimentAxisQuery</span></code> &lt;<a class="reference external" href="https://tiledbsoma.readthedocs.io/en/stable/python-tiledbsoma-experimentaxisquery.html">https://tiledbsoma.readthedocs.io/en/stable/python-tiledbsoma-experimentaxisquery.html</a>&gt;`__ in a series of “batches,” each consisting of a NumPy <code class="docutils literal notranslate"><span class="pre">ndarray</span></code> (batch of X results) and a Pandas <code class="docutils literal notranslate"><span class="pre">DataFrame</span></code> (corresponding batch of obs results). Most importantly, it avoids loading large result sets into
+<section id="ExperimentDataset-class-explained">
+<h3><a class="reference external" href="https://single-cell-data.github.io/TileDB-SOMA-ML/#tiledbsoma_ml.ExperimentDataset">ExperimentDataset</a> class explained<a class="headerlink" href="#ExperimentDataset-class-explained" title="Permalink to this heading"></a></h3>
+<p>This class provides an implementation of PyTorch’s <code class="docutils literal notranslate"><span class="pre">IterableDataset</span></code> interface for accessing data from abstract sources. It encapsulates streaming the result set of a SOMA <a class="reference external" href="https://tiledbsoma.readthedocs.io/en/stable/python-tiledbsoma-experimentaxisquery.html">ExperimentAxisQuery</a> in a series of “batches,” each consisting of a NumPy <code class="docutils literal notranslate"><span class="pre">ndarray</span></code> (batch of X results) and a Pandas <code class="docutils literal notranslate"><span class="pre">DataFrame</span></code> (corresponding batch of obs results). Most importantly, it avoids loading large result sets into
 memory all at once.</p>
-<p>The constructor requires the <code class="docutils literal notranslate"><span class="pre">`ExperimentAxisQuery</span></code> &lt;<a class="reference external" href="https://tiledbsoma.readthedocs.io/en/stable/python-tiledbsoma-experimentaxisquery.html">https://tiledbsoma.readthedocs.io/en/stable/python-tiledbsoma-experimentaxisquery.html</a>&gt;`__ defining the desired slice of Census data, and the name of the X layer to access.</p>
+<p>The constructor requires the <a class="reference external" href="https://tiledbsoma.readthedocs.io/en/stable/python-tiledbsoma-experimentaxisquery.html">ExperimentAxisQuery</a> defining the desired slice of Census data, and the name of the X layer to access.</p>
 <p><code class="docutils literal notranslate"><span class="pre">obs_column_names</span></code> sets the columns to be included in the DataFrame for each batch, to be used as data labels or model inputs.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">batch_size</span></code> parameter specifies the target number of rows (cells) in each batch.</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">shuffle</span></code> flag supports randomizing the ordering of the training data for each training epoch (default: <code class="docutils literal notranslate"><span class="pre">True</span></code>). This should be used instead of <code class="docutils literal notranslate"><span class="pre">`DataLoader</span></code> &lt;<a class="reference external" href="https://pytorch.org/docs/stable/data.html">https://pytorch.org/docs/stable/data.html</a>&gt;`__’s <code class="docutils literal notranslate"><span class="pre">shuffle</span></code> flag, as the implementation is more efficient.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">shuffle</span></code> flag supports randomizing the ordering of the training data for each training epoch (default: <code class="docutils literal notranslate"><span class="pre">True</span></code>). This should be used instead of <a class="reference external" href="https://pytorch.org/docs/stable/data.html">DataLoader</a>’s <code class="docutils literal notranslate"><span class="pre">shuffle</span></code> flag, as the implementation is more efficient.</p>
 <p>You can inspect the shape of the full dataset, without causing the full dataset to be loaded. The <code class="docutils literal notranslate"><span class="pre">shape</span></code> property returns the number of batches on the first dimension:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
@@ -330,7 +331,7 @@ memory all at once.</p>
 </section>
 <section id="Split-the-dataset">
 <h2>Split the dataset<a class="headerlink" href="#Split-the-dataset" title="Permalink to this heading"></a></h2>
-<p>You may split the query results into the typical training and test sets using the <code class="docutils literal notranslate"><span class="pre">`ExperimentDataset.random_split()</span></code> &lt;<a class="reference external" href="https://single-cell-data.github.io/TileDB-SOMA-ML/#tiledbsoma_ml.ExperimentDataset.random_split">https://single-cell-data.github.io/TileDB-SOMA-ML/#tiledbsoma_ml.ExperimentDataset.random_split</a>&gt;`__ method:</p>
+<p>You may split the query results into the typical training and test sets using the <a class="reference external" href="https://single-cell-data.github.io/TileDB-SOMA-ML/#tiledbsoma_ml.ExperimentDataset.random_split">ExperimentDataset.random_split()</a> method:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
@@ -373,7 +374,7 @@ memory all at once.</p>
 </section>
 <section id="Create-the-DataLoader">
 <h2>Create the DataLoader<a class="headerlink" href="#Create-the-DataLoader" title="Permalink to this heading"></a></h2>
-<p>Now you can prepare a PyTorch <code class="docutils literal notranslate"><span class="pre">`DataLoader</span></code> &lt;<a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader">https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader</a>&gt;`__ on the training data. While not shown here, the DataLoader can be configured with multiple worker processes to stream the result batches as quickly as possible.</p>
+<p>Now you can prepare a PyTorch <a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader">DataLoader</a> on the training data. While not shown here, the DataLoader can be configured with multiple worker processes to stream the result batches as quickly as possible.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
@@ -384,7 +385,7 @@ memory all at once.</p>
 </pre></div>
 </div>
 </div>
-<p>(Instantiating a PyTorch <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> object directly is not recommended, as <code class="docutils literal notranslate"><span class="pre">`experiment_dataloader()</span></code> &lt;<a class="reference external" href="https://single-cell-data.github.io/TileDB-SOMA-ML/#tiledbsoma_ml.experiment_dataloader">https://single-cell-data.github.io/TileDB-SOMA-ML/#tiledbsoma_ml.experiment_dataloader</a>&gt;`__ enforces correct and performant usage.)</p>
+<p>(Instantiating a PyTorch DataLoader object directly is not recommended, as <a class="reference external" href="https://single-cell-data.github.io/TileDB-SOMA-ML/#tiledbsoma_ml.experiment_dataloader">experiment_dataloader()</a> enforces correct and performant usage.)</p>
 </section>
 <section id="Define-the-model">
 <h2>Define the model<a class="headerlink" href="#Define-the-model" title="Permalink to this heading"></a></h2>
@@ -1078,13 +1079,13 @@ array([&#39;basal cell&#39;, &#39;fibroblast&#39;, &#39;endothelial cell&#39;,
             </div>
             <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="../api_demo/census_compute_over_X.html" class="btn btn-neutral float-left" title="Computing on X using online (incremental) algorithms" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../../cellxgene_census_docsite_FAQ.html" class="btn btn-neutral float-right" title="FAQ" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="pytorch_scvi.html" class="btn btn-neutral float-right" title="Train an scVI model using Census data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Chan Zuckerberg Initiative.</p>
+    <p>&#169; Copyright 2022-Present, Chan Zuckerberg Initiative.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

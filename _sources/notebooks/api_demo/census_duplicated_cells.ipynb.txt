@@ -50,28 +50,13 @@
   {
    "cell_type": "code",
    "execution_count": 1,
-   "metadata": {
-    "execution": {
-     "iopub.execute_input": "2023-05-17T15:37:06.246546Z",
-     "iopub.status.busy": "2023-05-17T15:37:06.246069Z",
-     "iopub.status.idle": "2023-05-17T15:37:08.867857Z",
-     "shell.execute_reply": "2023-05-17T15:37:08.867253Z"
-    }
-   },
-   "outputs": [
-    {
-     "name": "stderr",
-     "output_type": "stream",
-     "text": [
-      "The \"stable\" release is currently 2023-05-15. Specify 'census_version=\"2023-05-15\"' in future calls to open_soma() to ensure data consistency.\n"
-     ]
-    }
-   ],
+   "metadata": {},
+   "outputs": [],
    "source": [
     "import cellxgene_census\n",
     "\n",
     "tabula_muris_dataset_id = \"48b37086-25f7-4ecd-be66-f5bb378e3aea\"\n",
-    "census = cellxgene_census.open_soma()\n",
+    "census = cellxgene_census.open_soma(census_version=\"2025-11-08\")\n",
     "\n",
     "tabula_muris_obs = cellxgene_census.get_obs(\n",
     "    census,\n",
@@ -92,14 +77,7 @@
   {
    "cell_type": "code",
    "execution_count": 2,
-   "metadata": {
-    "execution": {
-     "iopub.execute_input": "2023-05-17T15:37:08.871706Z",
-     "iopub.status.busy": "2023-05-17T15:37:08.870353Z",
-     "iopub.status.idle": "2023-05-17T15:37:08.911114Z",
-     "shell.execute_reply": "2023-05-17T15:37:08.910586Z"
-    }
-   },
+   "metadata": {},
    "outputs": [
     {
      "data": {
@@ -146,23 +124,8 @@
   {
    "cell_type": "code",
    "execution_count": 3,
-   "metadata": {
-    "execution": {
-     "iopub.execute_input": "2023-05-17T15:37:08.913202Z",
-     "iopub.status.busy": "2023-05-17T15:37:08.913060Z",
-     "iopub.status.idle": "2023-05-17T15:37:09.968086Z",
-     "shell.execute_reply": "2023-05-17T15:37:09.967626Z"
-    }
-   },
-   "outputs": [
-    {
-     "name": "stderr",
-     "output_type": "stream",
-     "text": [
-      "The \"stable\" release is currently 2023-05-15. Specify 'census_version=\"2023-05-15\"' in future calls to open_soma() to ensure data consistency.\n"
-     ]
-    }
-   ],
+   "metadata": {},
+   "outputs": [],
    "source": [
     "tabula_muris_liver_dataset_id = \"6202a243-b713-4e12-9ced-c387f8483dea\"\n",
     "\n",
@@ -185,14 +148,7 @@
   {
    "cell_type": "code",
    "execution_count": 4,
-   "metadata": {
-    "execution": {
-     "iopub.execute_input": "2023-05-17T15:37:09.970720Z",
-     "iopub.status.busy": "2023-05-17T15:37:09.970563Z",
-     "iopub.status.idle": "2023-05-17T15:37:09.976304Z",
-     "shell.execute_reply": "2023-05-17T15:37:09.975953Z"
-    }
-   },
+   "metadata": {},
    "outputs": [
     {
      "data": {
@@ -231,7 +187,7 @@
     "\n",
     "### Filtering out duplicate cells when reading the `obs` data frame.\n",
     "\n",
-    "Let's say you are interested in looking at the cell metadata of *\"all natural killer cells from blood of female cells with COVID-19\"* but you want to exclude duplicate cells, then you can use `value_filter` when reading the data frame to only include cells with `is_primary_data` as `True`.\n",
+    "Let's say you are interested in looking at the cell metadata of *\"all human natural killer cells from blood of female cells with COVID-19\"* but you want to exclude duplicate cells, then you can use `value_filter` when reading the data frame to only include cells with `is_primary_data` as `True`.\n",
     "\n",
     "Let's first read the cell metadata including **all** cells:"
    ]
@@ -239,27 +195,12 @@
   {
    "cell_type": "code",
    "execution_count": 5,
-   "metadata": {
-    "execution": {
-     "iopub.execute_input": "2023-05-17T15:37:09.978023Z",
-     "iopub.status.busy": "2023-05-17T15:37:09.977879Z",
-     "iopub.status.idle": "2023-05-17T15:37:16.049592Z",
-     "shell.execute_reply": "2023-05-17T15:37:16.048490Z"
-    }
-   },
-   "outputs": [
-    {
-     "name": "stderr",
-     "output_type": "stream",
-     "text": [
-      "The \"stable\" release is currently 2023-05-15. Specify 'census_version=\"2023-05-15\"' in future calls to open_soma() to ensure data consistency.\n"
-     ]
-    }
-   ],
+   "metadata": {},
+   "outputs": [],
    "source": [
     "nk_cells = cellxgene_census.get_obs(\n",
     "    census,\n",
-    "    \"mus_musculus\",\n",
+    "    \"Homo sapiens\",\n",
     "    value_filter=\"cell_type == 'natural killer cell' \"\n",
     "    \"and disease == 'COVID-19' \"\n",
     "    \"and sex == 'female'\"\n",
@@ -270,19 +211,12 @@
   {
    "cell_type": "code",
    "execution_count": 6,
-   "metadata": {
-    "execution": {
-     "iopub.execute_input": "2023-05-17T15:37:16.052588Z",
-     "iopub.status.busy": "2023-05-17T15:37:16.052364Z",
-     "iopub.status.idle": "2023-05-17T15:37:16.055971Z",
-     "shell.execute_reply": "2023-05-17T15:37:16.055607Z"
-    }
-   },
+   "metadata": {},
    "outputs": [
     {
      "data": {
       "text/plain": [
-       "(80935, 21)"
+       "(82596, 28)"
       ]
      },
      "execution_count": 6,
@@ -305,27 +239,12 @@
   {
    "cell_type": "code",
    "execution_count": 7,
-   "metadata": {
-    "execution": {
-     "iopub.execute_input": "2023-05-17T15:37:16.057773Z",
-     "iopub.status.busy": "2023-05-17T15:37:16.057628Z",
-     "iopub.status.idle": "2023-05-17T15:37:22.371662Z",
-     "shell.execute_reply": "2023-05-17T15:37:22.370999Z"
-    }
-   },
-   "outputs": [
-    {
-     "name": "stderr",
-     "output_type": "stream",
-     "text": [
-      "The \"stable\" release is currently 2023-05-15. Specify 'census_version=\"2023-05-15\"' in future calls to open_soma() to ensure data consistency.\n"
-     ]
-    }
-   ],
+   "metadata": {},
+   "outputs": [],
    "source": [
     "nk_cells_primary = cellxgene_census.get_obs(\n",
     "    census,\n",
-    "    \"mus_musculus\",\n",
+    "    \"Homo sapiens\",\n",
     "    value_filter=\"cell_type == 'natural killer cell' \"\n",
     "    \"and disease == 'COVID-19' \"\n",
     "    \"and tissue_general == 'blood'\"\n",
@@ -337,19 +256,12 @@
   {
    "cell_type": "code",
    "execution_count": 8,
-   "metadata": {
-    "execution": {
-     "iopub.execute_input": "2023-05-17T15:37:22.374378Z",
-     "iopub.status.busy": "2023-05-17T15:37:22.374168Z",
-     "iopub.status.idle": "2023-05-17T15:37:22.377211Z",
-     "shell.execute_reply": "2023-05-17T15:37:22.376841Z"
-    }
-   },
+   "metadata": {},
    "outputs": [
     {
      "data": {
       "text/plain": [
-       "(59109, 21)"
+       "(60770, 28)"
       ]
      },
      "execution_count": 8,
@@ -368,6 +280,8 @@
    "source": [
     "You can see a clear reduction in the number of cells.\n",
     "\n",
+    "NOTE: In Census 2025-11-08 and later (CELLxGENE schema 7.0.0 and above), a subset of datasets encode multiple values in the `disease` field delimited by `' || '`. If such datasets are relevant, then the string-equality query condition shown above (`disease == 'COVID-19'`) would not be adequate. We could instead `get_obs` a larger DataFrame without that condition, then split and filter on the `disease` values.\n",
+    "\n",
     "### Filtering out duplicate cells when creating an AnnData\n",
     "\n",
     "You can also utilize `is_primary_data` on the `obs_value_filter` of `get_anndata`.\n",
@@ -378,20 +292,16 @@
   {
    "cell_type": "code",
    "execution_count": 9,
-   "metadata": {
-    "execution": {
-     "iopub.execute_input": "2023-05-17T15:37:22.379352Z",
-     "iopub.status.busy": "2023-05-17T15:37:22.379138Z",
-     "iopub.status.idle": "2023-05-17T15:37:35.927633Z",
-     "shell.execute_reply": "2023-05-17T15:37:35.926700Z"
-    }
-   },
+   "metadata": {},
    "outputs": [
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "The \"stable\" release is currently 2023-05-15. Specify 'census_version=\"2023-05-15\"' in future calls to open_soma() to ensure data consistency.\n"
+      "/opt/conda/lib/python3.12/functools.py:912: ImplicitModificationWarning: Transforming to str index.\n",
+      "  return dispatch(args[0].__class__)(*args, **kw)\n",
+      "/opt/conda/lib/python3.12/functools.py:912: ImplicitModificationWarning: Transforming to str index.\n",
+      "  return dispatch(args[0].__class__)(*args, **kw)\n"
      ]
     }
    ],
@@ -410,19 +320,12 @@
   {
    "cell_type": "code",
    "execution_count": 10,
-   "metadata": {
-    "execution": {
-     "iopub.execute_input": "2023-05-17T15:37:35.930595Z",
-     "iopub.status.busy": "2023-05-17T15:37:35.930444Z",
-     "iopub.status.idle": "2023-05-17T15:37:35.934725Z",
-     "shell.execute_reply": "2023-05-17T15:37:35.933957Z"
-    }
-   },
+   "metadata": {},
    "outputs": [
     {
      "data": {
       "text/plain": [
-       "80935"
+       "82596"
       ]
      },
      "execution_count": 10,
@@ -445,20 +348,16 @@
   {
    "cell_type": "code",
    "execution_count": 11,
-   "metadata": {
-    "execution": {
-     "iopub.execute_input": "2023-05-17T15:37:35.936993Z",
-     "iopub.status.busy": "2023-05-17T15:37:35.936846Z",
-     "iopub.status.idle": "2023-05-17T15:37:46.880757Z",
-     "shell.execute_reply": "2023-05-17T15:37:46.879659Z"
-    }
-   },
+   "metadata": {},
    "outputs": [
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "The \"stable\" release is currently 2023-05-15. Specify 'census_version=\"2023-05-15\"' in future calls to open_soma() to ensure data consistency.\n"
+      "/opt/conda/lib/python3.12/functools.py:912: ImplicitModificationWarning: Transforming to str index.\n",
+      "  return dispatch(args[0].__class__)(*args, **kw)\n",
+      "/opt/conda/lib/python3.12/functools.py:912: ImplicitModificationWarning: Transforming to str index.\n",
+      "  return dispatch(args[0].__class__)(*args, **kw)\n"
      ]
     }
    ],
@@ -478,19 +377,12 @@
   {
    "cell_type": "code",
    "execution_count": 12,
-   "metadata": {
-    "execution": {
-     "iopub.execute_input": "2023-05-17T15:37:46.883574Z",
-     "iopub.status.busy": "2023-05-17T15:37:46.883432Z",
-     "iopub.status.idle": "2023-05-17T15:37:46.888006Z",
-     "shell.execute_reply": "2023-05-17T15:37:46.887189Z"
-    }
-   },
+   "metadata": {},
    "outputs": [
     {
      "data": {
       "text/plain": [
-       "59109"
+       "60770"
       ]
      },
      "execution_count": 12,
@@ -519,34 +411,20 @@
   {
    "cell_type": "code",
    "execution_count": 13,
-   "metadata": {
-    "execution": {
-     "iopub.execute_input": "2023-05-17T15:37:46.890416Z",
-     "iopub.status.busy": "2023-05-17T15:37:46.890270Z",
-     "iopub.status.idle": "2023-05-17T15:38:11.311838Z",
-     "shell.execute_reply": "2023-05-17T15:38:11.310915Z"
-    }
-   },
+   "metadata": {},
    "outputs": [
-    {
-     "name": "stderr",
-     "output_type": "stream",
-     "text": [
-      "The \"stable\" release is currently 2023-05-15. Specify 'census_version=\"2023-05-15\"' in future calls to open_soma() to ensure data consistency.\n"
-     ]
-    },
     {
      "name": "stdout",
      "output_type": "stream",
      "text": [
       "pyarrow.Table\n",
-      "soma_dim_0: int64\n",
-      "soma_dim_1: int64\n",
-      "soma_data: float\n",
+      "soma_dim_0: int64 not null\n",
+      "soma_dim_1: int64 not null\n",
+      "soma_data: float not null\n",
       "----\n",
-      "soma_dim_0: [[8448858,8448858,8448858,8448858,8448858,...,52812487,52812553,52812556,52812556,52812566]]\n",
-      "soma_dim_1: [[59,60,62,113,170,...,37033,37052,36904,36919,37033]]\n",
-      "soma_data: [[1,1,1,1,1,...,1,1,1,1,2]]\n"
+      "soma_dim_0: [[5498486,5498486,5498486,5498486,5498486,...,125168899,125168899,125168899,125168899,125168909]]\n",
+      "soma_dim_1: [[1,11,16,22,29,...,31499,31569,32196,32339,31465]]\n",
+      "soma_data: [[1,3,1,1,1,...,1,1,1,1,1]]\n"
      ]
     }
    ],
@@ -595,7 +473,7 @@
    "name": "python",
    "nbconvert_exporter": "python",
    "pygments_lexer": "ipython3",
-   "version": "3.10.11"
+   "version": "3.12.9"
   },
   "vscode": {
    "interpreter": {
@@ -604,5 +482,5 @@
   }
  },
  "nbformat": 4,
- "nbformat_minor": 2
+ "nbformat_minor": 4
 }

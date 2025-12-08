@@ -45,21 +45,6 @@ Versioning of Cell Census builds
     cellxgene_census.get_census_version_description
     cellxgene_census.get_census_version_directory
 
-Experimental: Machine Learning
---------------------------------
-.. autosummary::
-    :toctree: _autosummary/
-    :nosignatures:
-
-    cellxgene_census.experimental.ml.pytorch.experiment_dataloader
-    cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe
-    cellxgene_census.experimental.ml.pytorch.Stats
-    cellxgene_census.experimental.ml.encoders.Encoder
-    cellxgene_census.experimental.ml.encoders.LabelEncoder
-    cellxgene_census.experimental.ml.encoders.BatchEncoder
-    cellxgene_census.experimental.ml.huggingface.CellDatasetBuilder
-    cellxgene_census.experimental.ml.huggingface.GeneformerTokenizer
-
 Experimental: Processing
 --------------------------------
 .. autosummary::

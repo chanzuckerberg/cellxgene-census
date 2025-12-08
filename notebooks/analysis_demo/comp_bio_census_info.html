@@ -238,48 +238,29 @@
 <section id="Opening-the-Census">
 <h2>Opening the Census<a class="headerlink" href="#Opening-the-Census" title="Permalink to this heading"></a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">cellxgene_census</span></code> python package contains a convenient API to open the latest version of the Census. If you open the census, you should close it. <code class="docutils literal notranslate"><span class="pre">open_soma()</span></code> returns a context, so you can open/close it in several ways, like a Python file handle. The context manager is preferred, as it will automatically close upon an error raise.</p>
-<div class="nbinput docutils container">
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">cellxgene_census</span>
-
-<span class="c1"># Preferred: use a Python context manager</span>
-<span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
-    <span class="o">...</span>
-
-<span class="c1"># or</span>
-<span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span>
-<span class="o">...</span>
-<span class="n">census</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_version=&#34;2023-07-25&#34;&#39; in future calls to open_soma() to ensure data consistency.
-The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_version=&#34;2023-07-25&#34;&#39; in future calls to open_soma() to ensure data consistency.
-</pre></div></div>
-</div>
-<p>You can learn more about the <code class="docutils literal notranslate"><span class="pre">cellxgene_census</span></code> methods by accessing their corresponding documentation via <code class="docutils literal notranslate"><span class="pre">help()</span></code>. For example <code class="docutils literal notranslate"><span class="pre">help(cellxgene_census.open_soma)</span></code>.</p>
-<div class="nbinput docutils container">
+# Preferred: use a Python context manager
+with cellxgene_census.open_soma() as census:
+    ...
+
+# or
+census = cellxgene_census.open_soma()
+...
+census.close()<p>You can learn more about the <code class="docutils literal notranslate"><span class="pre">cellxgene_census</span></code> methods by accessing their corresponding documentation via <code class="docutils literal notranslate"><span class="pre">help()</span></code>. For example <code class="docutils literal notranslate"><span class="pre">help(cellxgene_census.open_soma)</span></code>.</p>
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">(</span><span class="n">census_version</span><span class="o">=</span><span class="s2">&quot;2025-11-08&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_version=&#34;2023-07-25&#34;&#39; in future calls to open_soma() to ensure data consistency.
-</pre></div></div>
 </div>
 </section>
 <section id="Census-organization">
@@ -346,6 +327,7 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
  &#39;disease_ontology_term_id&#39;,
  &#39;donor_id&#39;,
  &#39;is_primary_data&#39;,
+ &#39;observation_joinid&#39;,
  &#39;self_reported_ethnicity&#39;,
  &#39;self_reported_ethnicity_ontology_term_id&#39;,
  &#39;sex&#39;,
@@ -353,8 +335,14 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
  &#39;suspension_type&#39;,
  &#39;tissue&#39;,
  &#39;tissue_ontology_term_id&#39;,
+ &#39;tissue_type&#39;,
  &#39;tissue_general&#39;,
- &#39;tissue_general_ontology_term_id&#39;]
+ &#39;tissue_general_ontology_term_id&#39;,
+ &#39;raw_sum&#39;,
+ &#39;nnz&#39;,
+ &#39;raw_mean_nnz&#39;,
+ &#39;raw_variance_nnz&#39;,
+ &#39;n_measured_vars&#39;]
 </pre></div></div>
 </div>
 <p>All of these variables are defined in the <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#obs-cell-metadata">CELLxGENE dataset schema</a> except for the following:</p>
@@ -384,7 +372,13 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[&#39;soma_joinid&#39;, &#39;feature_id&#39;, &#39;feature_name&#39;, &#39;feature_length&#39;]
+[&#39;soma_joinid&#39;,
+ &#39;feature_id&#39;,
+ &#39;feature_name&#39;,
+ &#39;feature_type&#39;,
+ &#39;feature_length&#39;,
+ &#39;nnz&#39;,
+ &#39;n_measured_obs&#39;]
 </pre></div></div>
 </div>
 <p>All of these variables are defined in the <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#var-and-rawvar-gene-metadata">CELLxGENE dataset schema</a> except for the following:</p>
@@ -435,43 +429,31 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
       <th>0</th>
       <td>0</td>
       <td>census_schema_version</td>
-      <td>1.0.0</td>
+      <td>2.4.0</td>
     </tr>
     <tr>
       <th>1</th>
       <td>1</td>
       <td>census_build_date</td>
-      <td>2023-07-25</td>
+      <td>2025-11-08</td>
     </tr>
     <tr>
       <th>2</th>
       <td>2</td>
       <td>dataset_schema_version</td>
-      <td>3.0.0</td>
+      <td>7.0.0</td>
     </tr>
     <tr>
       <th>3</th>
       <td>3</td>
       <td>total_cell_count</td>
-      <td>61656118</td>
+      <td>217768036</td>
     </tr>
     <tr>
       <th>4</th>
       <td>4</td>
       <td>unique_cell_count</td>
-      <td>37447773</td>
-    </tr>
-    <tr>
-      <th>5</th>
-      <td>5</td>
-      <td>number_donors_homo_sapiens</td>
-      <td>13035</td>
-    </tr>
-    <tr>
-      <th>6</th>
-      <td>6</td>
-      <td>number_donors_mus_musculus</td>
-      <td>1417</td>
+      <td>125463259</td>
     </tr>
   </tbody>
 </table>
@@ -485,7 +467,6 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">total_cell_count</span></code> is the total number of cells in the Census.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">unique_cell_count</span></code> is the number of unique cells, as some cells may be present twice due to meta-analysis or consortia-like data.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">number_donors_homo_sapiens</span></code> and <code class="docutils literal notranslate"><span class="pre">number_donors_mus_musculus</span></code> are the number of individuals for human and mouse. These are not guaranteed to be unique as one individual ID may be present or identical in different datasets.</p></li>
 </ul>
 <section id="Cell-counts-by-cell-metadata">
 <h3>Cell counts by cell metadata<a class="headerlink" href="#Cell-counts-by-cell-metadata" title="Permalink to this heading"></a></h3>
@@ -527,62 +508,62 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
       <th>soma_joinid</th>
       <th>organism</th>
       <th>category</th>
-      <th>ontology_term_id</th>
-      <th>unique_cell_count</th>
-      <th>total_cell_count</th>
       <th>label</th>
+      <th>ontology_term_id</th>
+      <th>total_cell_count</th>
+      <th>unique_cell_count</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <th>0</th>
       <td>0</td>
-      <td>Homo sapiens</td>
+      <td>callithrix_jacchus</td>
       <td>all</td>
       <td>na</td>
-      <td>33364242</td>
-      <td>56400873</td>
       <td>na</td>
+      <td>2275451</td>
+      <td>1712738</td>
     </tr>
     <tr>
       <th>1</th>
       <td>1</td>
-      <td>Homo sapiens</td>
+      <td>callithrix_jacchus</td>
       <td>assay</td>
-      <td>EFO:0008722</td>
-      <td>264166</td>
-      <td>279635</td>
-      <td>Drop-seq</td>
+      <td>10x 3' v3</td>
+      <td>EFO:0009922</td>
+      <td>2275451</td>
+      <td>1712738</td>
     </tr>
     <tr>
       <th>2</th>
       <td>2</td>
-      <td>Homo sapiens</td>
-      <td>assay</td>
-      <td>EFO:0008780</td>
-      <td>25652</td>
-      <td>51304</td>
-      <td>inDrop</td>
+      <td>callithrix_jacchus</td>
+      <td>cell_type</td>
+      <td>ependymal cell</td>
+      <td>CL:0000065</td>
+      <td>19113</td>
+      <td>19113</td>
     </tr>
     <tr>
       <th>3</th>
       <td>3</td>
-      <td>Homo sapiens</td>
-      <td>assay</td>
-      <td>EFO:0008919</td>
-      <td>89477</td>
-      <td>206754</td>
-      <td>Seq-Well</td>
+      <td>callithrix_jacchus</td>
+      <td>cell_type</td>
+      <td>T cell</td>
+      <td>CL:0000084</td>
+      <td>113</td>
+      <td>113</td>
     </tr>
     <tr>
       <th>4</th>
       <td>4</td>
-      <td>Homo sapiens</td>
-      <td>assay</td>
-      <td>EFO:0008931</td>
-      <td>78750</td>
-      <td>188248</td>
-      <td>Smart-seq2</td>
+      <td>callithrix_jacchus</td>
+      <td>cell_type</td>
+      <td>endothelial cell</td>
+      <td>CL:0000115</td>
+      <td>42093</td>
+      <td>41320</td>
     </tr>
     <tr>
       <th>...</th>
@@ -595,58 +576,58 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
       <td>...</td>
     </tr>
     <tr>
-      <th>1357</th>
-      <td>1357</td>
-      <td>Mus musculus</td>
-      <td>tissue_general</td>
-      <td>UBERON:0002113</td>
-      <td>179684</td>
-      <td>208324</td>
-      <td>kidney</td>
+      <th>2615</th>
+      <td>2615</td>
+      <td>pan_troglodytes</td>
+      <td>sex</td>
+      <td>female</td>
+      <td>PATO:0000383</td>
+      <td>78086</td>
+      <td>78086</td>
     </tr>
     <tr>
-      <th>1358</th>
-      <td>1358</td>
-      <td>Mus musculus</td>
-      <td>tissue_general</td>
-      <td>UBERON:0002365</td>
-      <td>15577</td>
-      <td>31154</td>
-      <td>exocrine gland</td>
+      <th>2616</th>
+      <td>2616</td>
+      <td>pan_troglodytes</td>
+      <td>sex</td>
+      <td>male</td>
+      <td>PATO:0000384</td>
+      <td>80013</td>
+      <td>80013</td>
     </tr>
     <tr>
-      <th>1359</th>
-      <td>1359</td>
-      <td>Mus musculus</td>
-      <td>tissue_general</td>
-      <td>UBERON:0002367</td>
-      <td>37715</td>
-      <td>130135</td>
-      <td>prostate gland</td>
+      <th>2617</th>
+      <td>2617</td>
+      <td>pan_troglodytes</td>
+      <td>suspension_type</td>
+      <td>nucleus</td>
+      <td>na</td>
+      <td>158099</td>
+      <td>158099</td>
     </tr>
     <tr>
-      <th>1360</th>
-      <td>1360</td>
-      <td>Mus musculus</td>
-      <td>tissue_general</td>
-      <td>UBERON:0002368</td>
-      <td>13322</td>
-      <td>26644</td>
-      <td>endocrine gland</td>
+      <th>2618</th>
+      <td>2618</td>
+      <td>pan_troglodytes</td>
+      <td>tissue</td>
+      <td>dorsolateral prefrontal cortex</td>
+      <td>UBERON:0009834</td>
+      <td>158099</td>
+      <td>158099</td>
     </tr>
     <tr>
-      <th>1361</th>
-      <td>1361</td>
-      <td>Mus musculus</td>
+      <th>2619</th>
+      <td>2619</td>
+      <td>pan_troglodytes</td>
       <td>tissue_general</td>
-      <td>UBERON:0002371</td>
-      <td>90225</td>
-      <td>144962</td>
-      <td>bone marrow</td>
+      <td>brain</td>
+      <td>UBERON:0000955</td>
+      <td>158099</td>
+      <td>158099</td>
     </tr>
   </tbody>
 </table>
-<p>1362 rows × 7 columns</p>
+<p>2620 rows × 7 columns</p>
 </div></div>
 </div>
 <p>For each combination of <code class="docutils literal notranslate"><span class="pre">organism</span></code> and values for each <code class="docutils literal notranslate"><span class="pre">category</span></code> of cell metadata you can take a look at <code class="docutils literal notranslate"><span class="pre">total_cell_count</span></code> and <code class="docutils literal notranslate"><span class="pre">unique_cell_count</span></code> for the cell counts of that combination.</p>
@@ -668,25 +649,52 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-organism      category
-Homo sapiens  all                          1
-              assay                       19
-              cell_type                  613
-              disease                     64
-              self_reported_ethnicity     26
-              sex                          3
-              suspension_type              1
-              tissue                     220
-              tissue_general              54
-Mus musculus  all                          1
-              assay                        9
-              cell_type                  248
-              disease                      5
-              self_reported_ethnicity      1
-              sex                          3
-              suspension_type              1
-              tissue                      66
-              tissue_general              27
+organism            category
+callithrix_jacchus  all                          1
+                    assay                        1
+                    cell_type                   40
+                    disease                      1
+                    self_reported_ethnicity      1
+                    sex                          2
+                    suspension_type              1
+                    tissue                      33
+                    tissue_general               1
+homo_sapiens        all                          1
+                    assay                       39
+                    cell_type                  903
+                    disease                    261
+                    self_reported_ethnicity     37
+                    sex                          3
+                    suspension_type              1
+                    tissue                     423
+                    tissue_general              71
+macaca_mulatta      all                          1
+                    assay                        2
+                    cell_type                   54
+                    disease                      1
+                    self_reported_ethnicity      1
+                    sex                          3
+                    suspension_type              1
+                    tissue                      29
+                    tissue_general               2
+mus_musculus        all                          1
+                    assay                       18
+                    cell_type                  492
+                    disease                     18
+                    self_reported_ethnicity      1
+                    sex                          3
+                    suspension_type              1
+                    tissue                     102
+                    tissue_general              36
+pan_troglodytes     all                          1
+                    assay                        1
+                    cell_type                   25
+                    disease                      1
+                    self_reported_ethnicity      1
+                    sex                          2
+                    suspension_type              1
+                    tissue                       1
+                    tissue_general               1
 Name: count, dtype: int64
 </pre></div></div>
 </div>
@@ -729,203 +737,13 @@ Name: count, dtype: int64
       <th>soma_joinid</th>
       <th>organism</th>
       <th>category</th>
-      <th>ontology_term_id</th>
-      <th>unique_cell_count</th>
-      <th>total_cell_count</th>
       <th>label</th>
+      <th>ontology_term_id</th>
+      <th>total_cell_count</th>
+      <th>unique_cell_count</th>
     </tr>
   </thead>
   <tbody>
-    <tr>
-      <th>10</th>
-      <td>10</td>
-      <td>Homo sapiens</td>
-      <td>assay</td>
-      <td>EFO:0009922</td>
-      <td>11845077</td>
-      <td>25597563</td>
-      <td>10x 3' v3</td>
-    </tr>
-    <tr>
-      <th>7</th>
-      <td>7</td>
-      <td>Homo sapiens</td>
-      <td>assay</td>
-      <td>EFO:0009899</td>
-      <td>7559102</td>
-      <td>12638794</td>
-      <td>10x 3' v2</td>
-    </tr>
-    <tr>
-      <th>14</th>
-      <td>14</td>
-      <td>Homo sapiens</td>
-      <td>assay</td>
-      <td>EFO:0011025</td>
-      <td>3872375</td>
-      <td>6139786</td>
-      <td>10x 5' v1</td>
-    </tr>
-    <tr>
-      <th>13</th>
-      <td>13</td>
-      <td>Homo sapiens</td>
-      <td>assay</td>
-      <td>EFO:0010550</td>
-      <td>4062980</td>
-      <td>5064268</td>
-      <td>sci-RNA-seq</td>
-    </tr>
-    <tr>
-      <th>8</th>
-      <td>8</td>
-      <td>Homo sapiens</td>
-      <td>assay</td>
-      <td>EFO:0009900</td>
-      <td>2930054</td>
-      <td>3139770</td>
-      <td>10x 5' v2</td>
-    </tr>
-    <tr>
-      <th>17</th>
-      <td>17</td>
-      <td>Homo sapiens</td>
-      <td>assay</td>
-      <td>EFO:0030004</td>
-      <td>915037</td>
-      <td>1084235</td>
-      <td>10x 5' transcription profiling</td>
-    </tr>
-    <tr>
-      <th>16</th>
-      <td>16</td>
-      <td>Homo sapiens</td>
-      <td>assay</td>
-      <td>EFO:0030003</td>
-      <td>744798</td>
-      <td>811422</td>
-      <td>10x 3' transcription profiling</td>
-    </tr>
-    <tr>
-      <th>15</th>
-      <td>15</td>
-      <td>Homo sapiens</td>
-      <td>assay</td>
-      <td>EFO:0030002</td>
-      <td>625175</td>
-      <td>642559</td>
-      <td>microwell-seq</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>1</td>
-      <td>Homo sapiens</td>
-      <td>assay</td>
-      <td>EFO:0008722</td>
-      <td>264166</td>
-      <td>279635</td>
-      <td>Drop-seq</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>3</td>
-      <td>Homo sapiens</td>
-      <td>assay</td>
-      <td>EFO:0008919</td>
-      <td>89477</td>
-      <td>206754</td>
-      <td>Seq-Well</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>4</td>
-      <td>Homo sapiens</td>
-      <td>assay</td>
-      <td>EFO:0008931</td>
-      <td>78750</td>
-      <td>188248</td>
-      <td>Smart-seq2</td>
-    </tr>
-    <tr>
-      <th>18</th>
-      <td>18</td>
-      <td>Homo sapiens</td>
-      <td>assay</td>
-      <td>EFO:0700003</td>
-      <td>146278</td>
-      <td>177276</td>
-      <td>BD Rhapsody Whole Transcriptome Analysis</td>
-    </tr>
-    <tr>
-      <th>9</th>
-      <td>9</td>
-      <td>Homo sapiens</td>
-      <td>assay</td>
-      <td>EFO:0009901</td>
-      <td>42397</td>
-      <td>121394</td>
-      <td>10x 3' v1</td>
-    </tr>
-    <tr>
-      <th>12</th>
-      <td>12</td>
-      <td>Homo sapiens</td>
-      <td>assay</td>
-      <td>EFO:0010183</td>
-      <td>58981</td>
-      <td>117962</td>
-      <td>single cell library construction</td>
-    </tr>
-    <tr>
-      <th>19</th>
-      <td>19</td>
-      <td>Homo sapiens</td>
-      <td>assay</td>
-      <td>EFO:0700004</td>
-      <td>96145</td>
-      <td>96145</td>
-      <td>BD Rhapsody Targeted mRNA</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>2</td>
-      <td>Homo sapiens</td>
-      <td>assay</td>
-      <td>EFO:0008780</td>
-      <td>25652</td>
-      <td>51304</td>
-      <td>inDrop</td>
-    </tr>
-    <tr>
-      <th>6</th>
-      <td>6</td>
-      <td>Homo sapiens</td>
-      <td>assay</td>
-      <td>EFO:0008995</td>
-      <td>0</td>
-      <td>29128</td>
-      <td>10x technology</td>
-    </tr>
-    <tr>
-      <th>5</th>
-      <td>5</td>
-      <td>Homo sapiens</td>
-      <td>assay</td>
-      <td>EFO:0008953</td>
-      <td>4693</td>
-      <td>9386</td>
-      <td>STRT-seq</td>
-    </tr>
-    <tr>
-      <th>11</th>
-      <td>11</td>
-      <td>Homo sapiens</td>
-      <td>assay</td>
-      <td>EFO:0010010</td>
-      <td>3105</td>
-      <td>5244</td>
-      <td>CEL-seq2</td>
-    </tr>
   </tbody>
 </table>
 </div></div>
@@ -968,32 +786,62 @@ Name: count, dtype: int64
       <th>soma_joinid</th>
       <th>organism</th>
       <th>category</th>
-      <th>ontology_term_id</th>
-      <th>unique_cell_count</th>
-      <th>total_cell_count</th>
       <th>label</th>
+      <th>ontology_term_id</th>
+      <th>total_cell_count</th>
+      <th>unique_cell_count</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <th>69</th>
-      <td>69</td>
-      <td>Homo sapiens</td>
+      <th>7</th>
+      <td>7</td>
+      <td>callithrix_jacchus</td>
       <td>cell_type</td>
-      <td>CL:0000129</td>
-      <td>268114</td>
-      <td>370771</td>
       <td>microglial cell</td>
+      <td>CL:0000129</td>
+      <td>65313</td>
+      <td>57904</td>
     </tr>
     <tr>
-      <th>1038</th>
-      <td>1038</td>
-      <td>Mus musculus</td>
+      <th>182</th>
+      <td>182</td>
+      <td>homo_sapiens</td>
       <td>cell_type</td>
-      <td>CL:0000129</td>
-      <td>48998</td>
-      <td>62617</td>
       <td>microglial cell</td>
+      <td>CL:0000129</td>
+      <td>1183509</td>
+      <td>910878</td>
+    </tr>
+    <tr>
+      <th>1830</th>
+      <td>1830</td>
+      <td>macaca_mulatta</td>
+      <td>cell_type</td>
+      <td>microglial cell</td>
+      <td>CL:0000129</td>
+      <td>129589</td>
+      <td>55858</td>
+    </tr>
+    <tr>
+      <th>1976</th>
+      <td>1976</td>
+      <td>mus_musculus</td>
+      <td>cell_type</td>
+      <td>microglial cell</td>
+      <td>CL:0000129</td>
+      <td>144763</td>
+      <td>100961</td>
+    </tr>
+    <tr>
+      <th>2592</th>
+      <td>2592</td>
+      <td>pan_troglodytes</td>
+      <td>cell_type</td>
+      <td>microglial cell</td>
+      <td>CL:0000129</td>
+      <td>5748</td>
+      <td>5748</td>
     </tr>
   </tbody>
 </table>
@@ -1057,27 +905,27 @@ Name: count, dtype: int64
   <tbody>
     <tr>
       <th>0</th>
-      <td>syncytiotrophoblast cell</td>
+      <td>endothelial cell</td>
       <td>False</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>placental villous trophoblast</td>
+      <td>malignant cell</td>
       <td>False</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>syncytiotrophoblast cell</td>
+      <td>fibroblast</td>
       <td>False</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>syncytiotrophoblast cell</td>
+      <td>fibroblast</td>
       <td>False</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>extravillous trophoblast</td>
+      <td>macrophage</td>
       <td>False</td>
     </tr>
     <tr>
@@ -1086,33 +934,33 @@ Name: count, dtype: int64
       <td>...</td>
     </tr>
     <tr>
-      <th>56400868</th>
-      <td>pericyte</td>
+      <th>158982714</th>
+      <td>pvalb GABAergic cortical interneuron</td>
       <td>True</td>
     </tr>
     <tr>
-      <th>56400869</th>
-      <td>pericyte</td>
+      <th>158982715</th>
+      <td>VIP GABAergic cortical interneuron</td>
       <td>True</td>
     </tr>
     <tr>
-      <th>56400870</th>
-      <td>pericyte</td>
+      <th>158982716</th>
+      <td>L2/3-6 intratelencephalic projecting glutamate...</td>
       <td>True</td>
     </tr>
     <tr>
-      <th>56400871</th>
-      <td>pericyte</td>
+      <th>158982717</th>
+      <td>astrocyte of the cerebral cortex</td>
       <td>True</td>
     </tr>
     <tr>
-      <th>56400872</th>
-      <td>pericyte</td>
+      <th>158982718</th>
+      <td>sst GABAergic cortical interneuron</td>
       <td>True</td>
     </tr>
   </tbody>
 </table>
-<p>56400873 rows × 2 columns</p>
+<p>158982719 rows × 2 columns</p>
 </div></div>
 </div>
 <p>The number of rows is the total number of cells for humans. Now, if you wish to get the cell counts per cell type we can perform some <code class="docutils literal notranslate"><span class="pre">pandas</span></code> operations on this object.</p>
@@ -1139,7 +987,7 @@ Name: count, dtype: int64
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-(33364242, 1)
+(96591226, 1)
 </pre></div></div>
 </div>
 <p>This is the number of unique cells. Now let’s look at the counts per cell type:</p>
@@ -1159,18 +1007,18 @@ Name: count, dtype: int64
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 cell_type
-neuron                                             2673669
-glutamatergic neuron                               1541605
-CD4-positive, alpha-beta T cell                    1258976
-CD8-positive, alpha-beta T cell                    1235987
-classical monocyte                                 1030996
-                                                    ...
-microfold cell of epithelium of small intestine         19
-mature conventional dendritic cell                      17
-serous cell of epithelium of bronchus                   15
-sperm                                                   11
-type N enteroendocrine cell                             10
-Name: count, Length: 599, dtype: int64
+oligodendrocyte                                         5705502
+neuron                                                  3858369
+naive thymus-derived CD4-positive, alpha-beta T cell    3847813
+fibroblast                                              2663513
+glutamatergic neuron                                    2539819
+                                                         ...
+effector T cell                                               0
+A2 amacrine cell                                              0
+OFF retinal ganglion cell                                     0
+type II NK T cell                                             0
+CD38-negative naive B cell                                    0
+Name: count, Length: 898, dtype: int64
 </pre></div></div>
 </div>
 <p>This shows you that the most abundant cell types are “glutamatergic neuron”, “CD8-positive, alpha-beta T cell”, and “CD4-positive, alpha-beta T cell”.</p>
@@ -1189,7 +1037,7 @@ Name: count, Length: 599, dtype: int64
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-(599,)
+(898,)
 </pre></div></div>
 </div>
 <p>That is the total number of different cell types for human.</p>
@@ -1222,18 +1070,18 @@ Name: count, Length: 599, dtype: int64
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 cell_type
-T cell                               85739
-hepatoblast                          58447
-neoplastic cell                      52431
-erythroblast                         45605
-monocyte                             31388
-                                     ...
-pulmonary artery endothelial cell        1
-germinal center B cell                   1
-enteroendocrine cell                     1
-type I pneumocyte                        1
-group 2 innate lymphoid cell             1
-Name: count, Length: 126, dtype: int64
+malignant cell                                  196802
+T cell                                          160708
+hepatocyte                                      112485
+macrophage                                      109647
+periportal region hepatocyte                     90251
+                                                 ...
+epithelial cell of pancreas                          0
+epithelial cell of prostate                          0
+epithelial cell of proximal tubule                   0
+epithelial cell of proximal tubule segment 1         0
+ependymal cell                                       0
+Name: count, Length: 898, dtype: int64
 </pre></div></div>
 </div>
 <p>These are the cell types and their cell counts in the human liver.</p>
@@ -1268,55 +1116,23 @@ Name: count, Length: 126, dtype: int64
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-disease                                tissue_general
-B-cell non-Hodgkin lymphoma            blood                  62499
-COVID-19                               blood                 819428
-                                       lung                   30578
-                                       nose                      13
-                                       respiratory system         4
-                                       saliva                    41
-Crohn disease                          colon                  17490
-                                       small intestine        52029
-Down syndrome                          bone marrow              181
-breast cancer                          breast                  1850
-chronic obstructive pulmonary disease  lung                    9382
-chronic rhinitis                       nose                     909
-clear cell renal carcinoma             blood                   6548
-                                       kidney                 20540
-                                       lymph node                36
-cystic fibrosis                        lung                       7
-follicular lymphoma                    lymph node              1089
-influenza                              blood                   8871
-interstitial lung disease              lung                    1803
-kidney benign neoplasm                 blood                     20
-                                       kidney                    10
-kidney oncocytoma                      blood                     16
-                                       kidney                  2408
-lung adenocarcinoma                    adrenal gland            205
-                                       brain                   3274
-                                       liver                    507
-                                       lung                  215013
-                                       lymph node             24969
-                                       pleural fluid          11558
-lung large cell carcinoma              lung                    5922
-lymphangioleiomyomatosis               lung                     513
-non-small cell lung carcinoma          lung                   36573
-nonpapillary renal cell carcinoma      adipose tissue           243
-                                       adrenal gland           4828
-                                       blood                    288
-                                       blood clot              1717
-                                       kidney                 69136
-pleomorphic carcinoma                  lung                    1715
-pneumonia                              lung                     856
-pulmonary fibrosis                     lung                    1671
-respiratory system disorder            blood                  34301
-squamous cell lung carcinoma           lung                   52053
-                                       lymph node               100
-systemic lupus erythematosus           blood                 355471
-Name: count, dtype: int64
+disease                           tissue_general
+B-cell non-Hodgkin lymphoma       lymph node          232979
+COVID-19                          blood               834850
+                                  digestive system       626
+                                  lung                 71204
+                                  nose                    13
+                                                       ...
+rheumatoid arthritis              blood                  242
+squamous cell lung carcinoma      lung                 49279
+                                  lymph node             100
+systemic lupus erythematosus      blood               355471
+triple-negative breast carcinoma  exocrine gland        2003
+Name: count, Length: 63, dtype: int64
 </pre></div></div>
 </div>
 <p>These are the cell counts annotated with the indicated disease across human tissues for “CD8-positive, alpha-beta T cell” or “CD4-positive, alpha-beta T cell”.</p>
+<p>NOTE: In Census 2025-11-08 and later (CELLxGENE schema 7.0.0 and above), a subset of datasets encode multiple values in the <code class="docutils literal notranslate"><span class="pre">disease</span></code> field delimited by <code class="docutils literal notranslate"><span class="pre">'</span> <span class="pre">||</span> <span class="pre">'</span></code>. If our query touched such datasets, then we’d want to handle the <code class="docutils literal notranslate"><span class="pre">disease</span></code> field appropriately.</p>
 <p>And, don’t forget to close the census!</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
@@ -1343,7 +1159,7 @@ Name: count, dtype: int64
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Chan Zuckerberg Initiative.</p>
+    <p>&#169; Copyright 2022-Present, Chan Zuckerberg Initiative.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

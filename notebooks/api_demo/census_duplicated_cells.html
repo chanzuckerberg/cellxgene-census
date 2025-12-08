@@ -259,14 +259,14 @@
 <p>Let’s take a look at an example from the Census using the Tabula Muris Senis data. Some of its datasets contain duplicated cells.</p>
 <p>We can obtain cell metadata for the <strong>main</strong> Tabula Muris Senis dataset: “All - A single-cell transcriptomic atlas characterizes ageing tissues in the mouse - 10x”, which contains the original (non-duplicated) cells.</p>
 <p>And remember we must include the <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code> column.</p>
-<div class="nbinput docutils container">
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">cellxgene_census</span>
 
 <span class="n">tabula_muris_dataset_id</span> <span class="o">=</span> <span class="s2">&quot;48b37086-25f7-4ecd-be66-f5bb378e3aea&quot;</span>
-<span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span>
+<span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">(</span><span class="n">census_version</span><span class="o">=</span><span class="s2">&quot;2025-11-08&quot;</span><span class="p">)</span>
 
 <span class="n">tabula_muris_obs</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_obs</span><span class="p">(</span>
     <span class="n">census</span><span class="p">,</span>
@@ -276,14 +276,6 @@
 <span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-The &#34;stable&#34; release is currently 2023-05-15. Specify &#39;census_version=&#34;2023-05-15&#34;&#39; in future calls to open_soma() to ensure data consistency.
-</pre></div></div>
 </div>
 <p>Now let’s take a look at counts for the unique combinations of values.</p>
 <div class="nbinput docutils container">
@@ -322,7 +314,7 @@ Name: count, dtype: int64
 </div>
 <p>You can see all cells across the tissues are labelled as <code class="docutils literal notranslate"><span class="pre">True</span></code> for <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code>.</p>
 <p>But what if we select cells from the dataset that only contains cells from the liver: “Liver - A single-cell transcriptomic atlas characterizes ageing tissues in the mouse - 10x”.</p>
-<div class="nbinput docutils container">
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
@@ -336,14 +328,6 @@ Name: count, dtype: int64
 <span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-The &#34;stable&#34; release is currently 2023-05-15. Specify &#39;census_version=&#34;2023-05-15&#34;&#39; in future calls to open_soma() to ensure data consistency.
-</pre></div></div>
 </div>
 <p>And we take a look at counts for the unique combinations of values.</p>
 <div class="nbinput docutils container">
@@ -378,15 +362,15 @@ Name: count, dtype: int64
 <p>If you know <em>a priori</em> that you don’t want duplicated cells this section shows you how to efficiently exclude them from your queries.</p>
 <section id="Filtering-out-duplicate-cells-when-reading-the-obs-data-frame.">
 <h3>Filtering out duplicate cells when reading the <code class="docutils literal notranslate"><span class="pre">obs</span></code> data frame.<a class="headerlink" href="#Filtering-out-duplicate-cells-when-reading-the-obs-data-frame." title="Permalink to this heading"></a></h3>
-<p>Let’s say you are interested in looking at the cell metadata of <em>“all natural killer cells from blood of female cells with COVID-19”</em> but you want to exclude duplicate cells, then you can use <code class="docutils literal notranslate"><span class="pre">value_filter</span></code> when reading the data frame to only include cells with <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code> as <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
+<p>Let’s say you are interested in looking at the cell metadata of <em>“all human natural killer cells from blood of female cells with COVID-19”</em> but you want to exclude duplicate cells, then you can use <code class="docutils literal notranslate"><span class="pre">value_filter</span></code> when reading the data frame to only include cells with <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code> as <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
 <p>Let’s first read the cell metadata including <strong>all</strong> cells:</p>
-<div class="nbinput docutils container">
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">nk_cells</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_obs</span><span class="p">(</span>
     <span class="n">census</span><span class="p">,</span>
-    <span class="s2">&quot;mus_musculus&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Homo sapiens&quot;</span><span class="p">,</span>
     <span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;cell_type == &#39;natural killer cell&#39; &quot;</span>
     <span class="s2">&quot;and disease == &#39;COVID-19&#39; &quot;</span>
     <span class="s2">&quot;and sex == &#39;female&#39;&quot;</span>
@@ -394,14 +378,6 @@ Name: count, dtype: int64
 <span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-The &#34;stable&#34; release is currently 2023-05-15. Specify &#39;census_version=&#34;2023-05-15&#34;&#39; in future calls to open_soma() to ensure data consistency.
-</pre></div></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
@@ -417,17 +393,17 @@ The &#34;stable&#34; release is currently 2023-05-15. Specify &#39;census_versio
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-(80935, 21)
+(82596, 28)
 </pre></div></div>
 </div>
 <p>And now we repeat the query only using cells marked as <code class="docutils literal notranslate"><span class="pre">True</span></code> for <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code>.</p>
-<div class="nbinput docutils container">
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">nk_cells_primary</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_obs</span><span class="p">(</span>
     <span class="n">census</span><span class="p">,</span>
-    <span class="s2">&quot;mus_musculus&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Homo sapiens&quot;</span><span class="p">,</span>
     <span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;cell_type == &#39;natural killer cell&#39; &quot;</span>
     <span class="s2">&quot;and disease == &#39;COVID-19&#39; &quot;</span>
     <span class="s2">&quot;and tissue_general == &#39;blood&#39;&quot;</span>
@@ -436,14 +412,6 @@ The &#34;stable&#34; release is currently 2023-05-15. Specify &#39;census_versio
 <span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-The &#34;stable&#34; release is currently 2023-05-15. Specify &#39;census_version=&#34;2023-05-15&#34;&#39; in future calls to open_soma() to ensure data consistency.
-</pre></div></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
@@ -459,10 +427,11 @@ The &#34;stable&#34; release is currently 2023-05-15. Specify &#39;census_versio
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-(59109, 21)
+(60770, 28)
 </pre></div></div>
 </div>
 <p>You can see a clear reduction in the number of cells.</p>
+<p>NOTE: In Census 2025-11-08 and later (CELLxGENE schema 7.0.0 and above), a subset of datasets encode multiple values in the <code class="docutils literal notranslate"><span class="pre">disease</span></code> field delimited by <code class="docutils literal notranslate"><span class="pre">'</span> <span class="pre">||</span> <span class="pre">'</span></code>. If such datasets are relevant, then the string-equality query condition shown above (<code class="docutils literal notranslate"><span class="pre">disease</span> <span class="pre">==</span> <span class="pre">'COVID-19'</span></code>) would not be adequate. We could instead <code class="docutils literal notranslate"><span class="pre">get_obs</span></code> a larger DataFrame without that condition, then split and filter on the <code class="docutils literal notranslate"><span class="pre">disease</span></code> values.</p>
 </section>
 <section id="Filtering-out-duplicate-cells-when-creating-an-AnnData">
 <h3>Filtering out duplicate cells when creating an AnnData<a class="headerlink" href="#Filtering-out-duplicate-cells-when-creating-an-AnnData" title="Permalink to this heading"></a></h3>
@@ -489,7 +458,10 @@ The &#34;stable&#34; release is currently 2023-05-15. Specify &#39;census_versio
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-The &#34;stable&#34; release is currently 2023-05-15. Specify &#39;census_version=&#34;2023-05-15&#34;&#39; in future calls to open_soma() to ensure data consistency.
+/opt/conda/lib/python3.12/functools.py:912: ImplicitModificationWarning: Transforming to str index.
+  return dispatch(args[0].__class__)(*args, **kw)
+/opt/conda/lib/python3.12/functools.py:912: ImplicitModificationWarning: Transforming to str index.
+  return dispatch(args[0].__class__)(*args, **kw)
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -506,7 +478,7 @@ The &#34;stable&#34; release is currently 2023-05-15. Specify &#39;census_versio
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-80935
+82596
 </pre></div></div>
 </div>
 <p>And now we repeat the query only using cells marked as <code class="docutils literal notranslate"><span class="pre">True</span></code> for <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code>.</p>
@@ -532,7 +504,10 @@ The &#34;stable&#34; release is currently 2023-05-15. Specify &#39;census_versio
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-The &#34;stable&#34; release is currently 2023-05-15. Specify &#39;census_version=&#34;2023-05-15&#34;&#39; in future calls to open_soma() to ensure data consistency.
+/opt/conda/lib/python3.12/functools.py:912: ImplicitModificationWarning: Transforming to str index.
+  return dispatch(args[0].__class__)(*args, **kw)
+/opt/conda/lib/python3.12/functools.py:912: ImplicitModificationWarning: Transforming to str index.
+  return dispatch(args[0].__class__)(*args, **kw)
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -549,7 +524,7 @@ The &#34;stable&#34; release is currently 2023-05-15. Specify &#39;census_versio
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-59109
+60770
 </pre></div></div>
 </div>
 <p>In this case you can also observe a clear reduction in the number of cells.</p>
@@ -589,27 +564,19 @@ The &#34;stable&#34; release is currently 2023-05-15. Specify &#39;census_versio
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-The &#34;stable&#34; release is currently 2023-05-15. Specify &#39;census_version=&#34;2023-05-15&#34;&#39; in future calls to open_soma() to ensure data consistency.
-</pre></div></div>
-</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 pyarrow.Table
-soma_dim_0: int64
-soma_dim_1: int64
-soma_data: float
+soma_dim_0: int64 not null
+soma_dim_1: int64 not null
+soma_data: float not null
 ----
-soma_dim_0: [[8448858,8448858,8448858,8448858,8448858,...,52812487,52812553,52812556,52812556,52812566]]
-soma_dim_1: [[59,60,62,113,170,...,37033,37052,36904,36919,37033]]
-soma_data: [[1,1,1,1,1,...,1,1,1,1,2]]
+soma_dim_0: [[5498486,5498486,5498486,5498486,5498486,...,125168899,125168899,125168899,125168899,125168909]]
+soma_dim_1: [[1,11,16,22,29,...,31499,31569,32196,32339,31465]]
+soma_data: [[1,3,1,1,1,...,1,1,1,1,1]]
 </pre></div></div>
 </div>
 </section>
@@ -629,7 +596,7 @@ soma_data: [[1,1,1,1,1,...,1,1,1,1,2]]
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Chan Zuckerberg Initiative.</p>
+    <p>&#169; Copyright 2022-Present, Chan Zuckerberg Initiative.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

@@ -1,0 +1,889 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Train an scVI model using Census data &mdash; cellxgene-census  documentation</title>
+  
+
+  
+  <link rel="icon" type="image/png" sizes="32x32" href="../../_static/img/favicon_32x32_v2.png"/>
+  <link rel="icon" type="image/png" sizes="16x16" href="../../_static/img/favicon_16x16_v2.png"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/nbsphinx-code-cells.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script data-domain="chanzuckerberg.github.io/cellxgene-census" defer="defer" src="https://plausible.io/js/script.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="FAQ" href="../../cellxgene_census_docsite_FAQ.html" />
+    <link rel="prev" title="Training a PyTorch Model" href="pytorch.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+  <div style="height: 100vh; overflow: hidden;">
+     
+    <!-- top 56px for navbar height -->
+    <div class="navbar-cxg">
+        <div style="padding: 0 16px; display: flex; height: inherit; align-items: center; justify-content: space-between;">
+            <span style="display:flex; gap: 32px; align-items: center;">
+                <a href="https://cellxgene.cziscience.com/">
+                  <img src="../../_static/img/cellxgene-discover-logo.svg" />
+                </a>
+                <span class="navbar-cxg-nav-wrapper">
+                  <span class="navbar-cxg-section">
+                    <span class="navbar-cxg-nav-section-title">Application</span>
+                    <span class="navbar-cxg-nav-item-container">
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/collections">Collections</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/datasets">Datasets</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/cellguide">Cell Guide</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/differential-expression">Differential Expression</a>
+                        <div style="height: 16px!important; display: flex;">
+                          <span class="beta">NEW</span>
+                        </div>
+                      </span>
+                    </span>
+                  </span>
+                  <hr class="navbar-divider"/>
+                  <span class="navbar-cxg-section">
+                    <span class="navbar-cxg-nav-section-title">Census</span>
+                    <span class="navbar-cxg-nav-item-container">
+                      <span class="navbar-cxg-link active-link">
+                        <a class="navbar-cxg-anchor" href="/cellxgene-census/index.html">API</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/census-models">Models</a>
+                      </span>
+                    </span>
+                  </span>
+                </span>
+            </span>
+
+            <span class="navbar-cxg-link">
+              <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/docs">Help & Documentation</a>
+            </span>
+        </div>
+    </div>
+    <div style="width: 100%; height: 100%; overflow: auto; padding-top: 56px;">
+        
+        <!-- top 56px for navbar height -->
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side" style="top: 56px;" >
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search" >
+            
+
+            
+                <a href="../../index.html" class="icon icon-home"> cellxgene-census
+            
+
+            
+            </a>
+
+            
+
+            
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+            
+            </div>
+
+            
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+            
+                
+                
+                
+                
+                
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_quick_start.html">Quick start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../articles.html">What’s new?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_aws_open_data.html">Census in AWS ☁️</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_schema.html">Census data and schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_data_release_info.html">Census data releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python-api.html">Python API</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../examples.html">Python tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#exporting-data">Exporting data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#new-accessing-spatial-transcriptomics-data-with-census">[NEW! 🚀] Accessing spatial transcriptomics data with Census</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#using-integrated-embeddings-and-models">Using integrated embeddings and models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#understanding-census-data">Understanding Census data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#analyzing-census-data">Analyzing Census data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#scalable-computing">Scalable computing</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../examples.html#scalable-machine-learning">Scalable machine learning</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="pytorch.html">Training a PyTorch Model</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Train an scVI model using Census data</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Contents">Contents</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Training-the-model">Training the model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Generate-cell-embeddings">Generate cell embeddings</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Analyzing-the-results">Analyzing the results</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/r/index.html">R API &amp; tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_FAQ.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/releases">Release notes</a></li>
+</ul>
+
+                
+            
+            </div>
+            
+        </div>
+        </nav>
+
+        <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+        
+        <nav class="wy-nav-top" aria-label="top navigation">
+            
+            <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+            <a href="../../index.html">cellxgene-census</a>
+            
+        </nav>
+
+
+        <div class="wy-nav-content">
+            
+            <div class="rst-content">
+            
+            <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../examples.html">Python tutorials</a></li>
+      <li class="breadcrumb-item active">Train an scVI model using Census data</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/notebooks/experimental/pytorch_scvi.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+            <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div itemprop="articleBody">
+                
+  <section id="Train-an-scVI-model-using-Census-data">
+<h1>Train an scVI model using Census data<a class="headerlink" href="#Train-an-scVI-model-using-Census-data" title="Permalink to this heading"></a></h1>
+<p><em>Authors: Emanuele Bezzi, Martin Kim, Mike Lin</em></p>
+<p>This notebook demonstrates a scalable approach to training an <a class="reference external" href="https://docs.scvi-tools.org/en/latest/user_guide/models/scvi.html">scVI</a> model on Census data. The <a class="reference external" href="https://scvi-tools.org/">scvi-tools</a> library is built around <a class="reference external" href="https://lightning.ai/docs/pytorch/stable/">PyTorch Lightning</a>. <a class="reference external" href="https://github.com/single-cell-data/TileDB-SOMA-ML">TileDB-SOMA-ML</a> assists with streaming Census query results to PyTorch in batches, allowing for training datasets larger than available RAM.</p>
+<section id="Contents">
+<h2>Contents<a class="headerlink" href="#Contents" title="Permalink to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p>Training the model</p></li>
+<li><p>Generate cell embeddings</p></li>
+<li><p>Analyzing the results</p></li>
+</ol>
+</section>
+<section id="Training-the-model">
+<h2>Training the model<a class="headerlink" href="#Training-the-model" title="Permalink to this heading"></a></h2>
+<p>Let’s start by importing the necessary dependencies.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">cellxgene_census</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scanpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scvi</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tiledbsoma</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">soma</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tiledbsoma_ml</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">cellxgene_census.experimental.pp</span><span class="w"> </span><span class="kn">import</span> <span class="n">highly_variable_genes</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lightning</span><span class="w"> </span><span class="kn">import</span> <span class="n">LightningDataModule</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">LabelEncoder</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataLoader</span>
+
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/opt/conda/lib/python3.11/site-packages/docrep/decorators.py:43: SyntaxWarning: &#39;param_categorical_covariate_keys&#39; is not a valid key!
+  doc = func(self, args[0].__doc__, *args[1:], **kwargs)
+/opt/conda/lib/python3.11/site-packages/docrep/decorators.py:43: SyntaxWarning: &#39;param_continuous_covariate_keys&#39; is not a valid key!
+  doc = func(self, args[0].__doc__, *args[1:], **kwargs)
+</pre></div></div>
+</div>
+<p>We’ll now prepare the necessary parameters for running a training pass of the model.</p>
+<p>For this notebook, we’ll use a stable version of the Census:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">(</span><span class="n">census_version</span><span class="o">=</span><span class="s2">&quot;2023-12-15&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>We’ll also do two types of filtering.</p>
+<p>For <strong>cells</strong>, we will apply a filter to only select primary cells, with at least 300 expressed genes (nnz &gt;= 300). For notebook demonstration purposes, we will also apply a tissue filtering so that the training can happen on a laptop. The same approach can be used on datasets much larger than available RAM. (A GPU is recommended, though.)</p>
+<p>For <strong>genes</strong>, we will apply a filter so that only the top 8000 highly variable genes (HVG) are included in the training. This is a commonly used dimensionality reduction approach and is recommended on production models as well.</p>
+<p>Let’s define a few parameters:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">experiment_name</span> <span class="o">=</span> <span class="s2">&quot;mus_musculus&quot;</span>
+<span class="n">obs_value_filter</span> <span class="o">=</span> <span class="s1">&#39;is_primary_data == True and tissue_general in [&quot;spleen&quot;, &quot;kidney&quot;] and nnz &gt;= 300&#39;</span>
+<span class="n">top_n_hvg</span> <span class="o">=</span> <span class="mi">8000</span>
+<span class="n">hvg_batch</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;assay&quot;</span><span class="p">,</span> <span class="s2">&quot;suspension_type&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<p>For HVG, we can use the <code class="docutils literal notranslate"><span class="pre">highly_variable_genes</span></code> function provided in <code class="docutils literal notranslate"><span class="pre">cellxgene_census</span></code>, which can compute HVGs in constant memory:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">hvgs_df</span> <span class="o">=</span> <span class="n">highly_variable_genes</span><span class="p">(</span>
+    <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="n">experiment_name</span><span class="p">]</span><span class="o">.</span><span class="n">axis_query</span><span class="p">(</span>
+        <span class="n">measurement_name</span><span class="o">=</span><span class="s2">&quot;RNA&quot;</span><span class="p">,</span> <span class="n">obs_query</span><span class="o">=</span><span class="n">soma</span><span class="o">.</span><span class="n">AxisQuery</span><span class="p">(</span><span class="n">value_filter</span><span class="o">=</span><span class="n">obs_value_filter</span><span class="p">)</span>
+    <span class="p">),</span>
+    <span class="n">n_top_genes</span><span class="o">=</span><span class="n">top_n_hvg</span><span class="p">,</span>
+    <span class="n">batch_key</span><span class="o">=</span><span class="n">hvg_batch</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">hv</span> <span class="o">=</span> <span class="n">hvgs_df</span><span class="o">.</span><span class="n">highly_variable</span>
+<span class="n">hv_idx</span> <span class="o">=</span> <span class="n">hv</span><span class="p">[</span><span class="n">hv</span><span class="p">]</span><span class="o">.</span><span class="n">index</span>
+</pre></div>
+</div>
+</div>
+<p>We will now introduce a helper class <code class="docutils literal notranslate"><span class="pre">SCVIDataModule</span></code> to connect TileDB-SOMA-ML with PyTorch Lightning. It subclasses <a class="reference external" href="https://lightning.ai/docs/pytorch/stable/data/datamodule.html">LightningDataModule</a> and:</p>
+<ol class="arabic simple">
+<li><p>Uses TileDB-SOMA-ML to prepare a DataLoader for the results of a SOMA <a class="reference external" href="https://tiledbsoma.readthedocs.io/en/1.15.0/python-tiledbsoma-experimentaxisquery.html">ExperimentAxisQuery</a> on the Census.</p></li>
+<li><p>Derives each cell’s scVI batch label as a tuple of obs attributes: <code class="docutils literal notranslate"><span class="pre">dataset_id</span></code>, <code class="docutils literal notranslate"><span class="pre">assay</span></code>, <code class="docutils literal notranslate"><span class="pre">suspension_type</span></code>, <code class="docutils literal notranslate"><span class="pre">donor_id</span></code>.</p>
+<ul class="simple">
+<li><p><em>Don’t confuse each cell’s label for scVI “batch” integration with a training data “batch” generated by the DataLoader.</em></p></li>
+</ul>
+</li>
+<li><p>Converts the RNA counts and batch labels to a dict of tensors for each training data batch, as scVI expects.</p></li>
+</ol>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">SCVIDataModule</span><span class="p">(</span><span class="n">LightningDataModule</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;PyTorch Lightning DataModule for training scVI models from SOMA data</span>
+
+<span class="sd">    Wraps a `tiledbsoma_ml.ExperimentDataset` to stream the results of a SOMA `ExperimentAxisQuery`,</span>
+<span class="sd">    exposing a `DataLoader` to generate tensors ready for scVI model training. Also handles deriving</span>
+<span class="sd">    the scVI batch label as a tuple of obs columns.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">query</span><span class="p">:</span> <span class="n">soma</span><span class="o">.</span><span class="n">ExperimentAxisQuery</span><span class="p">,</span>
+        <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+        <span class="n">batch_column_names</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">batch_labels</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">dataloader_kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Args:</span>
+
+<span class="sd">        query: tiledbsoma.ExperimentAxisQuery</span>
+<span class="sd">                        Defines the desired result set from a SOMA Expeirement.</span>
+<span class="sd">        *args, **kwargs:</span>
+<span class="sd">        Additional arguments passed through to `tiledbsoma_ml.ExperimentDataset`.</span>
+
+<span class="sd">        batch_column_names: List[str], optional</span>
+<span class="sd">        List of obs column names, the tuple of which defines the scVI batch label (not to to be confused with</span>
+<span class="sd">                        a batch of training data). Defaults to</span>
+<span class="sd">                        `[&quot;dataset_id&quot;, &quot;assay&quot;, &quot;suspension_type&quot;, &quot;donor_id&quot;]`.</span>
+
+<span class="sd">        batch_labels: List[str], optional</span>
+<span class="sd">        List of possible values of the batch label, for mapping to label tensors. By default,</span>
+<span class="sd">                        this will be derived from the unique labels in the given query results (given</span>
+<span class="sd">                        `batch_column_names`), making the label mapping depend on the query. The `batch_labels`</span>
+<span class="sd">                        attribute in the `SCVIDataModule` used for training may be saved and here restored in</span>
+<span class="sd">                        another instance for a different query. That ensures the label mapping will be correct</span>
+<span class="sd">                        for the trained model, even if the second query doesn&#39;t return examples of every</span>
+<span class="sd">                        training batch label.</span>
+
+<span class="sd">        dataloader_kwargs: dict, optional</span>
+<span class="sd">        Keyword arguments passed to `tiledbsoma_ml.experiment_dataloader()`, e.g. `num_workers`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="n">query</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset_args</span> <span class="o">=</span> <span class="n">args</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset_kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataloader_kwargs</span> <span class="o">=</span> <span class="n">dataloader_kwargs</span> <span class="k">if</span> <span class="n">dataloader_kwargs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch_column_names</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">batch_column_names</span>
+            <span class="k">if</span> <span class="n">batch_column_names</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="p">[</span><span class="s2">&quot;dataset_id&quot;</span><span class="p">,</span> <span class="s2">&quot;assay&quot;</span><span class="p">,</span> <span class="s2">&quot;suspension_type&quot;</span><span class="p">,</span> <span class="s2">&quot;donor_id&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch_colsep</span> <span class="o">=</span> <span class="s2">&quot;//&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch_colname</span> <span class="o">=</span> <span class="s2">&quot;scvi_batch&quot;</span>
+        <span class="c1"># prepare LabelEncoder for the scVI batch label:</span>
+        <span class="c1">#   1. read obs DataFrame for the whole query result set</span>
+        <span class="c1">#   2. add scvi_batch column</span>
+        <span class="c1">#   3. fit LabelEncoder to the scvi_batch column&#39;s unique values</span>
+        <span class="k">if</span> <span class="n">batch_labels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">obs_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">obs</span><span class="p">(</span><span class="n">column_names</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_column_names</span><span class="p">)</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_batch_col</span><span class="p">(</span><span class="n">obs_df</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">batch_labels</span> <span class="o">=</span> <span class="n">obs_df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_colname</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch_labels</span> <span class="o">=</span> <span class="n">batch_labels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch_encoder</span> <span class="o">=</span> <span class="n">LabelEncoder</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_labels</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stage</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Instantiate the ExperimentDataset with the provided args and kwargs.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">train_dataset</span> <span class="o">=</span> <span class="n">tiledbsoma_ml</span><span class="o">.</span><span class="n">ExperimentDataset</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_args</span><span class="p">,</span> <span class="n">obs_column_names</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_column_names</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_kwargs</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">train_dataloader</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataLoader</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">tiledbsoma_ml</span><span class="o">.</span><span class="n">experiment_dataloader</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">train_dataset</span><span class="p">,</span>
+            <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">dataloader_kwargs</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_add_batch_col</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">inplace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="c1"># synthesize a new column for obs_df by concatenating the self.batch_column_names columns</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">inplace</span><span class="p">:</span>
+            <span class="n">obs_df</span> <span class="o">=</span> <span class="n">obs_df</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">obs_df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_colname</span><span class="p">]</span> <span class="o">=</span> <span class="n">obs_df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_column_names</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_colsep</span><span class="o">.</span><span class="n">join</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">obs_df</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_before_batch_transfer</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">batch</span><span class="p">,</span>
+        <span class="n">dataloader_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
+        <span class="c1"># DataModule hook: transform the ExperimentDataset data batch (X: ndarray, obs_df: DataFrame)</span>
+        <span class="c1"># into X &amp; batch variable tensors for scVI (using batch_encoder on scvi_batch)</span>
+        <span class="n">batch_X</span><span class="p">,</span> <span class="n">batch_obs</span> <span class="o">=</span> <span class="n">batch</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_batch_col</span><span class="p">(</span><span class="n">batch_obs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;X&quot;</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">batch_X</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">(),</span>
+            <span class="s2">&quot;batch&quot;</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_encoder</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">batch_obs</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_colname</span><span class="p">]))</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span>
+            <span class="s2">&quot;labels&quot;</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+        <span class="p">}</span>
+
+    <span class="c1"># scVI code expects these properties on the DataModule:</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">n_obs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">obs_joinids</span><span class="p">())</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">n_vars</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">var_joinids</span><span class="p">())</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">n_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_encoder</span><span class="o">.</span><span class="n">classes_</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">hvg_query</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="n">experiment_name</span><span class="p">]</span><span class="o">.</span><span class="n">axis_query</span><span class="p">(</span>
+    <span class="n">measurement_name</span><span class="o">=</span><span class="s2">&quot;RNA&quot;</span><span class="p">,</span>
+    <span class="n">obs_query</span><span class="o">=</span><span class="n">soma</span><span class="o">.</span><span class="n">AxisQuery</span><span class="p">(</span><span class="n">value_filter</span><span class="o">=</span><span class="n">obs_value_filter</span><span class="p">),</span>
+    <span class="n">var_query</span><span class="o">=</span><span class="n">soma</span><span class="o">.</span><span class="n">AxisQuery</span><span class="p">(</span><span class="n">coords</span><span class="o">=</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">hv_idx</span><span class="p">),)),</span>
+<span class="p">)</span>
+
+<span class="n">datamodule</span> <span class="o">=</span> <span class="n">SCVIDataModule</span><span class="p">(</span>
+    <span class="n">hvg_query</span><span class="p">,</span>
+    <span class="n">layer_name</span><span class="o">=</span><span class="s2">&quot;raw&quot;</span><span class="p">,</span>
+    <span class="n">batch_size</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span>
+    <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
+    <span class="n">dataloader_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;num_workers&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;persistent_workers&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">},</span>
+<span class="p">)</span>
+
+<span class="p">(</span><span class="n">datamodule</span><span class="o">.</span><span class="n">n_obs</span><span class="p">,</span> <span class="n">datamodule</span><span class="o">.</span><span class="n">n_vars</span><span class="p">,</span> <span class="n">datamodule</span><span class="o">.</span><span class="n">n_batch</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(203655, 8000, 43)
+</pre></div></div>
+</div>
+<p>Most parameters to <code class="docutils literal notranslate"><span class="pre">SCVIDataModule</span></code> are passed through to the <a class="reference external" href="https://single-cell-data.github.io/TileDB-SOMA-ML/#tiledbsoma_ml.ExperimentDataset">tiledbsoma_ml.ExperimentDataset</a> initializer; see that documentation to understand how it can be tuned.</p>
+<p>In particular, here are some parameters of interest:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">shuffle</span></code>: shuffles the result cell order, which is often advisable for model training.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">batch_size</span></code>: controls the size (number of cells) in each training data batch, in turn controlling memory usage.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dataloader_kwargs</span></code>: <a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader">DataLoader</a> tuning, for example controlling parallelization.</p></li>
+</ul>
+<p>We can now create the scVI model object:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">n_layers</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">n_latent</span> <span class="o">=</span> <span class="mi">50</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">scvi</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">SCVI</span><span class="p">(</span><span class="n">n_layers</span><span class="o">=</span><span class="n">n_layers</span><span class="p">,</span> <span class="n">n_latent</span><span class="o">=</span><span class="n">n_latent</span><span class="p">,</span> <span class="n">gene_likelihood</span><span class="o">=</span><span class="s2">&quot;nb&quot;</span><span class="p">,</span> <span class="n">encode_covariates</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Then, we can invoke the <code class="docutils literal notranslate"><span class="pre">.train</span></code> method which will start the training loop. For this demonstration, we’ll only do a single epoch, but this should likely be increased for a production model. The scVI models hosted in CELLxGENE have been trained for 100 epochs.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">train</span><span class="p">(</span>
+    <span class="n">datamodule</span><span class="o">=</span><span class="n">datamodule</span><span class="p">,</span>
+    <span class="n">max_epochs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">batch_size</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span>
+    <span class="n">train_size</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span>
+    <span class="n">early_stopping</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+GPU available: True (cuda), used: True
+TPU available: False, using: 0 TPU cores
+HPU available: False, using: 0 HPUs
+You are using a CUDA device (&#39;NVIDIA A10G&#39;) that has Tensor Cores. To properly utilize them, you should set `torch.set_float32_matmul_precision(&#39;medium&#39; | &#39;high&#39;)` which will trade-off precision for performance. For more details, read https://pytorch.org/docs/stable/generated/torch.set_float32_matmul_precision.html#torch.set_float32_matmul_precision
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "7a5a891840d0468f9bc7b14520d0d273", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+`Trainer.fit` stopped: `max_epochs=1` reached.
+</pre></div></div>
+</div>
+<p>We can now save the trained model. As of the current writing, scvi-tools doesn’t support saving a model that wasn’t generated through an AnnData loader, so we’ll use some custom code:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model_state_dict</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()</span>
+<span class="n">var_names</span> <span class="o">=</span> <span class="n">hv_idx</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+<span class="n">user_attributes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">_get_user_attributes</span><span class="p">()</span>
+<span class="n">user_attributes</span> <span class="o">=</span> <span class="p">{</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">user_attributes</span> <span class="k">if</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;_&quot;</span><span class="p">}</span>
+
+<span class="n">user_attributes</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;n_batch&quot;</span><span class="p">:</span> <span class="n">datamodule</span><span class="o">.</span><span class="n">n_batch</span><span class="p">,</span>
+        <span class="s2">&quot;n_extra_categorical_covs&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s2">&quot;n_extra_continuous_covs&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s2">&quot;n_labels&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s2">&quot;n_vars&quot;</span><span class="p">:</span> <span class="n">datamodule</span><span class="o">.</span><span class="n">n_vars</span><span class="p">,</span>
+        <span class="s2">&quot;batch_labels&quot;</span><span class="p">:</span> <span class="n">datamodule</span><span class="o">.</span><span class="n">batch_labels</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;model.pt&quot;</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;model_state_dict&quot;</span><span class="p">:</span> <span class="n">model_state_dict</span><span class="p">,</span>
+            <span class="s2">&quot;var_names&quot;</span><span class="p">:</span> <span class="n">var_names</span><span class="p">,</span>
+            <span class="s2">&quot;attr_dict&quot;</span><span class="p">:</span> <span class="n">user_attributes</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="n">f</span><span class="p">,</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>We will now load the model back and use it to generate cell embeddings (the latent space), which can then be used for further analysis. Loading the model similarly involves some custom code.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;model.pt&quot;</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">torch_model</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+    <span class="n">adict</span> <span class="o">=</span> <span class="n">torch_model</span><span class="p">[</span><span class="s2">&quot;attr_dict&quot;</span><span class="p">]</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="n">adict</span><span class="p">[</span><span class="s2">&quot;init_params_&quot;</span><span class="p">][</span><span class="s2">&quot;non_kwargs&quot;</span><span class="p">]</span>
+
+    <span class="n">n_batch</span> <span class="o">=</span> <span class="n">adict</span><span class="p">[</span><span class="s2">&quot;n_batch&quot;</span><span class="p">]</span>
+    <span class="n">n_extra_categorical_covs</span> <span class="o">=</span> <span class="n">adict</span><span class="p">[</span><span class="s2">&quot;n_extra_categorical_covs&quot;</span><span class="p">]</span>
+    <span class="n">n_extra_continuous_covs</span> <span class="o">=</span> <span class="n">adict</span><span class="p">[</span><span class="s2">&quot;n_extra_continuous_covs&quot;</span><span class="p">]</span>
+    <span class="n">n_labels</span> <span class="o">=</span> <span class="n">adict</span><span class="p">[</span><span class="s2">&quot;n_labels&quot;</span><span class="p">]</span>
+    <span class="n">n_vars</span> <span class="o">=</span> <span class="n">adict</span><span class="p">[</span><span class="s2">&quot;n_vars&quot;</span><span class="p">]</span>
+
+    <span class="n">latent_distribution</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;latent_distribution&quot;</span><span class="p">]</span>
+    <span class="n">dispersion</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;dispersion&quot;</span><span class="p">]</span>
+    <span class="n">n_hidden</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;n_hidden&quot;</span><span class="p">]</span>
+    <span class="n">dropout_rate</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;dropout_rate&quot;</span><span class="p">]</span>
+    <span class="n">gene_likelihood</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;gene_likelihood&quot;</span><span class="p">]</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">scvi</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">SCVI</span><span class="p">(</span>
+        <span class="n">n_layers</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;n_layers&quot;</span><span class="p">],</span>
+        <span class="n">n_latent</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;n_latent&quot;</span><span class="p">],</span>
+        <span class="n">gene_likelihood</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;gene_likelihood&quot;</span><span class="p">],</span>
+        <span class="n">encode_covariates</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">module</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">_module_cls</span><span class="p">(</span>
+        <span class="n">n_input</span><span class="o">=</span><span class="n">n_vars</span><span class="p">,</span>
+        <span class="n">n_batch</span><span class="o">=</span><span class="n">n_batch</span><span class="p">,</span>
+        <span class="n">n_labels</span><span class="o">=</span><span class="n">n_labels</span><span class="p">,</span>
+        <span class="n">n_continuous_cov</span><span class="o">=</span><span class="n">n_extra_continuous_covs</span><span class="p">,</span>
+        <span class="n">n_cats_per_cov</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">n_hidden</span><span class="o">=</span><span class="n">n_hidden</span><span class="p">,</span>
+        <span class="n">n_latent</span><span class="o">=</span><span class="n">n_latent</span><span class="p">,</span>
+        <span class="n">n_layers</span><span class="o">=</span><span class="n">n_layers</span><span class="p">,</span>
+        <span class="n">dropout_rate</span><span class="o">=</span><span class="n">dropout_rate</span><span class="p">,</span>
+        <span class="n">dispersion</span><span class="o">=</span><span class="n">dispersion</span><span class="p">,</span>
+        <span class="n">gene_likelihood</span><span class="o">=</span><span class="n">gene_likelihood</span><span class="p">,</span>
+        <span class="n">latent_distribution</span><span class="o">=</span><span class="n">latent_distribution</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">module</span> <span class="o">=</span> <span class="n">module</span>
+
+    <span class="n">model</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">torch_model</span><span class="p">[</span><span class="s2">&quot;model_state_dict&quot;</span><span class="p">])</span>
+
+    <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cuda:0&quot;</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
+
+    <span class="n">model</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">is_trained</span> <span class="o">=</span> <span class="kc">True</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Generate-cell-embeddings">
+<h2>Generate cell embeddings<a class="headerlink" href="#Generate-cell-embeddings" title="Permalink to this heading"></a></h2>
+<p>We will now generate the cell embeddings for this model, using the <code class="docutils literal notranslate"><span class="pre">get_latent_representation</span></code> function available in scvi-tools.</p>
+<p>We can use another instance of the <code class="docutils literal notranslate"><span class="pre">SCVIDataModule</span></code> for the forward pass, so we don’t need to load the whole dataset in memory. This will have shuffling disabled to make it easier to join the embeddings later. We also want to restore the list of scVI batch labels from the training data, ensuring our forward pass will map batch labels to tensors in the expected way (although this specific example would work regardless, since it reuses the same query).</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">inference_datamodule</span> <span class="o">=</span> <span class="n">SCVIDataModule</span><span class="p">(</span>
+    <span class="n">hvg_query</span><span class="p">,</span>
+    <span class="n">layer_name</span><span class="o">=</span><span class="s2">&quot;raw&quot;</span><span class="p">,</span>
+    <span class="n">batch_labels</span><span class="o">=</span><span class="n">adict</span><span class="p">[</span><span class="s2">&quot;batch_labels&quot;</span><span class="p">],</span>
+    <span class="n">batch_size</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span>
+    <span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">dataloader_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;num_workers&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;persistent_workers&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">},</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>To feed the data to <code class="docutils literal notranslate"><span class="pre">get_latent_representation</span></code>, we operate <code class="docutils literal notranslate"><span class="pre">inference_datamodule</span></code> as PyTorch Lightning would during training:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">inference_datamodule</span><span class="o">.</span><span class="n">setup</span><span class="p">()</span>
+<span class="n">inference_dataloader</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">inference_datamodule</span><span class="o">.</span><span class="n">on_before_batch_transfer</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="n">inference_datamodule</span><span class="o">.</span><span class="n">train_dataloader</span><span class="p">()</span>
+<span class="p">)</span>
+<span class="n">latent</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_latent_representation</span><span class="p">(</span><span class="n">dataloader</span><span class="o">=</span><span class="n">inference_dataloader</span><span class="p">)</span>
+<span class="n">latent</span><span class="o">.</span><span class="n">shape</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(203655, 50)
+</pre></div></div>
+</div>
+<p>We successfully trained the model and generated embeddings using limited memory. Even on the full Census, this has been tested to run with less than 30G of memory.</p>
+</section>
+<section id="Analyzing-the-results">
+<h2>Analyzing the results<a class="headerlink" href="#Analyzing-the-results" title="Permalink to this heading"></a></h2>
+<p>We will now take a look at the UMAP for the generated embedding. Note that this model was only trained for one epoch (for demo purposes), so we don’t expect the UMAP to show significant integration patterns, but it is nonetheless a good way to check the overall health of the generated embedding.</p>
+<p>In order to do this, we’ll use <code class="docutils literal notranslate"><span class="pre">scanpy</span></code> which accepts an AnnData object, so we’ll generate one using the <code class="docutils literal notranslate"><span class="pre">get_anndata</span></code> utility function:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_anndata</span><span class="p">(</span>
+    <span class="n">census</span><span class="p">,</span>
+    <span class="n">organism</span><span class="o">=</span><span class="n">experiment_name</span><span class="p">,</span>
+    <span class="n">obs_value_filter</span><span class="o">=</span><span class="n">obs_value_filter</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Add the generated embedding (stored in <code class="docutils literal notranslate"><span class="pre">latent</span></code>) in the obsm slot of the AnnData object:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># verify cell order:</span>
+<span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;soma_joinid&quot;</span><span class="p">]),</span> <span class="n">inference_datamodule</span><span class="o">.</span><span class="n">train_dataset</span><span class="o">.</span><span class="n">query_ids</span><span class="o">.</span><span class="n">obs_joinids</span><span class="p">)</span>
+
+<span class="n">adata</span><span class="o">.</span><span class="n">obsm</span><span class="p">[</span><span class="s2">&quot;scvi&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">latent</span>
+</pre></div>
+</div>
+</div>
+<p>We can now generate the neighbors and the UMAP.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">neighbors</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">use_rep</span><span class="o">=</span><span class="s2">&quot;scvi&quot;</span><span class="p">,</span> <span class="n">key_added</span><span class="o">=</span><span class="s2">&quot;scvi&quot;</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">neighbors_key</span><span class="o">=</span><span class="s2">&quot;scvi&quot;</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;dataset_id&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;SCVI&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+2025-03-09 23:51:44.271925: E external/local_xla/xla/stream_executor/cuda/cuda_fft.cc:485] Unable to register cuFFT factory: Attempting to register factory for plugin cuFFT when one has already been registered
+2025-03-09 23:51:44.285009: E external/local_xla/xla/stream_executor/cuda/cuda_dnn.cc:8454] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+2025-03-09 23:51:44.288982: E external/local_xla/xla/stream_executor/cuda/cuda_blas.cc:1452] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_experimental_pytorch_scvi_34_1.png" src="../../_images/notebooks_experimental_pytorch_scvi_34_1.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;tissue_general&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;SCVI&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_experimental_pytorch_scvi_35_0.png" src="../../_images/notebooks_experimental_pytorch_scvi_35_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;cell_type&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;SCVI&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_experimental_pytorch_scvi_36_0.png" src="../../_images/notebooks_experimental_pytorch_scvi_36_0.png" />
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+
+
+            </div>
+            
+            </div>
+            <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pytorch.html" class="btn btn-neutral float-left" title="Training a PyTorch Model" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../cellxgene_census_docsite_FAQ.html" class="btn btn-neutral float-right" title="FAQ" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022-Present, Chan Zuckerberg Initiative.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+            </div>
+        </div>
+
+        </section>
+
+    </div>
+    <!-- Newsletter Banner -->
+    <div role="banner" id="newsletter-banner">
+      <span id="newsletter-subscribe-button" role="button">Subscribe</span>&nbsp;to our newsletter to receive updates about new features.
+      <div id="newsletter-banner-close-button" role="button">X</div>
+    </div>
+    <!-- Newsletter Modal -->
+    <dialog id="newsletter-modal">
+      <div id="newsletter-header">
+        <img id="newsletter-logo" src="../../_static/img/cellxGene-newsletter-logo.svg" />
+        <div id="newsletter-close-button" role="button">X</div>
+      </div>
+      <div id="newsletter-content">
+        <div id="newsletter-callout">Join Our Newsletter</div>
+        <div id="newsletter-description">Get a quarterly email with the latest CELLxGENE features and data.</div>
+        <!-- HubSpot Form target -->
+        <div id="newsletter-form-container"></div>
+      </div>
+
+      <div id="newsletter-footnote">Unsubscribe at any time.</div>
+    </dialog>
+    
+  
+
+    <script>
+    // (thuang): 30 days
+    const NEWSLETTER_BANNER_DISMISSED_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+    const NEWSLETTER_BANNER_DISMISSED_KEY = "newsletterBannerDismissed"
+
+    var script = document.createElement('script');
+    script.src = 'https://js.hsforms.net/forms/v2.js';
+    script.defer = true;
+    document.head.appendChild(script);
+
+    // Run the code once the script is loaded
+    script.onload = async function() {
+      await hbspt.forms.create({
+        region: "na1",
+        portalId: "7272273",
+        formId: "eb65b811-0451-414d-8304-7b9b6f468ce5",
+        target: '#newsletter-form-container',
+        onFormReady() {
+          // get element by type "email"
+          const emailInput = document.querySelector('#email-eb65b811-0451-414d-8304-7b9b6f468ce5');
+          emailInput.setAttribute('placeholder', 'Enter email address');
+
+          // remove the label element for emailInput
+          const emailLabel = document.querySelector('#label-email-eb65b811-0451-414d-8304-7b9b6f468ce5');
+          emailLabel.remove();
+        },
+        submitText: 'Subscribe',
+      });
+    };
+
+    checkNewsletterBanner();
+
+    document.querySelector('#newsletter-banner-close-button').addEventListener('click', () => {
+      document.querySelector('#newsletter-banner').remove();
+      localStorage.setItem(NEWSLETTER_BANNER_DISMISSED_KEY, Date.now());
+    });
+
+    const modal = document.querySelector('#newsletter-modal');
+
+    document.querySelector('#newsletter-subscribe-button').addEventListener('click', () => {
+      modal.showModal();
+    });
+
+    document.querySelector('#newsletter-close-button').addEventListener('click', () => {
+      modal.close();
+    });
+
+    function checkNewsletterBanner() {
+      /**
+       * (thuang): Use LocalStorage to store dismissed state for 30 days
+       * NOTE: Currently Census doc page doesn't share the same domain as the main site,
+       * so dismissing the banner on the main site won't dismiss it on the Census doc page.
+       * And vice versa.
+       */
+      const newsletterBannerDismissed = localStorage.getItem('newsletterBannerDismissed');
+
+      if (newsletterBannerDismissed) {
+        return;
+      }
+
+      if (newsletterBannerDismissed && Date.now() - newsletterBannerDismissed > NEWSLETTER_BANNER_DISMISSED_TTL_MS) {
+        localStorage.removeItem(NEWSLETTER_BANNER_DISMISSED_KEY);
+      }
+
+      const newsletterBanner = document.querySelector('#newsletter-banner');
+
+      if (!newsletterBannerDismissed) {
+        newsletterBanner.style.display = 'flex';
+      }
+    }
+  </script>
+  
+  
+    
+   
+
+</body>
+</html>
