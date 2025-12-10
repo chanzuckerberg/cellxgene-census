@@ -93,7 +93,7 @@ def test_read_arrays(census_version: str) -> None:
 
             assert sarr.soma_type == "SOMASparseNDArray"
             assert sarr.nnz
-            tbl = sarr.read(coords=(slice(400),)).tables().concat()
+            tbl = next(sarr.read().tables())
             assert len(tbl) > 0, (
                 f"Empty table read from NDArray. "
                 f"name={name!r} soma_type={sarr.soma_type!r} shape={getattr(sarr, 'shape', None)!r} "
