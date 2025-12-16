@@ -123,7 +123,7 @@ Stand-alone use: `python -m cellxgene_census_builder.build_soma ...`
 
 TL;DR:
 
-- given a set of H5AD files, which comply with cellxgene 3.0 schema,
+- given a set of H5AD files, which comply with cellxgene schema version specified by `build_soma.globals.CXG_SCHEMA_VERSION`,
 - create several SOMAExperiment aggregations representing mouse & human slices of the entire collection, and
 - embed experiments into a single SOMACollection, along with other metadata about the aggregation/census
 
@@ -158,6 +158,7 @@ If you run out of memory, reduce `--max-workers`. You can also try a higher numb
 - Create a manifest file, in CSV format, containing two columns: dataset_id, h5ad_uri. Example:
 
   ```csv
+  dataset_id, h5ad_uri
   53d208b0-2cfd-4366-9866-c3c6114081bc, /files/53d208b0-2cfd-4366-9866-c3c6114081bc.h5ad
   559ed814-a9c9-4b77-a0e6-7da7b907fe3a, /files/559ed814-a9c9-4b77-a0e6-7da7b907fe3a.h5ad
   5b93b8fc-7c9a-45bd-ad3f-dc883137de30, /files/5b93b8fc-7c9a-45bd-ad3f-dc883137de30.h5ad
