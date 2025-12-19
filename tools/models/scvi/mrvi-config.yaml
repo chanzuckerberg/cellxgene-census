@@ -1,0 +1,19 @@
+census:
+  organism: 
+    "homo_sapiens"
+  obs_query: # Use if you want to train on a subset of the model
+    null
+  obs_query_model: # Required when loading data for model training. Do not change.
+    'is_primary_data == True and nnz >= 300'
+hvg:
+  top_n_hvg: 
+    5000
+  hvg_batch: 
+    [suspension_type, assay]
+anndata:
+  batch_key:
+    [dataset_id, assay, suspension_type, donor_id]
+  model_filename:
+    anndata_model.h5ad
+model:    
+  filename: "mrvi.model"
