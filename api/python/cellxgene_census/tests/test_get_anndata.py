@@ -189,9 +189,9 @@ def test_get_anndata_obsm_two_layers(dec_lts_census: soma.Collection, obsm_layer
 
 
 @pytest.mark.live_corpus
-@pytest.mark.parametrize("obs_embeddings", [["scvi", "geneformer"]])
+@pytest.mark.parametrize("obs_embeddings", [["scvi", "tf-sapiens"]])
 def test_get_anndata_obs_embeddings(lts_census: soma.Collection, obs_embeddings: list[str]) -> None:
-    # NOTE: when the next LTS gets released (>2023-12-15), embeddings may or may not be available,
+    # NOTE: when the next LTS gets released (>2025-11-08), embeddings may or may not be available,
     # so this test could require adjustments.
     ad = cellxgene_census.get_anndata(
         lts_census,
