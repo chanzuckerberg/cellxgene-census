@@ -9,7 +9,7 @@ Typical usage follows a simple recipe:
    * the embedding metadata, in a file named `meta.yml`
    * the embedding and joinid values, in NPY or SOMA format
 2. `ingest` - given source embeddings in NPY or SOMA formats, along with associated metadata in a YAML file, create a SOMA SparseNDArray. This step will create the SOMA SparseNDArray, and decorate it with associated metadata.
-3. `inject` - for embeddings to be published as part of the Census (in an `obsm` layer), this step will add the previously built emdedding to the Census build.
+3. `inject` - for embeddings to be published as part of the Census (in an `obsm` layer), this step will add the previously built emdedding to the Census build. **NOTE** as of 2025-12-16, inject is no longer being used.
 
 ## Stand-alone embeddings
 
