@@ -219,7 +219,6 @@ def test_proxy_fixture(collect_proxy_requests: Callable[[], list[dict]]):
     assert "cellxgene-census-python" in records[1]["headers"]["user-agent"]
 
 
-@pytest.mark.xfail(reason="issue #1451")
 def test_download_w_proxy_fixture(
     small_dataset_id: str,
     collect_proxy_requests: Callable[[], list[dict]],
@@ -238,7 +237,6 @@ def test_download_w_proxy_fixture(
     )
 
 
-@pytest.mark.xfail(reason="issue #1451")
 def test_query_w_proxy_fixture(collect_proxy_requests: Callable[[], list[dict]]):
     with cellxgene_census.open_soma(census_version="stable") as census:
         _ = cellxgene_census.get_obs(census, "Mus musculus", coords=slice(100, 300))
@@ -250,7 +248,6 @@ def test_query_w_proxy_fixture(collect_proxy_requests: Callable[[], list[dict]])
     )
 
 
-@pytest.mark.xfail(reason="issue #1451")
 def test_embedding_headers(collect_proxy_requests: Callable[[], list[dict]]):
     import cellxgene_census.experimental
 
