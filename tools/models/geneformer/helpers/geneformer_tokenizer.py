@@ -17,9 +17,6 @@ class GeneformerTokenizer(CellDatasetBuilder):
     This class requires the Geneformer package to be installed separately with:
     `pip install transformers[torch]<4.50 git+https://huggingface.co/ctheodoris/Geneformer@ebc1e096`
 
-    **DEPRECATION NOTICE:** this is planned for removal from the cellxgene_census API and
-    migrated into git:cellxgene-census/tools/models/geneformer.
-
     Example usage:
 
     ```

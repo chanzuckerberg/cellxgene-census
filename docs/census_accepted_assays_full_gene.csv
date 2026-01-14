@@ -14,6 +14,7 @@ EFO:0010058,Fluidigm C1-based library preparation
 EFO:0010184,Smart-like
 EFO:0022396,TruSeq
 EFO:0022488,Smart-seq3
+EFO:0022839,STORM-seq
 EFO:0030031,SCOPE-chip
 EFO:0030061,mcSCRB-seq
 EFO:0700016,Smart-seq v4

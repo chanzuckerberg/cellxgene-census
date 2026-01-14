@@ -133,8 +133,14 @@ def _consolidate_array(
     modes = consolidation_modes or ["fragment_meta", "array_meta", "commits", "fragments"]
     uri = obj.uri
 
-    # use ~1/32th of RAM, clamped to [1, 32].
-    total_buffer_size = clamp(int(psutil.virtual_memory().total / 32 // 1024**3), 1, 32) * 1024**3
+    # Memory budget for consolidation: use ~1/32th of RAM, clamped to [1, 32] GiB, then convert to bytes.
+    # TileDB recommendation: use sm.mem.total_budget (default 10GiB). We bump to a higher cap on large-memory boxes.
+    mem_budget_bytes = clamp(int(psutil.virtual_memory().total / 32 // 1024**3), 1, 32) * 1024**3
+
+    logger.info(
+        f"Consolidate config: sm.mem.total_budget={mem_budget_bytes // 1024**3} GiB, "
+        f"compute_concurrency={cpu_count()}, io_concurrency={cpu_count()}, modes={modes}"
+    )
 
     for mode in modes:
         tiledb.consolidate(
@@ -143,7 +149,7 @@ def _consolidate_array(
                 {
                     **DEFAULT_TILEDB_CONFIG,
                     "sm.consolidation.mode": mode,
-                    "sm.consolidation.total_buffer_size": total_buffer_size,
+                    "sm.mem.total_budget": mem_budget_bytes,
                     "sm.compute_concurrency_level": cpu_count(),
                     "sm.io_concurrency_level": cpu_count(),
                     **(consolidation_config or {}),

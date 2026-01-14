@@ -14,7 +14,7 @@ The `Dockerfile` provides the recipe for the docker image used by the WDLs, whic
 
 ## Example invocations
 
-Using [miniwdl-omics-run](https://github.com/miniwdl-ext/miniwdl-omics-run) for the Amazon HealthOmics workflow service, and assuming the docker image has been built and pushed to ECR (tagged `$DOCKER_TAG`).
+Using [miniwdl-omics-run](https://github.com/miniwdl-ext/miniwdl-omics-run) for the Amazon HealthOmics workflow service, and assuming the docker image has been built and pushed to ECR (tagged `$DOCKER_TAG`).  It's probably easier to build the docker image on EC2 than your laptop, since it's >10GB and uses CPU instructions that aren't supported by Docker for Mac's x86-64 emulator.
 
 Preparing a tokenized dataset for all of Census (>500GB, sharded):
 

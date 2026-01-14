@@ -13,7 +13,7 @@ env:
 jobs:
   pre_commit_checks:
     name: pre-commit checks
-    runs-on: [X64]
+    runs-on: amd64-privileged
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

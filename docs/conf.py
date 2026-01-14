@@ -7,7 +7,7 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'cellxgene-census'
-copyright = '2022, Chan Zuckerberg Initiative'
+copyright = '2022-Present, Chan Zuckerberg Initiative'
 author = 'Chan Zuckerberg Initiative'
 
 from packaging.version import Version
@@ -50,7 +50,6 @@ intersphinx_mapping = {
     'pandas': ('https://pandas.pydata.org/docs/', None),
     'scanpy': ('https://scanpy.readthedocs.io/en/stable/', None),
     'torch': ('https://pytorch.org/docs/stable/', None),
-    'torchdata': ('https://pytorch.org/data/beta/', None),
     'sklearn': ('http://scikit-learn.org/stable', None),
 }
 

@@ -35,6 +35,7 @@ from .globals import (
     CENSUS_DATASETS_NAME,
     CENSUS_DATASETS_TABLE_SPEC,
     CENSUS_INFO_NAME,
+    CENSUS_INFO_ORGANISMS_NAME,
     CENSUS_OBS_STATS_FIELDS,
     CENSUS_SCHEMA_VERSION,
     CENSUS_SPATIAL_SEQUENCING_NAME,
@@ -115,6 +116,7 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_specifications: l
         +-- census_info: soma.Collection
         |   +-- summary: soma.DataFrame
         |   +-- datasets: soma.DataFrame
+        |   +-- organisms: soma.DataFrame
         |   +-- summary_cell_counts: soma.DataFrame
         +-- census_data: soma.Collection
         |   +-- homo_sapiens: soma.Experiment
@@ -156,6 +158,16 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_specifications: l
         assert (df["collection_name"] != "").all()
         assert (df["dataset_title"] != "").all()
         assert (df["dataset_version_id"] != "").all()
+
+        # verify organisms dataframe exists and that each column contains unique values
+        # (regression test -- see PR #1439)
+        assert CENSUS_INFO_ORGANISMS_NAME in census_info, "`organisms` missing from census_info"
+        assert soma.DataFrame.exists(census_info[CENSUS_INFO_ORGANISMS_NAME].uri)
+        organisms_df: pd.DataFrame = census_info[CENSUS_INFO_ORGANISMS_NAME].read().concat().to_pandas()
+        for col in organisms_df.columns:
+            assert organisms_df[
+                col
+            ].is_unique, f"census_info.{CENSUS_INFO_ORGANISMS_NAME} column '{col}' contains duplicate values"
 
         # there should be an experiment for each builder
         census_data = census[CENSUS_DATA_NAME]
@@ -718,8 +730,9 @@ def validate_X_layers_raw_contents(
 
         # obs.nnz
         nnz = expected_X.getnnz(axis=1)
-        assert np.all(census_obs.nnz.to_numpy() > 0.0)  # All cells must contain at least one count value > 0
-        assert np.array_equal(census_obs.nnz.to_numpy(), nnz), f"{eb.name}:{dataset.dataset_id} obs.nnz incorrect."
+        census_obs_nnz = census_obs.nnz.to_numpy(dtype=np.int64)
+        assert np.all(census_obs_nnz > 0)  # All cells must contain at least one count value > 0
+        assert np.array_equal(census_obs_nnz, nnz), f"{eb.name}:{dataset.dataset_id} obs.nnz incorrect."
 
         # obs.raw_mean_nnz - mean of the explicitly stored values (zeros are _ignored_)
         with np.errstate(divide="ignore"):
@@ -991,7 +1004,7 @@ def validate_internal_consistency(
                     (
                         presence_tbl["soma_data"],
                         (
-                            datasets_df.index.get_indexer(presence_tbl["soma_dim_0"]),  # type: ignore[no-untyped-call]
+                            datasets_df.index.get_indexer(presence_tbl["soma_dim_0"]),
                             var.index.get_indexer(presence_tbl["soma_dim_1"]),
                         ),
                     ),

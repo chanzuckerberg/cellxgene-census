@@ -23,8 +23,6 @@ def create_census_summary(
         ("dataset_schema_version", CXG_SCHEMA_VERSION),
         ("total_cell_count", str(summary_stats["total_cell_count"])),
         ("unique_cell_count", str(summary_stats["unique_cell_count"])),
-        ("number_donors_homo_sapiens", str(summary_stats["number_donors"]["homo_sapiens"])),
-        ("number_donors_mus_musculus", str(summary_stats["number_donors"]["mus_musculus"])),
     ]
 
     df = pd.DataFrame.from_records(data, columns=["label", "value"])
@@ -55,6 +53,9 @@ def create_census_info_organisms(
             for eb in experiment_builders
         ]
     )
+    # Deduplicate multiple ExperimentSpecifications that refer to the same
+    # organism (e.g., spatial vs non-spatial experiments).
+    df = df.drop_duplicates(ignore_index=True)
     df["soma_joinid"] = range(len(df))
     with info_collection.add_new_dataframe(
         CENSUS_INFO_ORGANISMS_NAME,

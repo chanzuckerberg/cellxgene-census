@@ -22,10 +22,11 @@
 #' as.data.frame(census$get("census_info")$get("summary")$read()$concat())
 #' census$close()
 open_soma <- function(
-    census_version = "stable",
-    uri = NULL,
-    tiledbsoma_ctx = NULL,
-    mirror = NULL) {
+  census_version = "stable",
+  uri = NULL,
+  tiledbsoma_ctx = NULL,
+  mirror = NULL
+) {
   if (is.null(uri) || is.null(tiledbsoma_ctx)) {
     locator <- resolve_census_locator(census_version, uri, mirror)
     uri <- locator$uri

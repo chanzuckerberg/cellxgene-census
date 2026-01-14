@@ -14,7 +14,7 @@ import psutil
 import pyarrow as pa
 import tiledbsoma
 import tiledbsoma as soma
-from anndata.experimental import read_elem_as_dask
+from anndata.experimental import read_elem_lazy
 from dask.delayed import Delayed
 from tiledbsoma import (
     Axis,
@@ -88,7 +88,8 @@ def build(args: CensusBuildArgs, *, validate: bool = True) -> int:
     n_workers = clamp(cpu_count(), 1, args.config.max_worker_processes)
     with create_dask_client(args, n_workers=n_workers, threads_per_worker=1, memory_limit=0) as client:
         # Step 1 - get all source datasets
-        datasets = build_step1_get_source_datasets(args)
+        organism_ontology_term_ids = sorted({eb.specification.organism_ontology_term_id for eb in experiment_builders})
+        datasets = build_step1_get_source_datasets(args, organism_ontology_term_ids=organism_ontology_term_ids)
 
         # Step 2 - create root collection, and all child objects, but do not populate any dataframes or matrices
         root_collection = build_step2_create_root_collection(args.soma_path.as_posix(), experiment_builders)
@@ -178,11 +179,27 @@ def populate_root_collection(root_collection: soma.Collection) -> soma.Collectio
     return root_collection
 
 
-def build_step1_get_source_datasets(args: CensusBuildArgs) -> list[Dataset]:
+def build_step1_get_source_datasets(
+    args: CensusBuildArgs,
+    organism_ontology_term_ids: list[str] | None = None,
+) -> list[Dataset]:
+    """Stage source H5AD assets locally, either from manifest or by querying CELLxGENE
+    REST API.
+
+    organism_ontology_term_ids: if provided, only stage the datasets the API metadata
+    associates with these organisms. Otherwise, all datasets with the desired CxG
+    schema version will be staged (whether or not we have a SOMAExperimentSpecification
+    for their organism). Ignored if a manifest file is provided (since the manifest
+    enumerates the datasets to be staged).
+    """
     logger.info("Build step 1 - get source assets - started")
 
     # Load manifest defining the datasets
-    all_datasets = load_manifest(args.config.manifest, args.config.dataset_id_blocklist_uri)
+    all_datasets = load_manifest(
+        args.config.manifest,
+        args.config.dataset_id_blocklist_uri,
+        organism_ontology_term_ids=organism_ontology_term_ids if not args.config.manifest else None,
+    )
     if len(all_datasets) == 0:
         logger.error("No H5AD files in the manifest (or we can't find the files)")
         raise RuntimeError("No H5AD files in the manifest (or we can't find the files)")
@@ -252,10 +269,7 @@ def build_step3_populate_obs_and_var_axes(
             .sum()
         )
         for dataset in datasets:
-            dataset.dataset_total_cell_count += cast(
-                int,
-                cells_per_dataset.get(dataset.dataset_id, default=0),
-            )
+            dataset.dataset_total_cell_count += cells_per_dataset.get(dataset.dataset_id, default=0)
 
     logger.info("Build step 3 - accumulate obs and var axes - started")
 
@@ -302,7 +316,17 @@ def build_step4a_add_spatial(
     experiment_builders: list[ExperimentBuilder],
     args: CensusBuildArgs,
 ) -> None:
-    """Populate spatial info."""
+    """Populate spatial info.
+
+    For each experiment with spatial features:
+
+    1. Iterate through intersection of passed filtered_datasets, and datasets already in this experiment
+        1. Collect spatial metadata
+        2. Define a delayed task for writing images
+        3. Write point clouds
+    2. Write images in parallel (they are much larger than other spatial information)
+    3. Write spatial presence table
+    """
     logger.info("Build step 4a - Populate spatial info - started")
     import h5py
     import pyarrow as pa
@@ -311,15 +335,17 @@ def build_step4a_add_spatial(
     h5ad_path = args.h5ads_path
     client = dask.distributed.Client.current()
 
-    # Add images
+    # Iterate through datasets, extracting fields and setting up delayed tasks
     for eb in reopen_experiment_builders(experiment_builders):
         if not eb.specification.is_exclusively_spatial():
             continue
 
+        logger.debug(f"Writing spatial info to Experiment: {eb.name} at {eb.experiment_uri}")
+
         datasets = [d for d in filtered_datasets if d.dataset_id in eb.dataset_obs_joinid_start]
         spatial_collection = cast(soma.Experiment, eb.experiment)["spatial"]
-        obs_spatial_presences: list[pd.DataFrame] = []
-        write_tasks = []
+        obs_spatial_presences: list[pd.DataFrame] = []  # Dataframes mapping observations to scenes
+        write_tasks: list[Delayed] = []  # Image writing tasks to be computed in parallel later
 
         for d in datasets:
             logger.debug(f"Writing spatial info from {d.dataset_id}")
@@ -385,6 +411,7 @@ def build_step4a_add_spatial(
 
             obs_spatial_presences.append(obs[["soma_joinid", "dataset_id"]].rename(columns={"dataset_id": "scene_id"}))
 
+        logger.debug("Writing images")
         client.compute(write_tasks, sync=True)
 
         if len(obs_spatial_presences) == 0:
@@ -419,7 +446,7 @@ class TileDBSOMADenseArrayWriteWrapper:
         self,
         uri: str,
     ):
-        """Wrapper around tiledbsoma dense array that providing and interface compatible with dask.array."""
+        """Wrapper around tiledbsoma dense array that providing an interface compatible with dask.array."""
         self.uri = uri
 
     def __setitem__(self, k: tuple[slice, ...], v: npt.NDArray[Any]) -> None:
@@ -444,9 +471,8 @@ def add_image_collection(
     spatial_library_info: h5py.Group,
     scale_factors: dict[str, float],
 ) -> list[Delayed]:
-    image_dict = {
-        k: read_elem_as_dask(spatial_library_info["images"][k]) for k in spatial_library_info["images"].keys()
-    }
+    """Creates destination in tiledb store for images for a dataset, returning a delayed task to write the images."""
+    image_dict = {k: read_elem_lazy(spatial_library_info["images"][k]) for k in spatial_library_info["images"].keys()}
 
     scale_transform = ScaleTransform(
         ("y", "x"),
