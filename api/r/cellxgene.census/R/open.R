@@ -4,7 +4,7 @@
 #' @param uri A URI containing the Census SOMA objects to open instead of a
 #'            released version. (If supplied, takes precedence over
 #'            `census_version`.)
-#' @param tiledbsoma_ctx A `tiledbsoma::SOMATileDBContext` built using
+#' @param tiledbsoma_ctx A `tiledbsoma::SOMAContext` built using
 #'        `new_SOMATileDBContext_for_census()`. Optional (created automatically)
 #'        if using `census_version` and the context does not need to be reused.
 #' @param mirror The Census mirror to access; one of `names(get_census_mirror_directory())`.
@@ -14,7 +14,7 @@
 #'         `on.exit(census$close(), add = TRUE)`. Closing the top-level census
 #'         will also close all SOMA objects accessed through it.
 #' @importFrom tiledbsoma SOMACollection
-#' @importFrom tiledbsoma SOMATileDBContext
+#' @importFrom tiledbsoma SOMAContext
 #' @export
 #'
 #' @examples
@@ -35,7 +35,7 @@ open_soma <- function(
     }
   }
 
-  return(tiledbsoma::SOMACollectionOpen(uri, tiledbsoma_ctx = tiledbsoma_ctx))
+  return(tiledbsoma::SOMACollectionOpen(uri, context = tiledbsoma_ctx))
 }
 
 SUPPORTED_PROVIDERS <- c("S3", "file", "unknown")
@@ -72,8 +72,8 @@ DEFAULT_TILEDB_CONFIGURATION <- c(
   "soma.init_buffer_bytes" = paste(1 * 1024**3)
 )
 
-#' Create `SOMATileDBContext` for Census
-#' @description Create a SOMATileDBContext suitable for using with `open_soma()`.
+#' Create `SOMAContext` for Census
+#' @description Create a SOMAContext suitable for using with `open_soma()`.
 #' Typically `open_soma()` creates a context automatically, but one can be created
 #' separately in order to set custom configuration options, or to share it between
 #' multiple open Census handles.
@@ -84,7 +84,7 @@ DEFAULT_TILEDB_CONFIGURATION <- c(
 #'        to save the lookup), or NULL to configure for local file access.
 #' @param ... Custom configuration options.
 #'
-#' @return SOMATileDBContext object for `open_soma()`.
+#' @return SOMAContext object for `open_soma()`.
 #' @export
 #'
 #' @examples
@@ -126,6 +126,6 @@ new_SOMATileDBContext_for_census <- function(census_version_description, mirror 
     }
   }
 
-  # instantiate SOMATileDBContext
-  return(tiledbsoma::SOMATileDBContext$new(config = cfg))
+  # instantiate SOMAContext
+  return(tiledbsoma::SOMAContext$new(config = cfg))
 }

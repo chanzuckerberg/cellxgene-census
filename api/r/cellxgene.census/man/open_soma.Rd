@@ -18,7 +18,7 @@ open_soma(
 released version. (If supplied, takes precedence over
 \code{census_version}.)}
 
-\item{tiledbsoma_ctx}{A \code{tiledbsoma::SOMATileDBContext} built using
+\item{tiledbsoma_ctx}{A \code{tiledbsoma::SOMAContext} built using
 \code{new_SOMATileDBContext_for_census()}. Optional (created automatically)
 if using \code{census_version} and the context does not need to be reused.}
 
