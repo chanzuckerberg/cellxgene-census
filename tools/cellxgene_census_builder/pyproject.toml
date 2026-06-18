@@ -55,6 +55,9 @@ dependencies= [
     "spatialdata>=0.5.0",
     "pooch==1.8.2",
     "pytest-xdist==3.6.1",
+    # spatialdata pulls in the abandoned xarray-schema, which imports pkg_resources at load time;
+    # pkg_resources was removed in setuptools 81, so cap setuptools until that dependency is dropped.
+    "setuptools<81",
 ]
 
 [project.urls]

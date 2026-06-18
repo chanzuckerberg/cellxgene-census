@@ -74,7 +74,7 @@ def test_base_builder_creation(
     memstats = psutil.virtual_memory()
     memstats = memstats._replace(total=int(memstats.total // 2))
 
-    def proxy_psutil_virtual_memory() -> psutil._pslinux.svmem:
+    def proxy_psutil_virtual_memory() -> Any:  # psutil.virtual_memory()'s svmem namedtuple
         return memstats
 
     with (
