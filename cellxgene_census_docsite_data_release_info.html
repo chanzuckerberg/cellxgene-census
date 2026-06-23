@@ -327,7 +327,7 @@ a <a class="reference external" href="https://github.com/single-cell-data/TileDB
 <li><p>The obs <code class="docutils literal notranslate"><span class="pre">disease</span></code> and <code class="docutils literal notranslate"><span class="pre">disease_ontology_term_id</span></code> fields may now contain multiple values delimited by <code class="docutils literal notranslate"><span class="pre">'</span> <span class="pre">||</span> <span class="pre">'</span></code>, so exact string equality queries on these fields may yield incomplete results.</p></li>
 <li><p>The var <code class="docutils literal notranslate"><span class="pre">feature_name</span></code> field is no longer necessarily unique. Previously, colliding gene symbols were disambiguated by appending their <code class="docutils literal notranslate"><span class="pre">feature_id</span></code> (Ensembl gene ID). <code class="docutils literal notranslate"><span class="pre">feature_name</span></code> is now populated with the exact gene symbols, even if used multiple times, while <code class="docutils literal notranslate"><span class="pre">feature_id</span></code> remains unique.</p></li>
 </ul>
-<p>These reflect changes in the newer CELLxGENE Dataset schema version.</p>
+<p>See the <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md#changelog">Census schema changelog</a> for the full list of recent developments.</p>
 </section>
 <section id="cell-counts">
 <h4>Cell counts<a class="headerlink" href="#cell-counts" title="Permalink to this heading"></a></h4>

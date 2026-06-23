@@ -77,7 +77,7 @@ Census schema 2.4.0 has a few important changes that may need adjustments in ana
 * The obs `disease` and `disease_ontology_term_id` fields may now contain multiple values delimited by `' || '`, so exact string equality queries on these fields may yield incomplete results.
 * The var `feature_name` field is no longer necessarily unique. Previously, colliding gene symbols were disambiguated by appending their `feature_id` (Ensembl gene ID). `feature_name` is now populated with the exact gene symbols, even if used multiple times, while `feature_id` remains unique.
 
-These reflect changes in the newer CELLxGENE Dataset schema version.
+See the [Census schema changelog](https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md#changelog) for the full list of recent developments.
 
 #### Cell counts
 
