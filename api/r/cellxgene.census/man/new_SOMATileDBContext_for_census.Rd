@@ -2,7 +2,7 @@
 % Please edit documentation in R/open.R
 \name{new_SOMATileDBContext_for_census}
 \alias{new_SOMATileDBContext_for_census}
-\title{Create \code{SOMATileDBContext} for Census}
+\title{Create \code{SOMAContext} for Census}
 \usage{
 new_SOMATileDBContext_for_census(
   census_version_description,
@@ -20,10 +20,10 @@ to save the lookup), or NULL to configure for local file access.}
 \item{...}{Custom configuration options.}
 }
 \value{
-SOMATileDBContext object for \code{open_soma()}.
+SOMAContext object for \code{open_soma()}.
 }
 \description{
-Create a SOMATileDBContext suitable for using with \code{open_soma()}.
+Create a SOMAContext suitable for using with \code{open_soma()}.
 Typically \code{open_soma()} creates a context automatically, but one can be created
 separately in order to set custom configuration options, or to share it between
 multiple open Census handles.

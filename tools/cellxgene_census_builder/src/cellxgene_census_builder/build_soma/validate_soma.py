@@ -478,7 +478,7 @@ def validate_X_layers_normalized(
             assert np.all(raw_soma_data > 0.0), "Found zero value in raw layer"
             assert np.all(norm_soma_data > 0.0), "Found zero value in normalized layer"
 
-            row: npt.NDArray[np.int64] = pd.RangeIndex(row_range_start, row_range_stop).get_indexer(raw_soma_dim_0)  # type: ignore[no-untyped-call]
+            row: npt.NDArray[np.int64] = pd.RangeIndex(row_range_start, row_range_stop).get_indexer(raw_soma_dim_0)
             col = var_df.index.get_indexer(raw_soma_dim_1)
             n_rows: int = row.max() + 1
             del raw_soma_dim_0, raw_soma_dim_1

@@ -459,8 +459,8 @@ def post_acc_axes_processing(accumulated: list[tuple[ExperimentBuilder, tuple[pd
         eb.global_var_joinids = var[["feature_id", "soma_joinid"]].set_index("feature_id")
 
         grouped_by_id = obs.groupby("dataset_id").soma_joinid.agg(["min", "count"])
-        eb.dataset_obs_joinid_start = grouped_by_id["min"].to_dict()
-        eb.dataset_n_obs = grouped_by_id["count"].to_dict()
+        eb.dataset_obs_joinid_start = cast(dict[str, int], grouped_by_id["min"].to_dict())
+        eb.dataset_n_obs = cast(dict[str, int], grouped_by_id["count"].to_dict())
 
         # gather per-dataset summary statistics e.g., cell type counts, etc.
         per_dataset_summary_counts(eb, obs)
