@@ -18,6 +18,12 @@ To learn more and start using the Census please go to the main [**Census site**]
 
 The contents of this Github repository are freely available for reuse under the [MIT license](https://opensource.org/licenses/MIT). Data in the Census are available for re-use under the [CC-BY license](https://creativecommons.org/licenses/by/4.0/).
 
+## Trademarks
+
+CZ CELLXGENE, CZ CELLXGENE DISCOVER, and CZ CELLXGENE ANNOTATE are trademarks of the Chan Zuckerberg Initiative. All rights reserved.
+
+Use, reuse, modification, and re-distribution of the source code in this repository is subject to the terms of the applicable open source [license](LICENSE). However, that license does not grant permission to use the trademarks without separate, express permission from the Chan Zuckerberg Initiative.
+
 ## Code of Conduct
 
 This project adheres to the Contributor Covenant [code of conduct](https://github.com/chanzuckerberg/.github/blob/master/CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to <opensource@chanzuckerberg.com>.
