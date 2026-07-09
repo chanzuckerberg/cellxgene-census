@@ -127,7 +127,9 @@ def get_default_soma_context(tiledb_config: dict[str, Any] | None = None) -> som
     tiledb_config = dict(
         DEFAULT_TILEDB_CONFIGURATION, **{"vfs.s3.custom_headers.User-Agent": _user_agent()}, **(tiledb_config or {})
     )
-    return soma.options.SOMATileDBContext().replace(tiledb_config=tiledb_config)
+    context = soma.options.SOMATileDBContext().replace(tiledb_config=tiledb_config)
+    _ = context.native_context  # Force initialization so defaults (e.g., custom headers) are applied eagerly
+    return context
 
 
 def open_soma(
