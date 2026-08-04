@@ -114,30 +114,43 @@ The two spatial ones add four kinds of object with no non-spatial equivalent: sc
 What the Zarr corpus looks like. Seven stores, one per organism and modality, mirroring how the corpus is already divided rather than following from any measurement here. Human's spatial and non-spatial data stay in separate stores because they hold different things: spatial has no normalized layer and adds scenes, point clouds and images. Each store holds the cell table, the gene table, and the expression matrix.
 
 ```
-census_zarr/<organism>/
+STORE  one per organism and modality, seven in all
+│      census_zarr/homo_sapiens/
 │
-├── obs/                        cell metadata: where "which cells?" is answered
-│   ├── obs_index               per-chunk summary: which values each chunk contains,
-│   │                           and min/max for numeric columns. Read first.
-│   ├── cell_type_ontology_term_id/   chunks of 8,192 rows, 65,536-row shards
-│   ├── tissue_general_ontology_term_id/
-│   ├── nnz, is_primary_data, …       same chunking
-│   └──                         rows stay in the order datasets were added
+├── obs/          the cell table, 158,982,719 rows
+│   ├── obs_index                       per-chunk summary: which values each
+│   │                                   chunk holds, min/max for numeric
+│   │                                   columns. Read first, to skip chunks.
+│   └── cell_type_ontology_term_id      one Zarr array per column
+│       │
+│       ├── SHARD 0    one stored object, 65,536 rows
+│       │   ├── CHUNK 0   rows       0 –  8,191   ← smallest fetchable unit
+│       │   ├── CHUNK 1   rows   8,192 – 16,383
+│       │   └── … 8 chunks per shard
+│       └── SHARD 1    rows 65,536 – 131,071
 │
-├── var/                        gene metadata
+├── var/          the gene table, 61,497 rows
 │
-└── X/                          expression: sparse, split into 16 gene bands
-    ├── band_000/               genes 0…3,842
-    │   ├── data                the non-zero values
-    │   ├── indices             which gene each value belongs to, numbered
-    │   │                       within the band rather than across all 61,497
-    │   └── indptr              where each cell's values start
-    ├── band_001/               genes 3,843…7,686
+└── X/            expression, split along the GENE axis into 16 BANDS
+    │
+    ├── BAND 0    genes     0 –  3,842      its own little CSR matrix
+    │   ├── data      ─┐  chunked at 125,000 elements
+    │   ├── indices   ─┤  8 chunks per 1,000,000-element shard
+    │   └── indptr    ─┘  where each cell's run starts
+    │
+    ├── BAND 1    genes 3,843 –  7,686
     ├── …
-    └── band_015/               genes 57,653…61,496
+    └── BAND 15   genes 57,653 – 61,496
 ```
 
+A SLICE is one cell's run of values inside one band: the stretch from `indptr[i]` to `indptr[i+1]`. It is the thing a read is actually after; chunks and shards are just the packaging it arrives in.
 
+```
+        BAND 0        BAND 1        BAND 2       ...      BAND 15
+      ┌─────────┐   ┌─────────┐   ┌─────────┐          ┌─────────┐
+cell i│ ▓▓▓     │   │  ▓▓     │   │         │   ...    │   ▓▓▓   │
+      └─────────┘   └─────────┘   └─────────┘          └─────────┘
+```
 
 ### 3.1 The decisions
 
