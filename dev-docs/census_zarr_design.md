@@ -51,7 +51,7 @@ Short definitions for terms used throughout.
 | **chunk**         | The smallest piece of a Zarr array that can be fetched. Reading one value costs the whole chunk containing it.                                                                                                                                                 |
 | **shard**         | A single stored object holding many chunks, with an index so a reader can fetch just the chunks it wants. Lets a layout have small chunks without having a huge number of objects.                                                                             |
 | **CSR**           | The standard way to store a sparse matrix: keep only the non-zero values, row by row. Most cells express only ~1% of genes, so this is far smaller than storing every zero.                                                                                    |
-| **band**          | A fixed slice of the gene axis, stored as its own matrix. Splitting the genes into 16 bands means a query for a few genes reads only the bands holding them, instead of the whole matrix.                                                                      |
+| **band**          | A fixed slice of the gene axis, stored as its own matrix. Splitting the genes into 16 bands means a query for a few genes reads only the bands holding them, instead of the whole matrix. Bands are specific to this layout: unlike chunks and shards, they are not a Zarr concept. |
 | **predicate**     | The condition a query filters on: "cell type is X", "at least 500 genes detected".                                                                                                                                                                             |
 | **SOMA / TileDB** | The current format and the storage engine underneath it. Being retired.                                                                                                                                                                                        |
 | **LTS release**   | A long-term-support Census build, guaranteed available for at least five years.                                                                                                                                                                                |
@@ -151,6 +151,12 @@ A SLICE is one cell's run of values inside one band: the stretch from `indptr[i]
 cell i│ ▓▓▓     │   │  ▓▓     │   │         │   ...    │   ▓▓▓   │
       └─────────┘   └─────────┘   └─────────┘          └─────────┘
 ```
+
+**Where the vocabulary comes from.** Chunks and shards are Zarr's own, and are generic: a chunk is the smallest fetchable piece of any array, a shard is one stored object holding several chunks. Neither knows anything about cells or genes. Bands are this design's addition, and Zarr has no concept of them.
+
+That split exists for a reason. AnnData stores a sparse matrix as flat one-dimensional arrays of the non-zero values, so there is no gene axis for Zarr to chunk on, and no chunk size makes a single-gene read cheap. Cutting the genes into 16 separate arrays is the way around it.
+
+It also means a chunk is not always a range of rows. In an obs column it is, at 8,192 rows, because rows are the only axis there. In a band's `data` and `indices` a chunk is 125,000 stored values, and its boundary falls wherever that count lands, usually part-way through a cell and often part-way through a dataset. That is what the padding decision below is about.
 
 ### 3.1 The decisions
 
