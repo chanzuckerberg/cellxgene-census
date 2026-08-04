@@ -111,7 +111,7 @@ The two spatial ones add four kinds of object with no non-spatial equivalent: sc
 
 ## 3. The proposed storage layout
 
-What the Zarr corpus looks like. Seven stores, one per organism and modality, so human's spatial and non-spatial data sit in separate stores. Each holds the cell table, the gene table, and the expression matrix.
+What the Zarr corpus looks like. Seven stores, one per organism and modality, mirroring how the corpus is already divided rather than following from any measurement here. Human's spatial and non-spatial data stay in separate stores because they hold different things: spatial has no normalized layer and adds scenes, point clouds and images. Each store holds the cell table, the gene table, and the expression matrix.
 
 ```
 census_zarr/<organism>/
@@ -152,7 +152,7 @@ Each row was chosen against measured competitors. For the expression matrix thos
 | **Sharding**                  | Yes, **65,536-row** shards                                                                 | Eight chunks per shard, so **8× fewer stored objects**, with no meaningful change in bytes. The finer 2,048-row chunks measured 28×, but those are rejected above.                                                                                         |
 | **Cell-table index**          | A per-chunk summary stored beside the data, used **adaptively**                            | The index is **0.012–0.15 MB** and is read first, so the reader knows how much it would skip before fetching anything. It prunes when that is under ~1/20 of chunks and reads normally otherwise.                                                          |
 | **Row order**                 | Unchanged: the order datasets were added                                                   | Already within **1.2–1.7×** of optimal, because a cell type concentrates in the few datasets that assayed it. Reordering by cell type gained 6% on one query and cost 210% on another.                                                                     |
-| **Store organization**        | **Seven stores, one per organism and modality**, not one per dataset                                            | Per-dataset stores cost **114 extra requests per store opened**, roughly 211,000 for a query spanning the corpus.                                                                                                                                          |
+| **Store organization**        | Seven stores, one per organism and modality. **Not one per dataset.**                                            | Per-dataset stores cost **114 extra requests per store opened**, roughly 211,000 for a query spanning the corpus.                                                                                                                                          |
 
 
 **Why padding rather than exact boundaries.** Letting each dataset's chunk be exactly as wide as the dataset is not buildable today: Zarr's variable-width chunks are experimental in version 3.2.1, off by default, and cannot be combined with sharding, and sharding is what buys the object count below. Padding achieves the same result with ordinary chunks, so the layout depends on no experimental feature.
