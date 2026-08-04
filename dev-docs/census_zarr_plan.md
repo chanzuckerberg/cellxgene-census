@@ -25,7 +25,7 @@ retire. R parity runs alongside from the point the tooling allows it.
 | #   | Phase                    | Gated on                           |
 | --- | ------------------------ | ---------------------------------- |
 | 0   | The design               | Done                               |
-| 1   | Approvals and amendments | Decisions in spec §10              |
+| 1   | Approvals and amendments | Decisions in spec section 10              |
 | 2   | The validation harness   | Nothing                            |
 | 3   | Spatial representation   | Nothing                            |
 | 4   | The builder writes Zarr  | 1, and 3 for spatial               |
@@ -51,10 +51,10 @@ retire. R parity runs alongside from the point the tooling allows it.
 
 | Settled                                                           | Where                                                                            |
 | ----------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| The read path's cost problem, measured against the current format | [Evidence §9](./census_zarr_design_evidence.md#9-read-path-feasibility-evidence) |
-| The storage layout, chosen against measured alternatives          | [Evidence §10](./census_zarr_design_evidence.md#10-layout-comparison)            |
-| How cells and genes are identified                                | [Spec §4](./census_zarr_design.md#4-how-cells-and-genes-are-identified)          |
-| What the v2 client surface looks like                             | [Spec §6](./census_zarr_design.md#6-the-python-api)                              |
+| The read path's cost problem, measured against the current format | [Evidence section 9](./census_zarr_design_evidence.md#9-read-path-feasibility-evidence) |
+| The storage layout, chosen against measured alternatives          | [Evidence section 10](./census_zarr_design_evidence.md#10-layout-comparison)            |
+| How cells and genes are identified                                | [Spec section 4](./census_zarr_design.md#4-how-cells-and-genes-are-identified)          |
+| What the v2 client surface looks like                             | [Spec section 6](./census_zarr_design.md#6-the-python-api)                              |
 
 
 **Watch for** what is not covered. Spatial representation is Phase 3. Every corpus-scale figure is an
@@ -70,9 +70,9 @@ emits this layout, no client reads it, and no corpus has been built at full scal
 **Delivers** Census schema 3.0.0, an amended storage and release policy, and a docsite that no longer defines a
 release as a TileDB-SOMA collection.
 
-**Needs first** answers to the decisions in [spec §10](./census_zarr_design.md#10-decisions-requested).
-Decisions 1 and 2 are the blocking pair. Decision 6, on whether `soma_joinid` was always intended to be stable,
-should be answered early because a "yes" would send [spec §4](./census_zarr_design.md#4-how-cells-and-genes-are-identified)
+**Needs first** answers to the decisions in [spec section 10](./census_zarr_design.md#10-decisions-requested).
+Decisions 1 and 2 are the blocking pair. Decision 5, on whether `soma_joinid` was always intended to be stable,
+should be answered early because a "yes" would send [spec section 4](./census_zarr_design.md#4-how-cells-and-genes-are-identified)
 back for rework rather than adjusting it.
 
 **Done when** all three documents are merged upstream, and the policy amendment carries a check that fails a
@@ -97,7 +97,7 @@ metadata columns, and deliberately corrupting a result makes it fail. A check th
 
 **Watch for** the reference expiring. The old stack is the oracle, so anything wanting differential proof has
 to be proven before the TileDB corpus retires. Method is in
-[evidence §11](./census_zarr_design_evidence.md#11-validation-methodology).
+[evidence section 11](./census_zarr_design_evidence.md#11-validation-methodology).
 
 ---
 
@@ -113,7 +113,7 @@ accessor that reads them.
 **Done when** the mapping to `spatialdata` is specified in the schema, or spatial is explicitly deferred and
 the corpus ships non-spatial first.
 
-**Watch for** this being the only layout question still open ([spec §3.3](./census_zarr_design.md#33-open-questions)),
+**Watch for** this being the only layout question still open ([spec section 3.3](./census_zarr_design.md#33-open-questions)),
 and spatial being 2 of 7 experiments, so deferring it is a real option rather than a failure.
 
 ---
@@ -141,7 +141,7 @@ a chunk boundary, datasets can be appended one at a time without rewriting a nei
 
 ## Phase 5: The v2 Python client
 
-**Delivers** the surface in [spec §6](./census_zarr_design.md#6-the-python-api): opening a corpus, the
+**Delivers** the surface in [spec section 6](./census_zarr_design.md#6-the-python-api): opening a corpus, the
 accessors, filter translation, selection by the new identity, and lazy access.
 
 **Needs first** Phase 4, or at least enough of it to produce a store to read.
@@ -165,7 +165,7 @@ corpus, landing on the same biological cells.
 **Needs first** the mapping artifact from Phase 4 and the client from Phase 5.
 
 **Done when** the four assertions in
-[evidence §12](./census_zarr_design_evidence.md#12-identity-transition-proof) hold, each paired with a
+[evidence section 12](./census_zarr_design_evidence.md#12-identity-transition-proof) hold, each paired with a
 corruption that makes it fail.
 
 **Watch for** this being a release gate rather than a nice-to-have. It must be demonstrated against a real
@@ -185,7 +185,7 @@ embedding, not a synthetic one.
 the extrapolations the design currently carries.
 
 **Watch for** this being the phase that tests every claim marked as an extrapolation in
-[spec §8](./census_zarr_design.md#8-risks). Expect to update the design with real numbers rather than to
+[spec section 8](./census_zarr_design.md#8-risks). Expect to update the design with real numbers rather than to
 confirm the estimates exactly.
 
 ---
@@ -201,9 +201,9 @@ confirm the estimates exactly.
 **Done when** a published release is readable by the v2 client from S3, and the mapping resolves for a real
 embedding.
 
-**Watch for** decision 5 setting the shape of this phase. Publishing both formats means keeping two writers
-working and validated; publishing Zarr alone means the move becomes mandatory and needs announcing on a
-timeline. The identity mapping's source also depends on that answer.
+**Watch for** this being the point the move becomes mandatory. There are no further TileDB releases after it, so
+the timeline has to be announced ahead of the release rather than alongside it. The identity mapping is derived
+from the last TileDB release.
 
 ---
 
@@ -234,7 +234,7 @@ for something to read.
 
 **Watch for** the cheap early check being worth doing now rather than here: confirming that `anndataR` over a
 development `Rarr` really does read a sharded store, since neither project appears to test that combination.
-Until R can read Zarr, R users cannot reach a Zarr-only release.
+Until R can read Zarr, R users see no new data at all, since every release after Phase 8 is Zarr.
 
 ---
 
@@ -263,7 +263,7 @@ These are not phases and do not gate anything, but they will not happen unless s
 section 4. Both should land back in the design rather than only in someone's head.
 - **Scoping the** `experimental` **namespace**, which is SOMA-coupled and outside the current design.
 - **Upstream documentation defects** found while measuring, listed in
-[evidence §14](./census_zarr_design_evidence.md#14-findings-that-need-a-decision-elsewhere). Cheap to fix and
+[evidence section 14](./census_zarr_design_evidence.md#14-findings-that-need-a-decision-elsewhere). Cheap to fix and
 they build goodwill with the team whose approval Phase 1 needs.
 
 ---

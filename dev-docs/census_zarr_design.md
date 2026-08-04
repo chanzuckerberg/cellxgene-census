@@ -26,11 +26,11 @@ Biohub is retiring TileDB across the cellxgene stack. The Census is published to
 
 **What does not change.** The data. The same datasets on the same inclusion criteria, harmonized the same way. A build from the new writer must match a TileDB build from the same inputs, cell for cell and value for value, verified before release ([section 7](#7-what-existing-users-are-promised)).
 
-**What existing users get.** Everything already published stays published: pinned versions keep resolving and reading, and the five-year availability commitment on LTS releases is honoured. Data that external groups computed against the old format can be re-joined to the new one through a published mapping. Whether new releases also carry a TileDB corpus, or the move to Zarr is announced as a breaking change, is left open here for the team to decide ([section 7](#7-what-existing-users-are-promised)).
+**What existing users get.** Everything already published stays published: pinned versions keep resolving and reading, and the five-year availability commitment on LTS releases is honoured. Data that external groups computed against the old format can be re-joined to the new one through a published mapping. New data, though, arrives in Zarr alone. There are no further TileDB releases once the Zarr corpus ships, so moving to the v2 client is a requirement rather than an option, announced ahead of time ([section 7](#7-what-existing-users-are-promised)).
 
 **Performance.** The current format's cost for a selective query is dominated by finding the matching cells, and that cost grows with the size of the corpus rather than the size of the answer, the property that gets worse every release. The proposed layout targets that specific cost, and holds or improves on the current format elsewhere.
 
-**Six things need a decision** before implementation starts; they are listed at the end. The first is whether this becomes a major version of the Census schema.
+**Five things need a decision** before implementation starts; they are listed at the end. The first is whether this becomes a major version of the Census schema.
 
 ---
 
@@ -98,7 +98,7 @@ The published corpus, as of the `2025-11-08` LTS release.
 
 The two spatial ones add four kinds of object with no non-spatial equivalent: scenes, point clouds, images, and a cell-to-scene mapping.
 
-**Release cadence.** The most recent build of any kind is `2025-11-17`, which currently carries the `latest` alias. What the transition should publish depends on the intended cadence ([section 7](#7-what-existing-users-are-promised)).
+**Release cadence.** The most recent build of any kind is `2025-11-17`, which currently carries the `latest` alias. New releases carry Zarr only ([section 7](#7-what-existing-users-are-promised)).
 
 **Two properties of the current data that change how filters must be written**, both introduced by [schema 2.4.0](../docs/cellxgene_census_schema.md):
 
@@ -161,7 +161,7 @@ Each row was chosen against measured competitors. For the expression matrix thos
 
 *Object count.* Sharding makes object count grow with data volume rather than with the number of pieces the data is cut into: a shard holds more chunks instead of the store holding more objects. No spike store exceeded about 700 objects at any scale tested, where the unsharded equivalent would hold eight times as many. Today's corpus is 325,695 objects. This is a property of the layout rather than of the sample, so it carries to full scale.
 
-*Bytes per cell measured lower, but treat that as a floor.* A spike store of 64,798 cells worked out to **3.3 kB per cell** against today's **6.9 kB** corpus-wide. The cells in that sample carry fewer non-zero values than the corpus average, so the real figure will land higher than 3.3 kB, and how much higher is unknown until a full build exists. Nothing measured suggests the Zarr corpus is larger than the TileDB one, which is what bounds the cost of publishing both at once ([section 7](#7-what-existing-users-are-promised)).
+*Bytes per cell measured lower, but treat that as a floor.* A spike store of 64,798 cells worked out to **3.3 kB per cell** against today's **6.9 kB** corpus-wide. The cells in that sample carry fewer non-zero values than the corpus average, so the real figure will land higher than 3.3 kB, and how much higher is unknown until a full build exists. Nothing measured suggests the Zarr corpus is larger than the TileDB one, so replacing it should not cost more to store.
 
 ### 3.2 Why selective queries cost less
 
@@ -232,7 +232,7 @@ Groups outside Biohub hold embeddings and annotations keyed on the old row numbe
 
 Two requirements on it: a mapping is only meaningful together with the release it was built from, so one is published per release; and a lookup that cannot be resolved must **fail rather than silently drop rows**. A row number absent from the mapping means that cell is not in this release, which is a real answer and must be reported as one.
 
-This is written for releases that carry both formats, since the old row numbers are assigned by the TileDB build. If new releases ship Zarr only (decision 5), the mapping has to be derived from the last TileDB release instead, which costs nothing extra: both columns are already published there.
+The old row numbers are assigned by the TileDB build, so the mapping is derived from the last TileDB release. That costs nothing extra, since both columns are already published there.
 
 ---
 
@@ -244,9 +244,9 @@ Two governing documents currently require SOMA and must change: the [Census sche
 
 **The Census schema needs a major version, 3.0.0.** It divides in two. The half describing *what data is included* (organisms, assays, sample types) is untouched. The half describing *how data is encoded* specifies every object as a SOMA type, roughly sixty references, and is rewritten. The schema's own rule makes any change incompatible with the SOMA API a major bump.
 
-**The release policy must admit a second format.** Three clauses change: a build is defined by its content and schema rather than by its container; releases may carry a `zarr/` folder beside the existing `soma/` and `h5ads/`; and the release index records a third location under the key `zarr`, reusing the existing location structure unchanged.
+**The release policy must admit a second format.** Three clauses change: a build is defined by its content and schema rather than by its container; a release may carry a `zarr/` folder as a sibling of `h5ads/`, where `soma/` sits in existing releases; and the release index records a third location under the key `zarr`, reusing the existing location structure unchanged.
 
-**The change must be additive.** The `soma` entry cannot be removed or renamed while any supported TileDB release exists, for two independent reasons: already-released clients require that key and fail without it, and users who pinned a build expect it to keep working. This holds however [section 7](#7-what-existing-users-are-promised)'s open choice is settled. It is a statement about the releases already in the index, not about what future ones contain. If future releases do carry both formats, one release tag holds both locations and clients pick the one they understand. Removing the old entry is a separate decision, governed by the five-year support window.
+**The change must be additive.** The `soma` entry cannot be removed or renamed while any supported TileDB release exists, for two independent reasons: already-released clients require that key and fail without it, and users who pinned a build expect it to keep working. This is a statement about the releases already in the index, not about what future ones contain. Removing the old entry is a separate decision, governed by the five-year support window.
 
 **Two things the amendment should fix while it is open.**
 
@@ -300,14 +300,11 @@ The translator has one trap to avoid. `disease` and `disease_ontology_term_id` c
 
 Nothing already published is moved, rewritten or withdrawn, and a user who pinned a client version and a release keeps resolving the same release and reading the same bytes. The five-year availability commitment on LTS releases is honoured, though it is recorded on the public docsite rather than in the release policy. Retiring the TileDB corpus is a later decision, gated on that support window rather than on the new client's readiness.
 
-### 7.2 Whether new releases carry both formats
+### 7.2 New releases carry Zarr only
 
-This is an open choice (decision 5). Two shapes are available:
+Once the Zarr corpus is built and released, there are no further TileDB releases. The last TileDB release stays available under its support window, so nobody loses what they have, but new data arrives in Zarr alone.
 
-- *Publish both.* Old clients keep working against new data, and the transition is invisible to anyone who does not want it. The cost is running and validating two writers for as long as it lasts.
-- *Publish Zarr only, and announce it.* Users who want new data move to the v2 client on a published timeline; those who do not stay on the last TileDB release, still available under its support window. The cost is that the move becomes mandatory.
-
-The choice depends on the release cadence ([section 2](#2-what-exists-today)), not on anything in this design: both shapes work with the layout, the identity model and the API. It does change the release-policy amendment, since publishing both needs one release tag to carry two locations.
+The move is therefore mandatory rather than optional, and is announced on a published timeline ahead of the first Zarr release. Users who want new data move to the v2 client; users who do not stay on the last TileDB release until it retires.
 
 ### 7.3 What gates the first Zarr release
 
@@ -317,11 +314,11 @@ The choice depends on the release cadence ([section 2](#2-what-exists-today)), n
 
 ### 7.4 The R client
 
-**It keeps reading what it reads today**, since it reads the TileDB corpus and those releases stay published. Whether it also sees new data depends on decision 5.
+**It keeps reading what it reads today**, since it reads the TileDB corpus and those releases stay published. It will not see new data until it can read Zarr.
 
 A route to the new format exists and is recent. [anndataR](https://bioconductor.org/packages/anndataR/) reads AnnData-Zarr in its current Bioconductor release and hands its Zarr work to [Rarr](https://bioconductor.org/packages/Rarr/), where sharding reached the development branch in June 2026, read-only, and is expected in a release around October 2026. So R parity is separate work rather than a missing reader. Worth confirming early: that `anndataR` over a development `Rarr` really does read a sharded store, since neither project appears to test that. (State of the R ecosystem as of August 2026.)
 
-Until then R users cannot reach a Zarr-only release. Under decision 5's second shape they stay on the last TileDB release, keeping what they have but seeing no new data, and lose access only if that corpus is retired first.
+Until then R users stay on the last TileDB release, keeping what they have but seeing no new data, and lose access only if that corpus is retired first. That makes R parity a real constraint on the retirement date rather than a nice-to-have.
 
 ### 7.5 Deprecation
 
@@ -349,7 +346,7 @@ Collected here because several would otherwise be met only in passing.
 
 **The build's memory and runtime envelope is unknown.** The spike held whole matrices in memory, which does not scale to an organism, so the builder must write incrementally. The layout cooperates: each gene band is written independently, and because every dataset starts on a chunk boundary, datasets can be appended one at a time without rewriting a neighbour's chunk.
 
-**R support depends on Zarr tooling that is only now arriving.** The reader exists, but sharding is in a development branch expected in a Bioconductor release around October 2026, and nobody has confirmed the combination works end to end ([section 7](#7-what-existing-users-are-promised)). Until then R users cannot reach a Zarr-only release, and would lose access altogether only if the TileDB releases were retired first.
+**R support depends on Zarr tooling that is only now arriving.** The reader exists, but sharding is in a development branch expected in a Bioconductor release around October 2026, and nobody has confirmed the combination works end to end ([section 7](#7-what-existing-users-are-promised)). Until then R users see no new data at all, since every new release is Zarr, and they lose access altogether only if the TileDB releases are retired first.
 
 **Gene banding is half-realised.** It helps single-gene lookups and little else until genes are reordered ([section 3.3](#33-open-questions)). That costs nothing to carry, since banded storage is also the smallest encoding measured.
 
@@ -377,8 +374,7 @@ Collected here because several would otherwise be met only in passing.
 2. **Is the release-policy change additive as described**, with the `soma` entry retained for the life of the TileDB support window? Three things the same amendment should settle rather than leave open: how the unmet `V<#>` alias requirement is resolved, whether the amendment ships with a build-time conformance check, and that the five-year availability commitment currently lives on the public docsite rather than in the policy itself.
 3. **How long is the identifier mapping published after the transition?** Keeping it indefinitely makes old externally held data re-joinable forever; dropping it gives the transition window meaning.
 4. **Does the new client ship as a major version of** `cellxgene-census` **or as a separate package?**
-5. **Do new releases carry both formats, or does the move to Zarr ship as an announced breaking change?** [Section 7](#7-what-existing-users-are-promised) sets out both shapes and does not pick one, because the answer depends on the intended release cadence rather than on anything in this design. It is the decision that most affects what existing users experience, and it sets how much of the builder has to keep working in two modes.
-6. **Is** `soma_joinid` **intended to be stable across releases?** [Section 4](#4-how-cells-and-genes-are-identified) argues the new identity is needed because nothing documents the old one as stable. It is stable in practice today, which is why people join on it, but no guarantee appears to be written down. If the answer is that stability was always intended, section 4's premise needs revisiting.
+5. **Is** `soma_joinid` **intended to be stable across releases?** [Section 4](#4-how-cells-and-genes-are-identified) argues the new identity is needed because nothing documents the old one as stable. It is stable in practice today, which is why people join on it, but no guarantee appears to be written down. If the answer is that stability was always intended, section 4's premise needs revisiting.
 
 Smaller, but they should not be left to the implementation:
 
