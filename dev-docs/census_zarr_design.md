@@ -75,7 +75,7 @@ The bar for everything that follows.
 
 1. **A narrow question should cost in proportion to its answer, not to the size of the corpus.** Today a one-column filter finds 565 cells for 0.4 MB; adding a second column stops the engine skipping data, and the filters in the client's own documentation cost about 9× as much as a result. That is the problem being solved.
 2. **Reading does not get worse anywhere else.** Reading whole cells and reading whole columns stay at or below what they cost today.
-3. **Ordinary tools can read it.** Anyone with AnnData and Zarr can open the corpus. The extra index described in [section 3](#3-storage-layout) is optional: a reader that understands it fetches less data to answer the same question, and a reader that ignores it reads the columns straight through and gets identical results.
+3. **Ordinary tools can read it.** Anyone with AnnData and Zarr can open the corpus. The extra index described in [section 3](#3-the-proposed-storage-layout) is optional: a reader that understands it fetches less data to answer the same question, and a reader that ignores it reads the columns straight through and gets identical results.
 4. **The answers are the same as today's**, cell for cell and value for value, tested and verified ([section 7](#7-what-existing-users-are-promised)).
 5. **No existing user loses access.** Pinned clients and pinned releases keep working, and nothing already published is moved or withdrawn ([section 7](#7-what-existing-users-are-promised)).
 6. **Work computed against the old corpus re-attaches to the right cells.** Embeddings and annotations keyed on the old row numbers either land on the same cells they were computed on, or fail with an error, never attaching to the wrong cells quietly ([section 4.3](#43-re-joining-existing-work)).
@@ -109,9 +109,9 @@ The two spatial ones add four kinds of object with no non-spatial equivalent: sc
 
 
 
-## 3. Storage layout
+## 3. The proposed storage layout
 
-One store per organism, holding the cell table, the gene table, and the expression matrix.
+What the Zarr corpus looks like. Seven stores, one per organism and modality, so human's spatial and non-spatial data sit in separate stores. Each holds the cell table, the gene table, and the expression matrix.
 
 ```
 census_zarr/<organism>/
@@ -152,7 +152,7 @@ Each row was chosen against measured competitors. For the expression matrix thos
 | **Sharding**                  | Yes, **65,536-row** shards                                                                 | Eight chunks per shard, so **8× fewer stored objects**, with no meaningful change in bytes. The finer 2,048-row chunks measured 28×, but those are rejected above.                                                                                         |
 | **Cell-table index**          | A per-chunk summary stored beside the data, used **adaptively**                            | The index is **0.012–0.15 MB** and is read first, so the reader knows how much it would skip before fetching anything. It prunes when that is under ~1/20 of chunks and reads normally otherwise.                                                          |
 | **Row order**                 | Unchanged: the order datasets were added                                                   | Already within **1.2–1.7×** of optimal, because a cell type concentrates in the few datasets that assayed it. Reordering by cell type gained 6% on one query and cost 210% on another.                                                                     |
-| **Store organization**        | **One store per organism**, not one per dataset                                            | Per-dataset stores cost **114 extra requests per store opened**, roughly 211,000 for a query spanning the corpus.                                                                                                                                          |
+| **Store organization**        | **Seven stores, one per organism and modality**, not one per dataset                                            | Per-dataset stores cost **114 extra requests per store opened**, roughly 211,000 for a query spanning the corpus.                                                                                                                                          |
 
 
 **Why padding rather than exact boundaries.** Letting each dataset's chunk be exactly as wide as the dataset is not buildable today: Zarr's variable-width chunks are experimental in version 3.2.1, off by default, and cannot be combined with sharding, and sharding is what buys the object count below. Padding achieves the same result with ordinary chunks, so the layout depends on no experimental feature.
@@ -256,7 +256,7 @@ Two governing documents currently require SOMA and must change: the [Census sche
 
 Worth knowing when deciding who signs this off: the policy file has exactly one commit in this repository's history, a 2024-05-28 link fix, and no substantive edit ever.
 
-**One new requirement.** The per-chunk index in [section 3](#3-storage-layout) has no home in either the Zarr or the AnnData specification. It sits beside the data as an extension. The schema must define where it lives and what it contains, or the index is usable only by Biohub's own client. The schema should also state that the published layout depends on no experimental Zarr feature, so that a future Zarr release cannot invalidate a published corpus.
+**One new requirement.** The per-chunk index in [section 3](#3-the-proposed-storage-layout) has no home in either the Zarr or the AnnData specification. It sits beside the data as an extension. The schema must define where it lives and what it contains, or the index is usable only by Biohub's own client. The schema should also state that the published layout depends on no experimental Zarr feature, so that a future Zarr release cannot invalidate a published corpus.
 
 ---
 
