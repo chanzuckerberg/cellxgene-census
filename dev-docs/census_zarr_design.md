@@ -8,11 +8,7 @@
 - **Storage and release policy:** the additive amendment, plus the three things [section 10](#10-decisions-requested) asks it to settle. The approver for this document still needs identifying.
 - **Python client:** the v2 surface and its migration path ([section 6](#6-the-python-api)).
 
-This document specifies how the [CELLxGENE Census](https://chanzuckerberg.github.io/cellxgene-census/) is stored and read after it moves off TileDB, stating each decision with the figure behind it. The measurements, their methods and their limits are in [census_anndata_zarr_migration_design.md](./census_anndata_zarr_migration_design.md), which remains the source of truth for evidence.
-
-<!-- TODO: review and sanitize the evidence doc before this goes out for review. It is 1,864 lines and still
-     carries supersession passages, process narration and TBD stubs. Either clean it up in place or stage a
-     shorter version for reviewers; keep this document's section cross-references in sync if it is renumbered. -->
+This document specifies how the [CELLxGENE Census](https://chanzuckerberg.github.io/cellxgene-census/) is stored and read after it moves off TileDB, stating each decision with the figure behind it. The measurements, their methods and their limits are in [census_zarr_design_evidence.md](./census_zarr_design_evidence.md), which remains the source of truth for evidence.
 
 ---
 
@@ -127,7 +123,7 @@ census_zarr/<organism>/
 
 ### 3.1 The decisions
 
-Each row was chosen against measured competitors. For the expression matrix those were four encodings of the same matrix (banded CSR, plain CSR, gene-major CSC, and a dense two-dimensional array), each required to return identical values. The full comparison, including what each alternative cost, is [section 10 of the evidence document](./census_anndata_zarr_migration_design.md#10-layout-comparison).
+Each row was chosen against measured competitors. For the expression matrix those were four encodings of the same matrix (banded CSR, plain CSR, gene-major CSC, and a dense two-dimensional array), each required to return identical values. The full comparison, including what each alternative cost, is [section 10 of the evidence document](./census_zarr_design_evidence.md#10-layout-comparison).
 
 | Decision | Choice | Why, in one figure |
 |---|---|---|
@@ -356,6 +352,6 @@ Smaller, but they should not be left to the implementation:
 
 ## Evidence
 
-Every figure in this document is measured. The measurements, their methods, and their limits are in **[census_anndata_zarr_migration_design.md](./census_anndata_zarr_migration_design.md)**, which is the source of truth for evidence and is organised as: [read-path measurements against the current format](./census_anndata_zarr_migration_design.md#9-read-path-feasibility-evidence), [layout comparisons](./census_anndata_zarr_migration_design.md#10-layout-comparison), [validation methodology](./census_anndata_zarr_migration_design.md#11-validation-methodology), and [build-cost bounds](./census_anndata_zarr_migration_design.md#13-build-resource-envelope). Raw results are in [tools/zarr_layout_spike/results/](../tools/zarr_layout_spike/results/).
+Every figure in this document is measured. The measurements, their methods, and their limits are in **[census_zarr_design_evidence.md](./census_zarr_design_evidence.md)**, which is the source of truth for evidence and is organised as: [read-path measurements against the current format](./census_zarr_design_evidence.md#9-read-path-feasibility-evidence), [layout comparisons](./census_zarr_design_evidence.md#10-layout-comparison), [validation methodology](./census_zarr_design_evidence.md#11-validation-methodology), [the identity-proof gate](./census_zarr_design_evidence.md#12-identity-transition-proof), and [build-cost bounds](./census_zarr_design_evidence.md#13-build-resource-envelope). Raw results are in [tools/zarr_layout_spike/results/](../tools/zarr_layout_spike/results/).
 
 One thing to carry into any reading of the numbers: no timing claims are made anywhere in this document. Read timings taken from outside the corpus's AWS region varied by more than thirtyfold on queries that their byte counts prove did identical work, so everything here is expressed in bytes transferred and requests issued, which are exactly reproducible. The other limit, that nothing has been measured at full scale, is section 8.
