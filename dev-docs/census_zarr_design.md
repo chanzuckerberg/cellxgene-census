@@ -1,16 +1,22 @@
 # Publishing the Census as AnnData-Zarr
 
-**Status:** proposed, ready for review. **Last edited:** 2026-08-03.
+**Status:** proposed, ready for review. **Last edited:** 2026-08-04.
 
-**Approval is needed in three areas**, not from one owner:
+**Approval is needed in three areas**:
 
-- **Census schema:** the major version bump and the rewritten encoding half ([section 5](#5-schema-and-release-changes)).
-- **Storage and release policy:** the additive amendment, plus the three things [section 10](#10-decisions-requested) asks it to settle. The approver for this document still needs identifying.
-- **Python client:** the v2 surface and its migration path ([section 6](#6-the-python-api)).
+
+| Area                           | What is being approved                                                                                                              | Where                                                                             |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| **Census schema**              | The major version bump, and the rewritten encoding half                                                                             | [Section 5](#5-schema-and-release-changes)                                        |
+| **Storage and release policy** | The additive amendment, plus the three things decision 2 asks it to settle. The approver for this document still needs identifying. | [Section 5](#5-schema-and-release-changes), [decision 2](#10-decisions-requested) |
+| **Python client**              | The v2 surface and its migration path                                                                                               | [Section 6](#6-the-python-api)                                                    |
+
 
 This document specifies how the [CELLxGENE Census](https://chanzuckerberg.github.io/cellxgene-census/) is stored and read after it moves off TileDB, stating each decision with the figure behind it. The measurements, their methods and their limits are in [census_zarr_design_evidence.md](./census_zarr_design_evidence.md), which remains the source of truth for evidence.
 
 ---
+
+
 
 ## Summary
 
@@ -28,28 +34,34 @@ Biohub is retiring TileDB across the cellxgene stack. The Census is published to
 
 ---
 
+
+
 ## Terms
 
 Short definitions for terms used throughout.
 
-| Term | Meaning |
-|---|---|
-| **AnnData** | The standard Python container for single-cell data: a cell-by-gene matrix plus tables describing the rows and columns. |
-| **Zarr** | A format for storing large arrays as many small compressed pieces, designed to be read directly from cloud storage without downloading the whole thing. |
-| **obs** | The cell table. One row per cell, ~28 columns: tissue, cell type, disease, assay, and so on. Predicates ("all lung cells") are answered here. |
-| **var** | The gene table. One row per gene. |
-| **X** | The expression matrix itself: cells × genes. Almost all of the data volume. |
-| **chunk** | The smallest piece of a Zarr array that can be fetched. Reading one value costs the whole chunk containing it. |
-| **shard** | A single stored object holding many chunks, with an index so a reader can fetch just the chunks it wants. Lets a layout have small chunks without having a huge number of objects. |
-| **CSR** | The standard way to store a sparse matrix: keep only the non-zero values, row by row. Most cells express only ~1% of genes, so this is far smaller than storing every zero. |
-| **band** | A fixed slice of the gene axis, stored as its own matrix. Splitting the genes into 16 bands means a query for a few genes reads only the bands holding them, instead of the whole matrix. |
-| **predicate** | The condition a query filters on: "cell type is X", "at least 500 genes detected". |
-| **SOMA / TileDB** | The current format and the storage engine underneath it. Being retired. |
-| **LTS release** | A long-term-support Census build, guaranteed available for at least five years. |
-| **dataset** | One contributed study, curated by CELLxGENE Discover. The Census concatenates 1,845 of them. |
+
+| Term              | Meaning                                                                                                                                                                                                                                                        |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **AnnData**       | The standard Python container for single-cell data: a cell-by-gene matrix plus tables describing the rows and columns.                                                                                                                                         |
+| **Zarr**          | A format for storing large arrays as many small compressed pieces, designed to be read directly from cloud storage without downloading the whole thing.                                                                                                        |
+| **obs**           | The cell table. One row per cell, ~28 columns: tissue, cell type, disease, assay, and so on. Predicates ("all lung cells") are answered here.                                                                                                                  |
+| **var**           | The gene table. One row per gene.                                                                                                                                                                                                                              |
+| **X**             | The expression matrix itself: cells × genes. Almost all of the data volume.                                                                                                                                                                                    |
+| **chunk**         | The smallest piece of a Zarr array that can be fetched. Reading one value costs the whole chunk containing it.                                                                                                                                                 |
+| **shard**         | A single stored object holding many chunks, with an index so a reader can fetch just the chunks it wants. Lets a layout have small chunks without having a huge number of objects.                                                                             |
+| **CSR**           | The standard way to store a sparse matrix: keep only the non-zero values, row by row. Most cells express only ~1% of genes, so this is far smaller than storing every zero.                                                                                    |
+| **band**          | A fixed slice of the gene axis, stored as its own matrix. Splitting the genes into 16 bands means a query for a few genes reads only the bands holding them, instead of the whole matrix.                                                                      |
+| **predicate**     | The condition a query filters on: "cell type is X", "at least 500 genes detected".                                                                                                                                                                             |
+| **SOMA / TileDB** | The current format and the storage engine underneath it. Being retired.                                                                                                                                                                                        |
+| **LTS release**   | A long-term-support Census build, guaranteed available for at least five years.                                                                                                                                                                                |
+| **dataset**       | One contributed study, curated by CELLxGENE Discover. The Census concatenates 1,845 of them.                                                                                                                                                                   |
 | **harmonization** | Combining separately curated datasets into one: a single shared gene list, one concatenated cell table, and uniformly computed per-cell statistics and normalization. Standardizing labels to ontology terms happens upstream, in CELLxGENE Discover curation. |
 
+
 ---
+
+
 
 ## 1. Why this change
 
@@ -72,6 +84,8 @@ Stored size is not on this list. It changes, and the measurements point down rat
 
 ---
 
+
+
 ## 2. What exists today
 
 The published corpus, as of the `2025-11-08` LTS release.
@@ -88,10 +102,12 @@ The two spatial ones add four kinds of object with no non-spatial equivalent: sc
 
 **Two properties of the current data that change how filters must be written**, both introduced by [schema 2.4.0](../docs/cellxgene_census_schema.md):
 
-- **`disease` and `disease_ontology_term_id` can each hold several values in one field**, separated by ` || `. A filter written as exact string equality returns a subset of the matching cells, and raises nothing.
+- `disease` **and** `disease_ontology_term_id` **can each hold several values in one field**, separated by `||`. A filter written as exact string equality returns a subset of the matching cells, and raises nothing.
 - **Gene symbols are not unique.** Two different genes can carry the same symbol. Only the [Ensembl](https://www.ensembl.org/) accession (`feature_id`) identifies a gene.
 
 ---
+
+
 
 ## 3. Storage layout
 
@@ -121,19 +137,23 @@ census_zarr/<organism>/
     └── band_015/               genes 57,653…61,496
 ```
 
+
+
 ### 3.1 The decisions
 
 Each row was chosen against measured competitors. For the expression matrix those were four encodings of the same matrix (banded CSR, plain CSR, gene-major CSC, and a dense two-dimensional array), each required to return identical values. The full comparison, including what each alternative cost, is [section 10 of the evidence document](./census_zarr_design_evidence.md#10-layout-comparison).
 
-| Decision | Choice | Why, in one figure |
-|---|---|---|
-| **Expression matrix** | Sparse, split into **16 gene bands**, each stored as CSR | Reading one gene costs **0.51 MB** instead of **98.7 MB**. Plain CSR has no gene dimension, so it reads the entire matrix to return one column. Whole-cell reads stay within 0.4% of plain CSR, and this is also the smallest of the four encodings tried. |
-| **Where matrix chunks start** | Pad each dataset's values so it begins on a chunk boundary and no chunk mixes two datasets | Fewer bytes on every query measured: **17–35%** at the scale tested, less for datasets larger than a chunk. The padding costs essentially nothing to store: it compresses away, changing stored size by **−0.1%**. |
-| **Cell-table chunking** | Uniform **8,192 rows** | AnnData's default writes each column as a single chunk, so nothing can be skipped. 8,192 issues **~1.7× fewer requests** than a finer 2,048. |
-| **Sharding** | Yes, **65,536-row** shards | Eight chunks per shard, so **8× fewer stored objects**, with no meaningful change in bytes. The finer 2,048-row chunks measured 28×, but those are rejected above. |
-| **Cell-table index** | A per-chunk summary stored beside the data, used **adaptively** | The index is **0.012–0.15 MB** and is read first, so the reader knows how much it would skip before fetching anything. It prunes when that is under ~1/20 of chunks and reads normally otherwise. |
-| **Row order** | Unchanged: the order datasets were added | Already within **1.2–1.7×** of optimal, because a cell type concentrates in the few datasets that assayed it. Reordering by cell type gained 6% on one query and cost 210% on another. |
-| **Store organization** | **One store per organism**, not one per dataset | Per-dataset stores cost **114 extra requests per store opened**, roughly 211,000 for a query spanning the corpus. |
+
+| Decision                      | Choice                                                                                     | Why, in one figure                                                                                                                                                                                                                                         |
+| ----------------------------- | ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Expression matrix**         | Sparse, split into **16 gene bands**, each stored as CSR                                   | Reading one gene costs **0.51 MB** instead of **98.7 MB**. Plain CSR has no gene dimension, so it reads the entire matrix to return one column. Whole-cell reads stay within 0.4% of plain CSR, and this is also the smallest of the four encodings tried. |
+| **Where matrix chunks start** | Pad each dataset's values so it begins on a chunk boundary and no chunk mixes two datasets | Fewer bytes on every query measured: **17–35%** at the scale tested, less for datasets larger than a chunk. The padding costs essentially nothing to store: it compresses away, changing stored size by **−0.1%**.                                         |
+| **Cell-table chunking**       | Uniform **8,192 rows**                                                                     | AnnData's default writes each column as a single chunk, so nothing can be skipped. 8,192 issues **~1.7× fewer requests** than a finer 2,048.                                                                                                               |
+| **Sharding**                  | Yes, **65,536-row** shards                                                                 | Eight chunks per shard, so **8× fewer stored objects**, with no meaningful change in bytes. The finer 2,048-row chunks measured 28×, but those are rejected above.                                                                                         |
+| **Cell-table index**          | A per-chunk summary stored beside the data, used **adaptively**                            | The index is **0.012–0.15 MB** and is read first, so the reader knows how much it would skip before fetching anything. It prunes when that is under ~1/20 of chunks and reads normally otherwise.                                                          |
+| **Row order**                 | Unchanged: the order datasets were added                                                   | Already within **1.2–1.7×** of optimal, because a cell type concentrates in the few datasets that assayed it. Reordering by cell type gained 6% on one query and cost 210% on another.                                                                     |
+| **Store organization**        | **One store per organism**, not one per dataset                                            | Per-dataset stores cost **114 extra requests per store opened**, roughly 211,000 for a query spanning the corpus.                                                                                                                                          |
+
 
 **Why padding rather than exact boundaries.** Letting each dataset's chunk be exactly as wide as the dataset is not buildable today: Zarr's variable-width chunks are experimental in version 3.2.1, off by default, and cannot be combined with sharding, and sharding is what buys the object count below. Padding achieves the same result with ordinary chunks, so the layout depends on no experimental feature.
 
@@ -186,7 +206,11 @@ The reader consults the summary first, and only then reads:
 
 ---
 
+
+
 ## 4. How cells and genes are identified
+
+
 
 ### 4.1 The problem with today's identifier
 
@@ -194,11 +218,11 @@ Cells are currently addressed by `soma_joinid`, which is simply a cell's row num
 
 ### 4.2 What replaces it
 
-**A cell is identified by the pair `(dataset_id, observation_joinid)`**: which dataset it came from, and its identity within that dataset. Both columns already exist and are required by the Census schema, so nothing new is computed. The pair is needed because `observation_joinid` is not unique on its own; at least one organism has collisions across its datasets.
+**A cell is identified by the pair** `(dataset_id, observation_joinid)`: which dataset it came from, and its identity within that dataset. Both columns already exist and are required by the Census schema, so nothing new is computed. The pair is needed because `observation_joinid` is not unique on its own; at least one organism has collisions across its datasets.
 
 Verified on 68 datasets and 6.0 million cells with no violation, sampling 40 of human's 1,086 and leaving mouse unchecked. The property is one the CELLxGENE dataset schema already guarantees, so a violation would be an upstream data bug rather than a flaw here, but the builder should assert it on every release, which costs one pass over a column it already holds.
 
-**A gene is identified by `feature_id`**, the Ensembl accession, never by symbol. Symbols are not unique ([section 2](#2-what-exists-today)).
+**A gene is identified by** `feature_id`, the Ensembl accession, never by symbol. Symbols are not unique ([section 2](#2-what-exists-today)).
 
 A cell's identity is stable for as long as its dataset is not re-curated. Re-curation mints a new dataset version upstream, and this design inherits whatever guarantee CELLxGENE Discover makes there.
 
@@ -211,6 +235,8 @@ Two requirements on it: a mapping is only meaningful together with the release i
 This is written for releases that carry both formats, since the old row numbers are assigned by the TileDB build. If new releases ship Zarr only (decision 5), the mapping has to be derived from the last TileDB release instead, which costs nothing extra: both columns are already published there.
 
 ---
+
+
 
 ## 5. Schema and release changes
 
@@ -234,21 +260,25 @@ Worth knowing when deciding who signs this off: the policy file has exactly one 
 
 ---
 
+
+
 ## 6. The Python API
 
 A new major version of `cellxgene-census`, or a separate package (decision 4). Either way the shape of the current API is kept (open a handle, pass it to accessors), so migrating existing code is mostly mechanical.
 
 The table below covers the eleven functions in the top-level namespace.
 
-| Today | Proposed | What changes |
-|---|---|---|
-| `open_soma(...) → soma.Collection` | `open_census(...) → Census` | Name and return type no longer mention SOMA; TileDB configuration arguments disappear. The handle is opaque and exposes no storage internals. |
-| `get_default_soma_context(...)` | removed | Exists only to hand callers a TileDB object. |
-| `get_anndata(census, …)` | same shape | Already returns AnnData. The handle, filter and coordinate arguments change. |
-| `get_obs`, `get_var` | same shape | Already return pandas tables. |
-| `get_presence_matrix` | same shape | Must survive, or measured-versus-zero is lost ([section 2](#2-what-exists-today)). |
-| (none) | `get_anndata_lazy(…)` | New. Returns a result that is described but not yet loaded, so a query spanning an entire organism, up to 159 million cells, can be expressed without materialising it. A separate function rather than a flag, because the return value differs in kind. |
-| `download_source_h5ad`, release-directory functions | unchanged | Source files and the release index are unaffected. |
+
+| Today                                               | Proposed                    | What changes                                                                                                                                                                                                                                              |
+| --------------------------------------------------- | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `open_soma(...) → soma.Collection`                  | `open_census(...) → Census` | Name and return type no longer mention SOMA; TileDB configuration arguments disappear. The handle is opaque and exposes no storage internals.                                                                                                             |
+| `get_default_soma_context(...)`                     | removed                     | Exists only to hand callers a TileDB object.                                                                                                                                                                                                              |
+| `get_anndata(census, …)`                            | same shape                  | Already returns AnnData. The handle, filter and coordinate arguments change.                                                                                                                                                                              |
+| `get_obs`, `get_var`                                | same shape                  | Already return pandas tables.                                                                                                                                                                                                                             |
+| `get_presence_matrix`                               | same shape                  | Must survive, or measured-versus-zero is lost ([section 2](#2-what-exists-today)).                                                                                                                                                                        |
+| (none)                                              | `get_anndata_lazy(…)`       | New. Returns a result that is described but not yet loaded, so a query spanning an entire organism, up to 159 million cells, can be expressed without materialising it. A separate function rather than a flag, because the return value differs in kind. |
+| `download_source_h5ad`, release-directory functions | unchanged                   | Source files and the release index are unaffected.                                                                                                                                                                                                        |
+
 
 **Selecting cells and genes.** Where the current API takes row numbers, the new one takes the identifiers of [section 4](#4-how-cells-and-genes-are-identified): `(dataset_id, observation_joinid)` pairs for cells, Ensembl accessions for genes. A positional fast path is kept for callers passing back offsets they just read from a previous result, documented as valid only within one release.
 
@@ -260,7 +290,11 @@ The translator has one trap to avoid. `disease` and `disease_ontology_term_id` c
 
 ---
 
+
+
 ## 7. What existing users are promised
+
+
 
 ### 7.1 What stays available
 
@@ -295,6 +329,8 @@ Until then R users cannot reach a Zarr-only release. Under decision 5's second s
 
 ---
 
+
+
 ## 8. Risks
 
 Collected here because several would otherwise be met only in passing.
@@ -319,6 +355,8 @@ Collected here because several would otherwise be met only in passing.
 
 ---
 
+
+
 ## 9. Out of scope
 
 - **What the Census contains.** Dataset inclusion criteria, harmonization, computed statistics, the presence matrix, and upstream curation are all unchanged.
@@ -331,15 +369,16 @@ Collected here because several would otherwise be met only in passing.
 
 ---
 
+
+
 ## 10. Decisions requested
 
 1. **Does this become Census schema 3.0.0?** [Section 5](#5-schema-and-release-changes) argues it must. If so: does 3.0.0 branch from the current 2.4.0 as published, or wait for 2.4.0 to be finalised, which is still marked as drafting.
 2. **Is the release-policy change additive as described**, with the `soma` entry retained for the life of the TileDB support window? Three things the same amendment should settle rather than leave open: how the unmet `V<#>` alias requirement is resolved, whether the amendment ships with a build-time conformance check, and that the five-year availability commitment currently lives on the public docsite rather than in the policy itself.
 3. **How long is the identifier mapping published after the transition?** Keeping it indefinitely makes old externally held data re-joinable forever; dropping it gives the transition window meaning.
-4. **Does the new client ship as a major version of `cellxgene-census` or as a separate package?**
+4. **Does the new client ship as a major version of** `cellxgene-census` **or as a separate package?**
 5. **Do new releases carry both formats, or does the move to Zarr ship as an announced breaking change?** [Section 7](#7-what-existing-users-are-promised) sets out both shapes and does not pick one, because the answer depends on the intended release cadence rather than on anything in this design. It is the decision that most affects what existing users experience, and it sets how much of the builder has to keep working in two modes.
-
-6. **Is `soma_joinid` intended to be stable across releases?** [Section 4](#4-how-cells-and-genes-are-identified) argues the new identity is needed because nothing documents the old one as stable. It is stable in practice today, which is why people join on it, but no guarantee appears to be written down. If the answer is that stability was always intended, section 4's premise needs revisiting.
+6. **Is** `soma_joinid` **intended to be stable across releases?** [Section 4](#4-how-cells-and-genes-are-identified) argues the new identity is needed because nothing documents the old one as stable. It is stable in practice today, which is why people join on it, but no guarantee appears to be written down. If the answer is that stability was always intended, section 4's premise needs revisiting.
 
 Smaller, but they should not be left to the implementation:
 
@@ -349,6 +388,8 @@ Smaller, but they should not be left to the implementation:
 - Confirmation of the adaptive index rule in [section 3.1](#31-the-decisions), since it is a behaviour of the published read path rather than an internal detail.
 
 ---
+
+
 
 ## Evidence
 
