@@ -28,7 +28,7 @@ class NeighborObs(NamedTuple):
     implementation-dependent.
     """
 
-    neighbor_ids: npt.NDArray[np.int64]
+    neighbor_ids: npt.NDArray[np.int64 | np.uint64]
     """
     obs soma_joinid's of the nearest neighbors for each query embedding (q by k).
     """
@@ -45,6 +45,7 @@ def find_nearest_obs(
     memory_GiB: int = 4,
     mirror: str | None = None,
     embedding_metadata: dict[str, Any] | None = None,
+    obs_value_filter: str | None = None,
     **kwargs: dict[str, Any],
 ) -> NeighborObs:
     """Search Census for similar obs (cells) based on nearest neighbors in embedding space.
@@ -68,9 +69,23 @@ def find_nearest_obs(
         embedding_metadata:
             The result of `get_embedding_metadata_by_name(embedding_name, organism, census_version)`.
             Supplying this saves a network request for repeated searches.
+        obs_value_filter:
+            Optional SOMA value filter restricting the reference cells before searching.
+            When provided, search is exact over the finite stored embeddings of matching
+            cells, ranking float64-computed squared Euclidean distances and breaking
+            internal ties by soma_joinid. Output distances remain float32; distinct
+            internal distances can round to the same output value.
+            This scans the selected embeddings in bounded batches; restrictive filters
+            are recommended for large releases. No precomputed vector index is needed.
+            ``nprobe`` does not apply, and additional index ``kwargs`` are not accepted.
+            ``memory_GiB`` bounds the numerical workspace (including results), not the
+            caller's query, streamed Arrow batches, or TileDB's internal memory.
+            Initial I/O buffers and headroom are not a hard process-RSS bound.
+            Missing/nonfinite reference embeddings are skipped. A ValueError is raised if fewer than ``k`` finite
+            reference embeddings remain, or if a query embedding is nonfinite.
+            Empty query batches return arrays of shape ``(0, k)`` without a candidate scan.
+            With ``None``, the existing approximate vector-index search is unchanged.
     """
-    import tiledb.vector_search as vs
-
     if embedding_metadata is None:
         embedding_metadata = get_embedding_metadata_by_name(embedding_name, organism, census_version)
     assert embedding_metadata["embedding_name"] == embedding_name
@@ -83,6 +98,25 @@ def find_nearest_obs(
         raise ValueError(
             f"Query embedding {embedding_name} has {query.obsm[embedding_name].shape[1]} features, expected {n_features}"
         )
+
+    if obs_value_filter is not None:
+        from ._embedding_search_exact import _find_nearest_obs_exact
+
+        if kwargs:
+            raise ValueError("Index query kwargs are not supported with obs_value_filter")
+        distances, neighbor_ids = _find_nearest_obs_exact(
+            query.obsm[embedding_name],
+            organism=organism,
+            census_version=census_version,
+            embedding_metadata=embedding_metadata,
+            obs_value_filter=obs_value_filter,
+            k=k,
+            memory_GiB=memory_GiB,
+            mirror=mirror,
+        )
+        return NeighborObs(distances=distances, neighbor_ids=neighbor_ids)
+
+    import tiledb.vector_search as vs
 
     # formulate index URI and run query
     resolved_index = _resolve_embedding_index(embedding_metadata, mirror=mirror)

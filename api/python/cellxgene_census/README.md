@@ -56,3 +56,60 @@ The "stable" release is currently 2023-12-15. Specify 'census_version="2023-12-1
 ```
 
 - Learn more about the Census API by going through the tutorials in the [notebooks](../notebooks/)
+
+## Restricting embedding search to a biological reference population
+
+`experimental.find_nearest_obs` accepts `obs_value_filter` in the same SOMA
+predicate syntax as `get_anndata`. For example, query only primary lung cells:
+
+```python
+neighbors = cellxgene_census.experimental.find_nearest_obs(
+    "scvi",
+    "homo_sapiens",
+    "2025-11-08",
+    query_adata,  # matching scVI vectors in query_adata.obsm["scvi"]
+    obs_value_filter="tissue_general == 'lung' and is_primary_data == True",
+    k=10,
+    memory_GiB=4,
+)
+```
+
+Providing a filter selects exact search over the complete, finite stored
+embeddings of cells satisfying that predicate in the selected release and
+organism. Filtering is applied before ranking, so an eligible neighbor can be
+found even when arbitrarily many excluded cells are closer. Results use squared
+Euclidean distances, the same units as the default Census IVFFlat indexes, with
+float64 query conversion and distance accumulation, and float32 output. Ranking
+uses float64-computed distances; equal internal distances are ordered by ascending
+`soma_joinid`. Distinct internal distances can round to the same reported float32
+value, so ties in the returned distance values need not be join-ID ordered.
+
+This mode reads the selected embedding vectors, not the expression matrix or a
+model, and does not require a precomputed nearest-neighbor index. It scans every
+eligible embedding and costs O(number of queries × selected cells × embedding
+dimensions) distance work; broad filters may be slow. Metadata IDs are streamed,
+embedding reads and distance computations are chunked, and only running top-k
+results are retained. `memory_GiB` budgets numerical working arrays and results,
+with 64 MiB of additional I/O headroom; it is not a hard process-RSS limit.
+Caller-owned query arrays, streamed Arrow tables, and TileDB internal allocations
+are outside this numerical budget. Initial TileDB read buffers are set to 8 MiB
+each, but returned Arrow batches may be larger and include predicate columns.
+Only join IDs are retained from each batch during processing. SOMA's
+`batch_size` is currently ignored upstream, so the implementation does not rely
+on it as a memory bound.
+
+Missing, partial, NaN, or infinite reference embeddings are excluded. Fewer than
+`k` eligible finite embeddings raises `ValueError` rather than returning invalid
+neighbor IDs. Query vectors must be dense numeric NumPy arrays representable as
+finite float64 values, `k` and
+`memory_GiB` must be positive integers, and a filter must be nonempty. Squared
+distances too large for finite float32 output also raise `ValueError`. Predicate
+syntax errors are reported by SOMA. `nprobe` is irrelevant for exact search and
+additional index query keyword arguments are rejected.
+Empty query batches return arrays of shape `(0, k)` without scanning candidates,
+even when fewer than `k` reference cells exist; predicate syntax and stored asset
+metadata are not read in this no-op case.
+
+Omitting `obs_value_filter` retains the existing approximate IVFFlat search and
+its behavior. Exactness here refers to the stored embeddings, which may already
+have reduced precision; it does not recover an unrounded model representation.
