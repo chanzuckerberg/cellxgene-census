@@ -62,6 +62,14 @@ def test_get_embedding_metadata_by_name(requests_mock: rm.Mocker) -> None:
     assert embedding["id"] == "embedding-id-3"
     assert embedding == mock_embeddings["embedding-id-3"]
 
+    # Organism may be given in the same forms accepted by the main API, e.g. "Homo sapiens"
+    # https://github.com/chanzuckerberg/cellxgene-census/issues/1205
+    for organism in ["Homo sapiens", "homo sapiens", "HOMO_SAPIENS"]:
+        embedding = get_embedding_metadata_by_name(
+            "emb_1", organism=organism, census_version="2023-12-15", embedding_type="obs_embedding"
+        )
+        assert embedding == mock_embeddings["embedding-id-2"]
+
     with pytest.raises(ValueError):
         get_embedding_metadata_by_name(
             "emb_2", organism="homo_sapiens", census_version="2023-12-15", embedding_type="obs_embedding"
@@ -200,6 +208,11 @@ def test_get_all_census_versions_with_embedding(requests_mock: rm.Mocker) -> Non
 
     versions = get_all_census_versions_with_embedding("emb_2", organism="mus_musculus", embedding_type="var_embedding")
     assert versions == ["2023-12-15"]
+
+    # Organism may be given in the same forms accepted by the main API, e.g. "Mus musculus"
+    # https://github.com/chanzuckerberg/cellxgene-census/issues/1205
+    versions = get_all_census_versions_with_embedding("emb_1", organism="Mus musculus", embedding_type="obs_embedding")
+    assert versions == ["2023-12-15", "2024-01-01"]
 
 
 @pytest.mark.parametrize("version", ["stable", "latest"])
