@@ -19,6 +19,7 @@ import tiledbsoma as soma
 
 from cellxgene_census._util import _user_agent
 
+from .._experiment import _get_experiment_name
 from .._open import get_default_soma_context, open_soma
 from .._release_directory import (
     CensusVersionDescription,
@@ -175,7 +176,8 @@ def get_embedding_metadata_by_name(
         embedding_name:
             The name of the embedding, e.g. "scvi".
         organism:
-            The organism for which the embedding is associated.
+            The organism for which the embedding is associated, usually one of ``"Homo sapiens"``
+            or ``"Mus musculus"``. Accepts the same values as :func:`cellxgene_census.get_anndata`.
         census_version:
             The Census version tag, e.g., ``"2023-12-15"``.
         embedding_type:
@@ -190,6 +192,7 @@ def get_embedding_metadata_by_name(
     """
     census_version_description = get_census_version_description(census_version)
     resolved_census_version = census_version_description["release_build"]
+    experiment_name = _get_experiment_name(organism)
 
     response = requests.get(CELL_CENSUS_EMBEDDINGS_MANIFEST_URL, headers={"User-Agent": _user_agent()})
     response.raise_for_status()
@@ -199,7 +202,7 @@ def get_embedding_metadata_by_name(
     for _, obj in manifest.items():
         if (
             obj["embedding_name"] == embedding_name
-            and obj["experiment_name"] == organism
+            and obj["experiment_name"] == experiment_name
             and obj["data_type"] == embedding_type
             and obj["census_version"] == resolved_census_version
         ):
@@ -260,13 +263,16 @@ def get_all_census_versions_with_embedding(
         embedding_name:
             The name of the embedding, e.g. "scvi".
         organism:
-            The organism for which the embedding is associated.
+            The organism for which the embedding is associated, usually one of ``"Homo sapiens"``
+            or ``"Mus musculus"``. Accepts the same values as :func:`cellxgene_census.get_anndata`.
         embedding_type:
             The type of embedding. Defaults to "obs_embedding".
 
     Returns:
         A list of census versions that contain the specified embedding.
     """
+    experiment_name = _get_experiment_name(organism)
+
     response = requests.get(CELL_CENSUS_EMBEDDINGS_MANIFEST_URL, headers={"User-Agent": _user_agent()})
     response.raise_for_status()
 
@@ -276,7 +282,7 @@ def get_all_census_versions_with_embedding(
             obj["census_version"]
             for obj in manifest.values()
             if obj["embedding_name"] == embedding_name
-            and obj["experiment_name"] == organism
+            and obj["experiment_name"] == experiment_name
             and obj["data_type"] == embedding_type
         }
     )
